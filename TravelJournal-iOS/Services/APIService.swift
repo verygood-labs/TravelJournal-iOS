@@ -8,14 +8,23 @@ class APIService {
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
     
+    // Enable/disable API logging
+    var enableLogging: Bool = true
+    
     private init() {
         #if DEBUG
-        self.baseURL = "http://localhost:5000/api"
+        // Use 127.0.0.1 instead of localhost to avoid network warnings
+        self.baseURL = "http://127.0.0.1:5151/api"
         #else
         self.baseURL = "https://api.yourdomain.com/api"
         #endif
         
-        self.session = URLSession.shared
+        // Configure URLSession with proper timeouts
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 60
+        configuration.waitsForConnectivity = true
+        self.session = URLSession(configuration: configuration)
         
         self.decoder = JSONDecoder()
         self.decoder.dateDecodingStrategy = .iso8601
@@ -62,6 +71,61 @@ class APIService {
         accessToken != nil
     }
     
+    // MARK: - Logging
+    
+    private func logRequest(method: String, url: URL, headers: [String: String], body: Data?) {
+        guard enableLogging else { return }
+        
+        print("\n🌐 ===== API REQUEST =====")
+        print("📍 \(method) \(url.absoluteString)")
+        print("📋 Headers:")
+        headers.forEach { key, value in
+            // Mask token for security
+            if key == "Authorization" {
+                print("  \(key): Bearer ***")
+            } else {
+                print("  \(key): \(value)")
+            }
+        }
+        
+        if let body = body, let jsonString = String(data: body, encoding: .utf8) {
+            print("📦 Body:")
+            print(jsonString)
+        }
+        print("========================\n")
+    }
+    
+    private func logResponse(statusCode: Int, data: Data, url: URL) {
+        guard enableLogging else { return }
+        
+        print("\n✅ ===== API RESPONSE =====")
+        print("📍 URL: \(url.absoluteString)")
+        print("📊 Status: \(statusCode)")
+        
+        if let jsonString = String(data: data, encoding: .utf8) {
+            print("📦 Response Data:")
+            // Try to pretty print JSON
+            if let jsonData = jsonString.data(using: .utf8),
+               let jsonObject = try? JSONSerialization.jsonObject(with: jsonData),
+               let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted),
+               let prettyString = String(data: prettyData, encoding: .utf8) {
+                print(prettyString)
+            } else {
+                print(jsonString)
+            }
+        }
+        print("==========================\n")
+    }
+    
+    private func logError(_ error: Error, url: URL) {
+        guard enableLogging else { return }
+        
+        print("\n❌ ===== API ERROR =====")
+        print("📍 URL: \(url.absoluteString)")
+        print("⚠️ Error: \(error.localizedDescription)")
+        print("========================\n")
+    }
+    
     // MARK: - Request Building
     
     private func buildRequest(
@@ -89,7 +153,8 @@ class APIService {
         endpoint: String,
         method: String = "GET",
         body: Encodable? = nil,
-        authenticated: Bool = true
+        authenticated: Bool = true,
+        retryCount: Int = 0
     ) async throws -> T {
         var bodyData: Data? = nil
         if let body = body {
@@ -103,21 +168,39 @@ class APIService {
             authenticated: authenticated
         )
         
-        let (data, response) = try await session.data(for: request)
+        // Log the request
+        logRequest(
+            method: method,
+            url: request.url!,
+            headers: request.allHTTPHeaderFields ?? [:],
+            body: bodyData
+        )
+        
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            logError(error, url: request.url!)
+            throw APIError.networkError(error)
+        }
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.unknown
         }
         
-        // Handle token refresh on 401
-        if httpResponse.statusCode == 401 && authenticated {
+        // Log the response
+        logResponse(statusCode: httpResponse.statusCode, data: data, url: request.url!)
+        
+        // Handle token refresh on 401 (prevent infinite loop with retryCount)
+        if httpResponse.statusCode == 401 && authenticated && retryCount == 0 {
             if try await refreshAccessToken() {
-                // Retry the request with new token
+                // Retry the request with new token (only once)
                 return try await self.request(
                     endpoint: endpoint,
                     method: method,
                     body: body,
-                    authenticated: authenticated
+                    authenticated: authenticated,
+                    retryCount: retryCount + 1
                 )
             } else {
                 throw APIError.unauthorized
@@ -131,7 +214,8 @@ class APIService {
         endpoint: String,
         method: String = "GET",
         body: Encodable? = nil,
-        authenticated: Bool = true
+        authenticated: Bool = true,
+        retryCount: Int = 0
     ) async throws {
         var bodyData: Data? = nil
         if let body = body {
@@ -145,10 +229,43 @@ class APIService {
             authenticated: authenticated
         )
         
-        let (data, response) = try await session.data(for: request)
+        // Log the request
+        logRequest(
+            method: method,
+            url: request.url!,
+            headers: request.allHTTPHeaderFields ?? [:],
+            body: bodyData
+        )
+        
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            logError(error, url: request.url!)
+            throw APIError.networkError(error)
+        }
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.unknown
+        }
+        
+        // Log the response
+        logResponse(statusCode: httpResponse.statusCode, data: data, url: request.url!)
+        
+        // Handle token refresh on 401 (prevent infinite loop with retryCount)
+        if httpResponse.statusCode == 401 && authenticated && retryCount == 0 {
+            if try await refreshAccessToken() {
+                // Retry the request with new token (only once)
+                return try await self.requestVoid(
+                    endpoint: endpoint,
+                    method: method,
+                    body: body,
+                    authenticated: authenticated,
+                    retryCount: retryCount + 1
+                )
+            } else {
+                throw APIError.unauthorized
+            }
         }
         
         if !(200...299).contains(httpResponse.statusCode) {

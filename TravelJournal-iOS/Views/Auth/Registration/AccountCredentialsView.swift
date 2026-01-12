@@ -1,8 +1,8 @@
 import SwiftUI
 
-// MARK: - Register View
-/// Passport-themed registration screen with email/password and social signup options
-struct RegisterView: View {
+// MARK: - Account Credentials View
+/// Step 1 of registration: Email and password collection
+struct AccountCredentialsView: View {
     @EnvironmentObject var authManager: AuthManager
     @Environment(\.dismiss) var dismiss
     
@@ -12,11 +12,16 @@ struct RegisterView: View {
     @State private var confirmPassword = ""
     @State private var agreedToTerms = false
     
+    // Loading/Error state
+    @State private var isCheckingEmail = false
+    @State private var emailError: String? = nil
+    
     // Focus state
     @FocusState private var focusedField: Field?
     
     // Navigation state
     @State private var showingLogin = false
+    @State private var showingTravelerDetails = false
     
     enum Field {
         case email, password, confirmPassword
@@ -46,6 +51,13 @@ struct RegisterView: View {
         } else {
             return .invalid
         }
+    }
+    
+    private var emailValidationState: PassportTextFieldStyle.ValidationState {
+        if emailError != nil {
+            return .invalid
+        }
+        return .none
     }
     
     var body: some View {
@@ -89,8 +101,19 @@ struct RegisterView: View {
         .sheet(isPresented: $showingLogin) {
             LoginView()
         }
+        .fullScreenCover(isPresented: $showingTravelerDetails) {
+            TravelerDetailsView(
+                email: email,
+                password: password
+            )
+            .environmentObject(authManager)
+        }
         .onTapGesture {
             focusedField = nil
+        }
+        .onChange(of: email) { _, _ in
+            // Clear email error when user types
+            emailError = nil
         }
     }
     
@@ -133,12 +156,21 @@ struct RegisterView: View {
                     .foregroundColor(AppTheme.Colors.textAccentMuted)
                 
                 TextField("traveler@example.com", text: $email)
-                    .textFieldStyle(PassportTextFieldStyle(isFocused: focusedField == .email))
+                    .textFieldStyle(PassportTextFieldStyle(
+                        isFocused: focusedField == .email,
+                        validationState: emailValidationState
+                    ))
                     .focused($focusedField, equals: .email)
                     .textContentType(.emailAddress)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
+                
+                if let error = emailError {
+                    Text(error)
+                        .font(AppTheme.Typography.monoCaption())
+                        .foregroundColor(.red)
+                }
             }
             
             // Password field
@@ -186,39 +218,46 @@ struct RegisterView: View {
             termsSection
                 .padding(.top, AppTheme.Spacing.xxs)
             
-            // Error message
-            if let error = authManager.error {
-                Text(error)
-                    .font(AppTheme.Typography.monoSmall())
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, AppTheme.Spacing.xxs)
-            }
-            
             // Signup button
             Button {
                 focusedField = nil
                 Task {
-                    await authManager.register(
-                        email: email,
-                        password: password,
-                        displayName: email.components(separatedBy: "@").first ?? "Traveler"
-                    )
+                    await checkEmailAndProceed()
                 }
             } label: {
-                if authManager.isLoading {
+                if isCheckingEmail {
                     HStack(spacing: AppTheme.Spacing.xxs) {
                         Text("🛫")
-                        Text("PROCESSING...")
+                        Text("CHECKING...")
                     }
                 } else {
-                    Text("ISSUE PASSPORT →")
+                    Text("CONTINUE →")
                 }
             }
-            .buttonStyle(PrimaryButtonStyle(isLoading: authManager.isLoading))
-            .disabled(!isFormValid || authManager.isLoading)
+            .buttonStyle(PrimaryButtonStyle(isLoading: isCheckingEmail))
+            .disabled(!isFormValid || isCheckingEmail)
             .padding(.top, AppTheme.Spacing.xxs)
         }
+    }
+    
+    // MARK: - Email Check
+    private func checkEmailAndProceed() async {
+        isCheckingEmail = true
+        emailError = nil
+        
+        do {
+            let response = try await AuthService.shared.checkEmail(email: email)
+            
+            if response.available {
+                showingTravelerDetails = true
+            } else {
+                emailError = response.message ?? "This email is already registered."
+            }
+        } catch {
+            emailError = "Unable to verify email. Please try again."
+        }
+        
+        isCheckingEmail = false
     }
     
     // MARK: - Terms Section
@@ -358,6 +397,6 @@ struct PasswordStrengthIndicator: View {
 
 // MARK: - Preview
 #Preview {
-    RegisterView()
+    AccountCredentialsView()
         .environmentObject(AuthManager())
 }

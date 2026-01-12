@@ -6,11 +6,49 @@ class AuthService {
     
     private init() {}
     
-    func register(email: String, password: String, displayName: String) async throws -> AuthResponse {
+    // MARK: - Email Check
+    
+    func checkEmail(email: String) async throws -> CheckEmailResponse {
+        let request = CheckEmailRequest(email: email)
+        
+        return try await api.request(
+            endpoint: "/auth/check-email",
+            method: "POST",
+            body: request,
+            authenticated: false
+        )
+    }
+    
+    // MARK: - Username Check
+    
+    func checkUsername(userName: String) async throws -> CheckUsernameResponse {
+        let request = CheckUsernameRequest(userName: userName)
+        
+        return try await api.request(
+            endpoint: "/auth/check-username",
+            method: "POST",
+            body: request,
+            authenticated: false
+        )
+    }
+    
+    // MARK: - Registration
+    
+    func register(
+        email: String,
+        password: String,
+        name: String,
+        userName: String,
+        nationalityId: String? = nil,
+        profilePictureUrl: String? = nil
+    ) async throws -> AuthResponse {
         let request = RegisterRequest(
             email: email,
             password: password,
-            displayName: displayName
+            name: name,
+            userName: userName,
+            nationalityId: nationalityId,
+            profilePictureUrl: profilePictureUrl
         )
         
         let response: AuthResponse = try await api.request(

@@ -64,7 +64,7 @@ struct SplashView: View {
                 .environmentObject(authManager)
         }
         .fullScreenCover(isPresented: $showingRegister) {
-            RegisterView()
+            AccountCredentialsView()
                 .environmentObject(authManager)
         }
     }
@@ -106,7 +106,7 @@ struct SplashView: View {
     
     // MARK: - Version Label
     private var versionLabel: some View {
-        Text("v1.0.0 • WANDERLUST EDITION")
+        Text("v1.0.0 • VERY GOOD EDITION")
             .font(AppTheme.Typography.monoTiny())
             .tracking(1)
             .foregroundColor(AppTheme.Colors.textPrimary.opacity(0.3))

@@ -15,8 +15,27 @@ struct LoginRequest: Codable {
 struct RegisterRequest: Codable {
     let email: String
     let password: String
-    let displayName: String
+    let name: String
+    let userName: String
+    let nationalityId: String?
+    let profilePictureUrl: String?
 }
+
+struct CheckEmailRequest: Codable {
+    let email: String
+}
+
+struct CheckEmailResponse: Codable {
+    let available: Bool
+    let message: String?
+}
+
+struct CheckUsernameRequest: Codable {
+    let userName: String
+}
+
+// Response is same structure as CheckEmailResponse
+typealias CheckUsernameResponse = CheckEmailResponse
 
 struct RefreshTokenRequest: Codable {
     let refreshToken: String

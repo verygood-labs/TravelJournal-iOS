@@ -60,7 +60,7 @@ struct LoginView: View {
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $showingRegister) {
-            RegisterView()
+            AccountCredentialsView()
         }
         .sheet(isPresented: $showingForgotPassword) {
             ForgotPasswordView()
