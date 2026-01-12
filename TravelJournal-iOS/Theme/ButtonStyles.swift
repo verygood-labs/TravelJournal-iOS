@@ -4,6 +4,7 @@ import SwiftUI
 /// Full-width filled button with press effects
 /// Usage: Button("CREATE PASSPORT") { }.buttonStyle(PrimaryButtonStyle())
 struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
     var isLoading: Bool = false
     
     func makeBody(configuration: Configuration) -> some View {
@@ -20,12 +21,13 @@ struct PrimaryButtonStyle: ButtonStyle {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, AppTheme.Spacing.sm)
-        .background(AppTheme.Colors.primary)
-        .foregroundColor(AppTheme.Colors.backgroundDark)
+        .background(isEnabled ? AppTheme.Colors.primary : AppTheme.Colors.primary.opacity(0.3))
+        .foregroundColor(isEnabled ? AppTheme.Colors.backgroundDark : AppTheme.Colors.backgroundDark.opacity(0.5))
         .cornerRadius(AppTheme.CornerRadius.pill)
-        .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+        .scaleEffect(configuration.isPressed && isEnabled ? 0.98 : 1.0)
         .opacity(isLoading ? 0.7 : 1.0)
         .animation(.easeInOut(duration: AppTheme.Animation.fast), value: configuration.isPressed)
+        .animation(.easeInOut(duration: AppTheme.Animation.fast), value: isEnabled)
     }
 }
 

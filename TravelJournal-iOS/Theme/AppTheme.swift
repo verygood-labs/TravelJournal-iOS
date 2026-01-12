@@ -21,6 +21,7 @@ struct AppTheme {
         // Text colors
         static let textPrimary = Color.white
         static let textSecondary = Color.white.opacity(0.5)
+        static let textPlaceholder = Color.white.opacity(0.35)
         static let textAccent = Color(hex: "c9a227")
         static let textAccentMuted = Color(hex: "c9a227").opacity(0.8)
         
@@ -29,6 +30,18 @@ struct AppTheme {
         static let inputBorder = primary.opacity(0.3)
         static let inputBorderFocused = primary
         static let divider = primary.opacity(0.2)
+        
+        // Passport page colors (cream/paper style)
+        static let passportPageLight = Color(hex: "f5f1e8")
+        static let passportPageDark = Color(hex: "ebe6d9")
+        static let passportPageGrid = Color(hex: "d4cfc2")
+        static let passportTextPrimary = Color(hex: "1a3a52")
+        static let passportTextSecondary = Color(hex: "666666")
+        static let passportTextMuted = Color(hex: "888888")
+        static let passportTextPlaceholder = Color(hex: "aaaaaa")
+        static let passportInputBackground = Color(hex: "1a3a52").opacity(0.05)
+        static let passportInputBorder = Color(hex: "d4cfc2")
+        static let passportInputBorderFocused = Color(hex: "1a3a52")
         
         // Accent overlays
         static let primaryOverlay = primary.opacity(0.15)

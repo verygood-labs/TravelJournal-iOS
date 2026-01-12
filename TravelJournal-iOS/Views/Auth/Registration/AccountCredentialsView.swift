@@ -32,13 +32,49 @@ struct AccountCredentialsView: View {
         password == confirmPassword
     }
     
+    // Email validation
+    private var isValidEmail: Bool {
+        let emailPattern = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        return email.range(of: emailPattern, options: .regularExpression) != nil
+    }
+    
+    // Password requirement checks
+    private var hasMinLength: Bool {
+        password.count >= 8
+    }
+    
+    private var hasUppercase: Bool {
+        password.range(of: "[A-Z]", options: .regularExpression) != nil
+    }
+    
+    private var hasLowercase: Bool {
+        password.range(of: "[a-z]", options: .regularExpression) != nil
+    }
+    
+    private var hasNumber: Bool {
+        password.range(of: "[0-9]", options: .regularExpression) != nil
+    }
+    
+    private var hasSpecialCharacter: Bool {
+        password.range(of: "[!@#$%^&*(),.?\":{}|<>\\[\\]\\-_=+]", options: .regularExpression) != nil
+    }
+    
+    private var isPasswordValid: Bool {
+        hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecialCharacter
+    }
+    
     private var passwordStrength: Int {
-        min(4, password.count / 2)
+        var strength = 0
+        if hasMinLength { strength += 1 }
+        if hasUppercase && hasLowercase { strength += 1 }
+        if hasNumber { strength += 1 }
+        if hasSpecialCharacter { strength += 1 }
+        return strength
     }
     
     private var isFormValid: Bool {
-        !email.isEmpty &&
-        password.count >= 8 &&
+        isValidEmail &&
+        isPasswordValid &&
         passwordsMatch &&
         agreedToTerms
     }
@@ -155,16 +191,21 @@ struct AccountCredentialsView: View {
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.textAccentMuted)
                 
-                TextField("traveler@example.com", text: $email)
-                    .textFieldStyle(PassportTextFieldStyle(
-                        isFocused: focusedField == .email,
-                        validationState: emailValidationState
-                    ))
-                    .focused($focusedField, equals: .email)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
+                TextField(
+                    "",
+                    text: $email,
+                    prompt: Text("traveler@example.com")
+                        .foregroundColor(AppTheme.Colors.textPlaceholder)
+                )
+                .textFieldStyle(PassportTextFieldStyle(
+                    isFocused: focusedField == .email,
+                    validationState: emailValidationState
+                ))
+                .focused($focusedField, equals: .email)
+                .textContentType(.emailAddress)
+                .keyboardType(.emailAddress)
+                .autocapitalization(.none)
+                .autocorrectionDisabled()
                 
                 if let error = emailError {
                     Text(error)
@@ -179,9 +220,8 @@ struct AccountCredentialsView: View {
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.textAccentMuted)
-                
                 SecureInputField(
-                    placeholder: "Min. 8 characters",
+                    placeholder: "Create a strong password",
                     text: $password,
                     isFocused: focusedField == .password
                 )
@@ -189,6 +229,18 @@ struct AccountCredentialsView: View {
                 .textContentType(.newPassword)
                 
                 PasswordStrengthIndicator(strength: passwordStrength)
+                
+                // Password requirements checklist
+                if !password.isEmpty {
+                    PasswordRequirementsView(
+                        hasMinLength: hasMinLength,
+                        hasUppercase: hasUppercase,
+                        hasLowercase: hasLowercase,
+                        hasNumber: hasNumber,
+                        hasSpecialCharacter: hasSpecialCharacter
+                    )
+                    .padding(.top, AppTheme.Spacing.xxxs)
+                }
             }
             
             // Confirm password field
@@ -231,7 +283,7 @@ struct AccountCredentialsView: View {
                         Text("CHECKING...")
                     }
                 } else {
-                    Text("CONTINUE →")
+                    Text("START APPLICATION →")
                 }
             }
             .buttonStyle(PrimaryButtonStyle(isLoading: isCheckingEmail))
@@ -392,6 +444,44 @@ struct PasswordStrengthIndicator: View {
             }
         }
         .animation(.easeInOut(duration: AppTheme.Animation.fast), value: strength)
+    }
+}
+
+// MARK: - Password Requirements View
+struct PasswordRequirementsView: View {
+    let hasMinLength: Bool
+    let hasUppercase: Bool
+    let hasLowercase: Bool
+    let hasNumber: Bool
+    let hasSpecialCharacter: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.xxxs) {
+            RequirementRow(met: hasMinLength, text: "At least 8 characters")
+            RequirementRow(met: hasUppercase, text: "One uppercase letter")
+            RequirementRow(met: hasLowercase, text: "One lowercase letter")
+            RequirementRow(met: hasNumber, text: "One number")
+            RequirementRow(met: hasSpecialCharacter, text: "One special character (!@#$%...)")
+        }
+    }
+}
+
+// MARK: - Requirement Row
+struct RequirementRow: View {
+    let met: Bool
+    let text: String
+    
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.xxxs) {
+            Image(systemName: met ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: 10))
+                .foregroundColor(met ? .green : AppTheme.Colors.textSecondary)
+            
+            Text(text)
+                .font(AppTheme.Typography.monoCaption())
+                .foregroundColor(met ? .green : AppTheme.Colors.textSecondary)
+        }
+        .animation(.easeInOut(duration: AppTheme.Animation.fast), value: met)
     }
 }
 

@@ -44,35 +44,43 @@ struct TravelerDetailsView: View {
             return .red
         }
         return focusedField == .username
-            ? AppTheme.Colors.inputBorderFocused
-            : AppTheme.Colors.inputBorder
+            ? AppTheme.Colors.passportInputBorderFocused
+            : AppTheme.Colors.passportInputBorder
     }
     
     var body: some View {
-        AppBackgroundView {
-            VStack(spacing: 0) {
-                // Progress bar
+        VStack(spacing: 0) {
+            // Progress bar with app background
+            AppBackgroundView {
                 RegistrationProgressBar(currentStep: 2, totalSteps: 4)
-                
-                ScrollView {
-                    VStack(spacing: 0) {
-                        // Header
-                        headerSection
-                            .padding(.top, AppTheme.Spacing.xxl)
-                            .padding(.bottom, AppTheme.Spacing.xl)
-                        
-                        // Form
-                        formSection
-                            .padding(.horizontal, AppTheme.Spacing.lg)
-                        
-                        Spacer(minLength: AppTheme.Spacing.xxxl)
+            }
+            .frame(height: 80)
+            
+            // Passport page content
+            PassportPageBackgroundView {
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            // Header
+                            headerSection
+                                .padding(.top, AppTheme.Spacing.xl)
+                                .padding(.bottom, AppTheme.Spacing.lg)
+                            
+                            // Form
+                            formSection
+                                .padding(.horizontal, AppTheme.Spacing.lg)
+                            
+                            Spacer(minLength: AppTheme.Spacing.xxxl)
+                        }
                     }
+                    
+                    // Bottom navigation
+                    bottomNavigation
                 }
-                
-                // Bottom navigation
-                bottomNavigation
             }
         }
+        .background(AppTheme.Colors.backgroundDark)
+        .ignoresSafeArea(edges: .bottom)
         .navigationBarHidden(true)
         .onTapGesture {
             focusedField = nil
@@ -88,15 +96,15 @@ struct TravelerDetailsView: View {
             Text("✦ IDENTIFICATION PAGE ✦")
                 .font(AppTheme.Typography.monoSmall())
                 .tracking(2)
-                .foregroundColor(AppTheme.Colors.textSecondary)
+                .foregroundColor(AppTheme.Colors.passportTextMuted)
             
             Text("Traveler Details")
                 .font(AppTheme.Typography.serifMedium())
-                .foregroundColor(AppTheme.Colors.primary)
+                .foregroundColor(AppTheme.Colors.passportTextPrimary)
             
             Text("Let's set up your passport identification.")
                 .font(AppTheme.Typography.monoSmall())
-                .foregroundColor(AppTheme.Colors.textSecondary)
+                .foregroundColor(AppTheme.Colors.passportTextSecondary)
                 .multilineTextAlignment(.center)
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
@@ -110,17 +118,22 @@ struct TravelerDetailsView: View {
                 Text("FULL NAME")
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
-                    .foregroundColor(AppTheme.Colors.textAccentMuted)
+                    .foregroundColor(AppTheme.Colors.passportTextMuted)
                 
-                TextField("Your name as it appears", text: $fullName)
-                    .textFieldStyle(PassportTextFieldStyle(isFocused: focusedField == .fullName))
-                    .focused($focusedField, equals: .fullName)
-                    .textContentType(.name)
-                    .autocorrectionDisabled()
+                TextField(
+                    "",
+                    text: $fullName,
+                    prompt: Text("Your name as it appears")
+                        .foregroundColor(AppTheme.Colors.passportTextPlaceholder)
+                )
+                .textFieldStyle(PassportPageTextFieldStyle(isFocused: focusedField == .fullName))
+                .focused($focusedField, equals: .fullName)
+                .textContentType(.name)
+                .autocorrectionDisabled()
                 
                 Text("This will appear on your passport")
                     .font(AppTheme.Typography.monoCaption())
-                    .foregroundColor(AppTheme.Colors.textSecondary)
+                    .foregroundColor(AppTheme.Colors.passportTextMuted)
             }
             
             // Username field
@@ -128,32 +141,37 @@ struct TravelerDetailsView: View {
                 Text("HANDLE / USERNAME")
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
-                    .foregroundColor(AppTheme.Colors.textAccentMuted)
+                    .foregroundColor(AppTheme.Colors.passportTextMuted)
                 
                 HStack(spacing: 0) {
                     Text("@")
                         .font(AppTheme.Typography.monoMedium())
-                        .foregroundColor(AppTheme.Colors.textSecondary)
+                        .foregroundColor(AppTheme.Colors.passportTextMuted)
                         .padding(.leading, AppTheme.Spacing.sm)
                     
-                    TextField("wanderlust", text: $username)
-                        .font(AppTheme.Typography.monoMedium())
-                        .foregroundColor(AppTheme.Colors.textPrimary)
-                        .focused($focusedField, equals: .username)
-                        .textContentType(.username)
-                        .autocapitalization(.none)
-                        .autocorrectionDisabled()
-                        .padding(.trailing, AppTheme.Spacing.sm)
-                        .padding(.vertical, 14)
+                    TextField(
+                        "",
+                        text: $username,
+                        prompt: Text("wanderlust")
+                            .foregroundColor(AppTheme.Colors.passportTextPlaceholder)
+                    )
+                    .font(AppTheme.Typography.monoMedium())
+                    .foregroundColor(AppTheme.Colors.passportTextPrimary)
+                    .focused($focusedField, equals: .username)
+                    .textContentType(.username)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
+                    .padding(.trailing, AppTheme.Spacing.sm)
+                    .padding(.vertical, 14)
                 }
                 .background(
                     focusedField == .username
-                        ? AppTheme.Colors.primaryOverlayLight
-                        : AppTheme.Colors.inputBackground
+                        ? AppTheme.Colors.passportInputBackground.opacity(1.5)
+                        : AppTheme.Colors.passportInputBackground
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
-                        .stroke(usernameBorderColor, lineWidth: 1.5)
+                        .stroke(usernameBorderColor, lineWidth: 2)
                 )
                 .cornerRadius(AppTheme.CornerRadius.medium)
                 .animation(.easeInOut(duration: AppTheme.Animation.fast), value: focusedField)
@@ -165,7 +183,7 @@ struct TravelerDetailsView: View {
                 } else {
                     Text("Choose a unique handle for your profile")
                         .font(AppTheme.Typography.monoCaption())
-                        .foregroundColor(AppTheme.Colors.textSecondary)
+                        .foregroundColor(AppTheme.Colors.passportTextMuted)
                 }
             }
             
@@ -174,7 +192,7 @@ struct TravelerDetailsView: View {
                 Text("HOME COUNTRY")
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
-                    .foregroundColor(AppTheme.Colors.textAccentMuted)
+                    .foregroundColor(AppTheme.Colors.passportTextMuted)
                 
                 Button {
                     showingCountryPicker = true
@@ -184,22 +202,22 @@ struct TravelerDetailsView: View {
                             .font(AppTheme.Typography.monoMedium())
                             .foregroundColor(
                                 selectedCountryId == nil
-                                    ? AppTheme.Colors.textSecondary
-                                    : AppTheme.Colors.textPrimary
+                                    ? AppTheme.Colors.passportTextMuted
+                                    : AppTheme.Colors.passportTextPrimary
                             )
                         
                         Spacer()
                         
                         Image(systemName: "chevron.down")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(AppTheme.Colors.textSecondary)
+                            .foregroundColor(AppTheme.Colors.passportTextMuted)
                     }
                     .padding(.horizontal, AppTheme.Spacing.sm)
                     .padding(.vertical, 14)
-                    .background(AppTheme.Colors.inputBackground)
+                    .background(AppTheme.Colors.passportInputBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
-                            .stroke(AppTheme.Colors.inputBorder, lineWidth: 1.5)
+                            .stroke(AppTheme.Colors.passportInputBorder, lineWidth: 2)
                     )
                     .cornerRadius(AppTheme.CornerRadius.medium)
                 }
@@ -244,7 +262,6 @@ struct TravelerDetailsView: View {
             }
             .buttonStyle(PrimaryButtonStyle(isLoading: isCheckingUsername))
             .disabled(!isFormValid || isCheckingUsername)
-            .opacity(isFormValid ? 1 : 0.5)
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
         .padding(.vertical, AppTheme.Spacing.md)

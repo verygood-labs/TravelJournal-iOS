@@ -73,13 +73,24 @@ struct SecureInputField: View {
         HStack(spacing: AppTheme.Spacing.xs) {
             Group {
                 if isSecure {
-                    SecureField(placeholder, text: $text)
+                    SecureField(
+                        "",
+                        text: $text,
+                        prompt: Text(placeholder)
+                            .foregroundColor(AppTheme.Colors.textPlaceholder)
+                    )
                 } else {
-                    TextField(placeholder, text: $text)
+                    TextField(
+                        "",
+                        text: $text,
+                        prompt: Text(placeholder)
+                            .foregroundColor(AppTheme.Colors.textPlaceholder)
+                    )
                 }
             }
             .font(AppTheme.Typography.monoMedium())
             .foregroundColor(AppTheme.Colors.textPrimary)
+            .tint(AppTheme.Colors.primary)
             
             Button {
                 isSecure.toggle()

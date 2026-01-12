@@ -40,7 +40,7 @@ class AuthManager: ObservableObject {
         isLoading = false
     }
     
-    func register(email: String, password: String, displayName: String) async {
+    func register(email: String, password: String, name: String, userName: String) async {
         isLoading = true
         error = nil
         
@@ -48,7 +48,8 @@ class AuthManager: ObservableObject {
             let response = try await authService.register(
                 email: email,
                 password: password,
-                displayName: displayName
+                name: name,
+                userName: userName
             )
             currentUser = response.user
             isAuthenticated = true
