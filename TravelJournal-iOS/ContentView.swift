@@ -6,9 +6,9 @@ struct ContentView: View {
     var body: some View {
         Group {
             if authManager.isAuthenticated {
-                MainTabView()
+                // MainTabView()
             } else {
-                LoginView()
+                SplashView()
             }
         }
     }

@@ -37,7 +37,7 @@ struct AppBackgroundView<Content: View>: View {
 /// Subtle repeating dot pattern overlay
 struct DotPatternView: View {
     var body: some View {
-        Canvas { context, size in
+        Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
             let dotSpacing: CGFloat = 40
             let dotRadius: CGFloat = 1
             
@@ -56,6 +56,7 @@ struct DotPatternView: View {
                 }
             }
         }
+        .drawingGroup() // Rasterizes the view for better performance
     }
 }
 

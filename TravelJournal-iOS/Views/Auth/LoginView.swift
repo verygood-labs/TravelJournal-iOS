@@ -9,7 +9,6 @@ struct LoginView: View {
     // Form state
     @State private var email = ""
     @State private var password = ""
-    @State private var showPassword = false
     
     // Focus state
     @FocusState private var focusedField: Field?
@@ -126,25 +125,13 @@ struct LoginView: View {
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.textAccentMuted)
                 
-                HStack(spacing: 0) {
-                    Group {
-                        if showPassword {
-                            TextField("••••••••", text: $password)
-                        } else {
-                            SecureField("••••••••", text: $password)
-                        }
-                    }
-                    .focused($focusedField, equals: .password)
-                    .textContentType(.password)
-                    
-                    Button {
-                        showPassword.toggle()
-                    } label: {
-                        Text(showPassword ? "🙈" : "👁️")
-                            .font(.system(size: 16))
-                    }
-                }
-                .textFieldStyle(PassportTextFieldStyle(isFocused: focusedField == .password))
+                SecureInputField(
+                    placeholder: "••••••••",
+                    text: $password,
+                    isFocused: focusedField == .password
+                )
+                .focused($focusedField, equals: .password)
+                .textContentType(.password)
             }
             
             // Forgot password

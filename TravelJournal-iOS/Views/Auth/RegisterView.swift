@@ -148,10 +148,13 @@ struct RegisterView: View {
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.textAccentMuted)
                 
-                SecureField("Min. 8 characters", text: $password)
-                    .textFieldStyle(PassportTextFieldStyle(isFocused: focusedField == .password))
-                    .focused($focusedField, equals: .password)
-                    .textContentType(.newPassword)
+                SecureInputField(
+                    placeholder: "Min. 8 characters",
+                    text: $password,
+                    isFocused: focusedField == .password
+                )
+                .focused($focusedField, equals: .password)
+                .textContentType(.newPassword)
                 
                 PasswordStrengthIndicator(strength: passwordStrength)
             }
@@ -163,13 +166,14 @@ struct RegisterView: View {
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.textAccentMuted)
                 
-                SecureField("Repeat password", text: $confirmPassword)
-                    .textFieldStyle(PassportTextFieldStyle(
-                        isFocused: focusedField == .confirmPassword,
-                        validationState: confirmPasswordValidationState
-                    ))
-                    .focused($focusedField, equals: .confirmPassword)
-                    .textContentType(.newPassword)
+                SecureInputField(
+                    placeholder: "Repeat password",
+                    text: $confirmPassword,
+                    isFocused: focusedField == .confirmPassword,
+                    validationState: confirmPasswordValidationState
+                )
+                .focused($focusedField, equals: .confirmPassword)
+                .textContentType(.newPassword)
                 
                 if !confirmPassword.isEmpty && !passwordsMatch {
                     Text("Passwords do not match")
@@ -219,7 +223,7 @@ struct RegisterView: View {
     
     // MARK: - Terms Section
     private var termsSection: some View {
-        HStack(alignment: .top, spacing: AppTheme.Spacing.xs) {
+        HStack(alignment: .center, spacing: AppTheme.Spacing.xs) {
             Button {
                 agreedToTerms.toggle()
             } label: {
@@ -228,21 +232,9 @@ struct RegisterView: View {
                     .foregroundColor(agreedToTerms ? AppTheme.Colors.primary : AppTheme.Colors.textSecondary)
             }
             
-            Text("I agree to the ")
-                .font(AppTheme.Typography.monoSmall())
+            Text("I agree to the \(Text("Terms of Service").foregroundColor(AppTheme.Colors.primary)) and \(Text("Privacy Policy").foregroundColor(AppTheme.Colors.primary))")
+                .font(AppTheme.Typography.monoTiny())
                 .foregroundColor(AppTheme.Colors.textSecondary)
-            +
-            Text("Terms of Service")
-                .font(AppTheme.Typography.monoSmall())
-                .foregroundColor(AppTheme.Colors.primary)
-            +
-            Text(" and ")
-                .font(AppTheme.Typography.monoSmall())
-                .foregroundColor(AppTheme.Colors.textSecondary)
-            +
-            Text("Privacy Policy")
-                .font(AppTheme.Typography.monoSmall())
-                .foregroundColor(AppTheme.Colors.primary)
         }
     }
     
@@ -297,37 +289,37 @@ struct BadgeCorners: View {
     
     var body: some View {
         GeometryReader { geometry in
+            // Top-left corner
             Path { path in
-                path.move(to: CGPoint(x: 0, y: size))
-                path.addLine(to: CGPoint(x: 0, y: 0))
-                path.addLine(to: CGPoint(x: size, y: 0))
+                path.move(to: CGPoint(x: lineWidth / 2, y: size))
+                path.addLine(to: CGPoint(x: lineWidth / 2, y: lineWidth / 2))
+                path.addLine(to: CGPoint(x: size, y: lineWidth / 2))
             }
             .stroke(AppTheme.Colors.primary, lineWidth: lineWidth)
-            .position(x: size / 2, y: size / 2)
             
+            // Top-right corner
             Path { path in
-                path.move(to: CGPoint(x: -size, y: 0))
-                path.addLine(to: CGPoint(x: 0, y: 0))
-                path.addLine(to: CGPoint(x: 0, y: size))
+                path.move(to: CGPoint(x: geometry.size.width - size, y: lineWidth / 2))
+                path.addLine(to: CGPoint(x: geometry.size.width - lineWidth / 2, y: lineWidth / 2))
+                path.addLine(to: CGPoint(x: geometry.size.width - lineWidth / 2, y: size))
             }
             .stroke(AppTheme.Colors.primary, lineWidth: lineWidth)
-            .position(x: geometry.size.width - size / 2, y: size / 2)
             
+            // Bottom-left corner
             Path { path in
-                path.move(to: CGPoint(x: 0, y: -size))
-                path.addLine(to: CGPoint(x: 0, y: 0))
-                path.addLine(to: CGPoint(x: size, y: 0))
+                path.move(to: CGPoint(x: lineWidth / 2, y: geometry.size.height - size))
+                path.addLine(to: CGPoint(x: lineWidth / 2, y: geometry.size.height - lineWidth / 2))
+                path.addLine(to: CGPoint(x: size, y: geometry.size.height - lineWidth / 2))
             }
             .stroke(AppTheme.Colors.primary, lineWidth: lineWidth)
-            .position(x: size / 2, y: geometry.size.height - size / 2)
             
+            // Bottom-right corner
             Path { path in
-                path.move(to: CGPoint(x: -size, y: 0))
-                path.addLine(to: CGPoint(x: 0, y: 0))
-                path.addLine(to: CGPoint(x: 0, y: -size))
+                path.move(to: CGPoint(x: geometry.size.width - size, y: geometry.size.height - lineWidth / 2))
+                path.addLine(to: CGPoint(x: geometry.size.width - lineWidth / 2, y: geometry.size.height - lineWidth / 2))
+                path.addLine(to: CGPoint(x: geometry.size.width - lineWidth / 2, y: geometry.size.height - size))
             }
             .stroke(AppTheme.Colors.primary, lineWidth: lineWidth)
-            .position(x: geometry.size.width - size / 2, y: geometry.size.height - size / 2)
         }
     }
 }
