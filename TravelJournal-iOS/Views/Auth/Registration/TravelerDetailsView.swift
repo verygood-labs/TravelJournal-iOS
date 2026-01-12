@@ -10,12 +10,15 @@ struct TravelerDetailsView: View {
     // Form state
     @State private var fullName = ""
     @State private var username = ""
-    @State private var selectedCountryId: String? = nil
-    @State private var showingCountryPicker = false
+    @State private var selectedCountry: LocationSearchResult? = nil
     
     // Loading/Error state
     @State private var isCheckingUsername = false
     @State private var usernameError: String? = nil
+    @State private var isUsernameAvailable: Bool? = nil
+    @State private var lastCheckedUsername: String = ""
+    @State private var isResolvingCountry = false
+    @State private var countryError: String? = nil
     
     // Focus state
     @FocusState private var focusedField: Field?
@@ -31,7 +34,9 @@ struct TravelerDetailsView: View {
     private var isFormValid: Bool {
         !fullName.trimmingCharacters(in: .whitespaces).isEmpty &&
         !username.trimmingCharacters(in: .whitespaces).isEmpty &&
-        isValidUsername(username)
+        isValidUsername(username) &&
+        isUsernameAvailable == true &&
+        selectedCountry != nil
     }
     
     private func isValidUsername(_ username: String) -> Bool {
@@ -87,6 +92,20 @@ struct TravelerDetailsView: View {
         }
         .onChange(of: username) { _, _ in
             usernameError = nil
+            isUsernameAvailable = nil
+        }
+        .onChange(of: focusedField) { oldValue, newValue in
+            // Check username when user leaves the username field
+            if oldValue == .username && newValue != .username {
+                let trimmedUsername = username.trimmingCharacters(in: .whitespaces)
+                if !trimmedUsername.isEmpty && 
+                   isValidUsername(trimmedUsername) && 
+                   trimmedUsername != lastCheckedUsername {
+                    Task {
+                        await checkUsernameAvailability()
+                    }
+                }
+            }
         }
     }
     
@@ -161,8 +180,25 @@ struct TravelerDetailsView: View {
                     .textContentType(.username)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
-                    .padding(.trailing, AppTheme.Spacing.sm)
                     .padding(.vertical, 14)
+                    
+                    // Status indicator
+                    if isCheckingUsername {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .padding(.trailing, AppTheme.Spacing.sm)
+                    } else if isUsernameAvailable == true {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .padding(.trailing, AppTheme.Spacing.sm)
+                    } else if isUsernameAvailable == false {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.red)
+                            .padding(.trailing, AppTheme.Spacing.sm)
+                    } else {
+                        Spacer()
+                            .frame(width: AppTheme.Spacing.sm)
+                    }
                 }
                 .background(
                     focusedField == .username
@@ -188,40 +224,17 @@ struct TravelerDetailsView: View {
             }
             
             // Home Country field
-            VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
-                Text("HOME COUNTRY")
-                    .font(AppTheme.Typography.inputLabel())
-                    .tracking(1)
-                    .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
-                Button {
-                    showingCountryPicker = true
-                } label: {
-                    HStack {
-                        Text(selectedCountryId == nil ? "Select your country" : "Country Selected")
-                            .font(AppTheme.Typography.monoMedium())
-                            .foregroundColor(
-                                selectedCountryId == nil
-                                    ? AppTheme.Colors.passportTextMuted
-                                    : AppTheme.Colors.passportTextPrimary
-                            )
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(AppTheme.Colors.passportTextMuted)
-                    }
-                    .padding(.horizontal, AppTheme.Spacing.sm)
-                    .padding(.vertical, 14)
-                    .background(AppTheme.Colors.passportInputBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
-                            .stroke(AppTheme.Colors.passportInputBorder, lineWidth: 2)
-                    )
-                    .cornerRadius(AppTheme.CornerRadius.medium)
+            SearchableDropdown<LocationSearchResult>(
+                label: "Home Country",
+                placeholder: "Search for a country...",
+                helperText: "Type to search for your country",
+                selectedHelperText: "Your home country for your passport",
+                selectedItem: $selectedCountry,
+                displayText: { $0.displayNameWithFlag },
+                search: { query in
+                    try await CountryService.shared.searchCountries(query: query)
                 }
-            }
+            )
         }
     }
     
@@ -247,21 +260,21 @@ struct TravelerDetailsView: View {
             Button {
                 focusedField = nil
                 Task {
-                    await checkUsernameAndProceed()
+                    await proceedToNextStep()
                 }
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxxs) {
-                    Text(isCheckingUsername ? "CHECKING..." : "CONTINUE")
+                    Text(isResolvingCountry ? "SAVING..." : "CONTINUE")
                         .font(AppTheme.Typography.button())
                         .tracking(1)
-                    if !isCheckingUsername {
+                    if !isResolvingCountry {
                         Image(systemName: "arrow.right")
                             .font(.system(size: 12, weight: .medium))
                     }
                 }
             }
-            .buttonStyle(PrimaryButtonStyle(isLoading: isCheckingUsername))
-            .disabled(!isFormValid || isCheckingUsername)
+            .buttonStyle(PrimaryButtonStyle(isLoading: isResolvingCountry))
+            .disabled(!isFormValid || isResolvingCountry)
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
         .padding(.vertical, AppTheme.Spacing.md)
@@ -269,24 +282,53 @@ struct TravelerDetailsView: View {
     }
     
     // MARK: - Username Check
-    private func checkUsernameAndProceed() async {
+    private func checkUsernameAvailability() async {
+        let trimmedUsername = username.trimmingCharacters(in: .whitespaces)
+        guard !trimmedUsername.isEmpty else { return }
+        
         isCheckingUsername = true
         usernameError = nil
+        isUsernameAvailable = nil
         
         do {
-            let response = try await AuthService.shared.checkUsername(userName: username)
+            let response = try await AuthService.shared.checkUsername(userName: trimmedUsername)
+            lastCheckedUsername = trimmedUsername
             
             if response.available {
-                // TODO: Navigate to next step (profile picture)
-                showingNextStep = true
+                isUsernameAvailable = true
             } else {
+                isUsernameAvailable = false
                 usernameError = response.message ?? "This username is already taken."
             }
         } catch {
+            isUsernameAvailable = nil
             usernameError = "Unable to verify username. Please try again."
         }
         
         isCheckingUsername = false
+    }
+    
+    // MARK: - Proceed to Next Step
+    private func proceedToNextStep() async {
+        guard let country = selectedCountry else { return }
+        
+        isResolvingCountry = true
+        countryError = nil
+        
+        do {
+            // Call getOrCreate to save the country and get its UUID
+            let placeDTO = try await PlaceService.shared.getOrCreate(from: country)
+            
+            // TODO: Navigate to next step with the resolved data
+            // nationalityId = placeDTO.id
+            print("Resolved country: \(placeDTO.name) with ID: \(placeDTO.id)")
+            
+            showingNextStep = true
+        } catch {
+            countryError = "Unable to save country. Please try again."
+        }
+        
+        isResolvingCountry = false
     }
 }
 
