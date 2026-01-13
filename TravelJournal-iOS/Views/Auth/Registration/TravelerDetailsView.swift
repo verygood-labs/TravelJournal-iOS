@@ -29,7 +29,12 @@ struct TravelerDetailsView: View {
     
     // Navigation
     @Environment(\.dismiss) var dismiss
-    @State private var showingNextStep = false
+    @State private var showingPassportPhoto = false
+    
+    // Photo state (shared with PassportPhotoPageContent)
+    @State private var selectedImage: UIImage? = nil
+    @State private var showingImagePicker = false
+    @State private var showingCamera = false
     
     enum Field {
         case fullName, username, country
@@ -68,34 +73,30 @@ struct TravelerDetailsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Progress bar with app background
+            // Progress bar stays in place during transition
             AppBackgroundView {
-                RegistrationProgressBar(currentStep: 2, totalSteps: 4)
+                RegistrationProgressBar(
+                    currentStep: showingPassportPhoto ? 3 : 2,
+                    totalSteps: 4
+                )
             }
             .frame(height: 80)
+            .animation(.easeInOut(duration: 0.3), value: showingPassportPhoto)
             
-            // Passport page content
-            PassportPageBackgroundView {
-                VStack(spacing: 0) {
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            // Header
-                            headerSection
-                                .padding(.top, AppTheme.Spacing.xl)
-                                .padding(.bottom, AppTheme.Spacing.lg)
-                            
-                            // Form
-                            formSection
-                                .padding(.horizontal, AppTheme.Spacing.lg)
-                            
-                            Spacer(minLength: AppTheme.Spacing.xxxl)
-                        }
-                    }
-                    
-                    // Bottom navigation
-                    bottomNavigation
-                }
+            // Page content with turn animation (only the form flips)
+            PageTurnCover(isPresented: $showingPassportPhoto) {
+                travelerDetailsFormContent
+            } destination: {
+                PassportPhotoFormContent(
+                    selectedImage: $selectedImage,
+                    showingImagePicker: $showingImagePicker,
+                    showingCamera: $showingCamera
+                )
             }
+            
+            // Bottom navigation stays in place during transition
+            bottomNavigation
+                .animation(.easeInOut(duration: 0.3), value: showingPassportPhoto)
         }
         .background(AppTheme.Colors.backgroundDark)
         .ignoresSafeArea(edges: .bottom)
@@ -122,6 +123,26 @@ struct TravelerDetailsView: View {
                     Task {
                         await checkUsernameAvailability()
                     }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Traveler Details Form Content (only the passport page that flips)
+    private var travelerDetailsFormContent: some View {
+        PassportPageBackgroundView {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Header
+                    headerSection
+                        .padding(.top, AppTheme.Spacing.xl)
+                        .padding(.bottom, AppTheme.Spacing.lg)
+                    
+                    // Form
+                    formSection
+                        .padding(.horizontal, AppTheme.Spacing.lg)
+                    
+                    Spacer(minLength: AppTheme.Spacing.xxxl)
                 }
             }
         }
@@ -401,7 +422,13 @@ struct TravelerDetailsView: View {
         HStack(spacing: AppTheme.Spacing.sm) {
             // Back button
             Button {
-                dismiss()
+                if showingPassportPhoto {
+                    // Go back to traveler details
+                    showingPassportPhoto = false
+                } else {
+                    // Go back to previous screen
+                    dismiss()
+                }
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxxs) {
                     Image(systemName: "arrow.left")
@@ -416,9 +443,15 @@ struct TravelerDetailsView: View {
             
             // Continue button
             Button {
-                focusedField = nil
-                Task {
-                    await proceedToNextStep()
+                if showingPassportPhoto {
+                    // Proceed from photo step
+                    proceedFromPhotoStep()
+                } else {
+                    // Proceed from traveler details step
+                    focusedField = nil
+                    Task {
+                        await proceedToNextStep()
+                    }
                 }
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxxs) {
@@ -430,11 +463,22 @@ struct TravelerDetailsView: View {
                 }
             }
             .buttonStyle(PrimaryButtonStyle())
-            .disabled(!isFormValid)
+            .disabled(showingPassportPhoto ? !hasPhoto : !isFormValid)
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
         .padding(.vertical, AppTheme.Spacing.md)
         .background(AppTheme.Colors.backgroundDark)
+    }
+    
+    private var hasPhoto: Bool {
+        selectedImage != nil
+    }
+    
+    private func proceedFromPhotoStep() {
+        guard hasPhoto else { return }
+        // TODO: Upload photo to server
+        // TODO: Navigate to next step (Step 4)
+        print("Proceeding with photo to next step")
     }
     
     // MARK: - Username Check
@@ -472,7 +516,7 @@ struct TravelerDetailsView: View {
         // nationalityId = country.id
         print("Selected country: \(country.name) with ID: \(country.id)")
         
-        showingNextStep = true
+        showingPassportPhoto = true
     }
 }
 
