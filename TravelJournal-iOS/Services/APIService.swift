@@ -1,6 +1,6 @@
 import Foundation
 
-class APIService {
+final class APIService: @unchecked Sendable {
     static let shared = APIService()
     
     private let baseURL: String

@@ -1,6 +1,6 @@
 import Foundation
 
-class PlaceService {
+final class PlaceService: @unchecked Sendable {
     static let shared = PlaceService()
     private let api = APIService.shared
     
@@ -16,6 +16,11 @@ class PlaceService {
         limit: Int = 10,
         language: String = "en"
     ) async throws -> [LocationSearchResult] {
+        // Guard against empty queries
+        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else {
+            return []
+        }
+        
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
         
         var endpoint = "/places/search?query=\(encodedQuery)&limit=\(limit)&language=\(language)"

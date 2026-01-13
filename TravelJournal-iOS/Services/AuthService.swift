@@ -1,6 +1,6 @@
 import Foundation
 
-class AuthService {
+final class AuthService: @unchecked Sendable {
     static let shared = AuthService()
     private let api = APIService.shared
     

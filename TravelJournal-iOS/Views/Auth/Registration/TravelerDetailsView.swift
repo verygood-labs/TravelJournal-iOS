@@ -10,15 +10,19 @@ struct TravelerDetailsView: View {
     // Form state
     @State private var fullName = ""
     @State private var username = ""
-    @State private var selectedCountry: LocationSearchResult? = nil
+    @State private var selectedCountry: PlaceSummaryDTO? = nil
     
     // Loading/Error state
     @State private var isCheckingUsername = false
     @State private var usernameError: String? = nil
     @State private var isUsernameAvailable: Bool? = nil
     @State private var lastCheckedUsername: String = ""
-    @State private var isResolvingCountry = false
-    @State private var countryError: String? = nil
+    
+    // Country dropdown state
+    @State private var allCountries: [PlaceSummaryDTO] = []
+    @State private var isLoadingCountries = false
+    @State private var countrySearchText = ""
+    @State private var showCountryDropdown = false
     
     // Focus state
     @FocusState private var focusedField: Field?
@@ -28,7 +32,7 @@ struct TravelerDetailsView: View {
     @State private var showingNextStep = false
     
     enum Field {
-        case fullName, username
+        case fullName, username, country
     }
     
     private var isFormValid: Bool {
@@ -51,6 +55,15 @@ struct TravelerDetailsView: View {
         return focusedField == .username
             ? AppTheme.Colors.passportInputBorderFocused
             : AppTheme.Colors.passportInputBorder
+    }
+    
+    // Filter countries based on search text
+    private var filteredCountries: [PlaceSummaryDTO] {
+        let trimmed = countrySearchText.trimmingCharacters(in: .whitespaces).lowercased()
+        if trimmed.isEmpty {
+            return allCountries
+        }
+        return allCountries.filter { $0.name.lowercased().contains(trimmed) }
     }
     
     var body: some View {
@@ -87,6 +100,11 @@ struct TravelerDetailsView: View {
         .background(AppTheme.Colors.backgroundDark)
         .ignoresSafeArea(edges: .bottom)
         .navigationBarHidden(true)
+        .onAppear {
+            Task {
+                await loadCountries()
+            }
+        }
         .onTapGesture {
             focusedField = nil
         }
@@ -224,17 +242,157 @@ struct TravelerDetailsView: View {
             }
             
             // Home Country field
-            SearchableDropdown<LocationSearchResult>(
-                label: "Home Country",
-                placeholder: "Search for a country...",
-                helperText: "Type to search for your country",
-                selectedHelperText: "Your home country for your passport",
-                selectedItem: $selectedCountry,
-                displayText: { $0.displayNameWithFlag },
-                search: { query in
-                    try await CountryService.shared.searchCountries(query: query)
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
+                Text("HOME COUNTRY")
+                    .font(AppTheme.Typography.inputLabel())
+                    .tracking(1)
+                    .foregroundColor(AppTheme.Colors.passportTextMuted)
+                
+                VStack(spacing: 0) {
+                    // Input field
+                    HStack {
+                        if let country = selectedCountry {
+                            // Show selected country
+                            Text(country.name)
+                                .font(AppTheme.Typography.monoMedium())
+                                .foregroundColor(AppTheme.Colors.passportTextPrimary)
+                            
+                            Spacer()
+                            
+                            Button {
+                                selectedCountry = nil
+                                countrySearchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(AppTheme.Colors.passportTextMuted)
+                            }
+                        } else {
+                            // Show search input
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 14))
+                                .foregroundColor(AppTheme.Colors.passportTextMuted)
+                            
+                            TextField(
+                                "",
+                                text: $countrySearchText,
+                                prompt: Text(isLoadingCountries ? "Loading countries..." : "Search for a country...")
+                                    .foregroundColor(AppTheme.Colors.passportTextPlaceholder)
+                            )
+                            .font(AppTheme.Typography.monoMedium())
+                            .foregroundColor(AppTheme.Colors.passportTextPrimary)
+                            .focused($focusedField, equals: .country)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.words)
+                            .disabled(isLoadingCountries)
+                            .onTapGesture {
+                                if !isLoadingCountries {
+                                    showCountryDropdown = true
+                                }
+                            }
+                            
+                            if isLoadingCountries {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, AppTheme.Spacing.sm)
+                    .padding(.vertical, 14)
+                    .background(AppTheme.Colors.passportInputBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: showCountryDropdown ? 0 : AppTheme.CornerRadius.medium)
+                            .stroke(
+                                focusedField == .country
+                                    ? AppTheme.Colors.passportInputBorderFocused
+                                    : AppTheme.Colors.passportInputBorder,
+                                lineWidth: 2
+                            )
+                    )
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: showCountryDropdown ? 0 : AppTheme.CornerRadius.medium)
+                    )
+                    
+                    // Dropdown list
+                    if showCountryDropdown && !filteredCountries.isEmpty {
+                        ScrollView {
+                            VStack(spacing: 0) {
+                                ForEach(filteredCountries) { country in
+                                    Button {
+                                        selectedCountry = country
+                                        countrySearchText = ""
+                                        showCountryDropdown = false
+                                        focusedField = nil
+                                    } label: {
+                                        HStack {
+                                            Text(country.name)
+                                                .font(AppTheme.Typography.monoMedium())
+                                                .foregroundColor(AppTheme.Colors.passportTextPrimary)
+                                            Spacer()
+                                        }
+                                        .padding(.horizontal, AppTheme.Spacing.sm)
+                                        .padding(.vertical, 12)
+                                        .background(AppTheme.Colors.passportInputBackground)
+                                    }
+                                    
+                                    if country.id != filteredCountries.last?.id {
+                                        Divider()
+                                            .background(AppTheme.Colors.passportInputBorder)
+                                    }
+                                }
+                            }
+                        }
+                        .frame(maxHeight: 180)
+                        .background(AppTheme.Colors.passportInputBackground)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 0)
+                                .stroke(AppTheme.Colors.passportInputBorder, lineWidth: 2)
+                        )
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                        )
+                    }
                 }
-            )
+                
+                Text(selectedCountry != nil ? "Your home country for your passport" : "Type to search for your country")
+                    .font(AppTheme.Typography.monoCaption())
+                    .foregroundColor(AppTheme.Colors.passportTextMuted)
+            }
+            .onChange(of: countrySearchText) { _, newValue in
+                // Show dropdown when user starts typing
+                if !newValue.isEmpty && selectedCountry == nil {
+                    showCountryDropdown = true
+                }
+            }
+            .onChange(of: focusedField) { _, newValue in
+                if newValue == .country {
+                    showCountryDropdown = true
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        showCountryDropdown = false
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Load Countries
+    private func loadCountries() async {
+        guard allCountries.isEmpty else { return }
+        
+        isLoadingCountries = true
+        
+        do {
+            let countries = try await PlaceService.shared.getAllCountries()
+            await MainActor.run {
+                allCountries = countries.sorted { $0.name < $1.name }
+                isLoadingCountries = false
+            }
+        } catch {
+            await MainActor.run {
+                isLoadingCountries = false
+                // Could show an error, but for now just leave empty
+            }
         }
     }
     
@@ -264,17 +422,15 @@ struct TravelerDetailsView: View {
                 }
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxxs) {
-                    Text(isResolvingCountry ? "SAVING..." : "CONTINUE")
+                    Text("CONTINUE")
                         .font(AppTheme.Typography.button())
                         .tracking(1)
-                    if !isResolvingCountry {
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 12, weight: .medium))
-                    }
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .medium))
                 }
             }
-            .buttonStyle(PrimaryButtonStyle(isLoading: isResolvingCountry))
-            .disabled(!isFormValid || isResolvingCountry)
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(!isFormValid)
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
         .padding(.vertical, AppTheme.Spacing.md)
@@ -312,23 +468,11 @@ struct TravelerDetailsView: View {
     private func proceedToNextStep() async {
         guard let country = selectedCountry else { return }
         
-        isResolvingCountry = true
-        countryError = nil
+        // Country already has UUID from pre-seeded data
+        // nationalityId = country.id
+        print("Selected country: \(country.name) with ID: \(country.id)")
         
-        do {
-            // Call getOrCreate to save the country and get its UUID
-            let placeDTO = try await PlaceService.shared.getOrCreate(from: country)
-            
-            // TODO: Navigate to next step with the resolved data
-            // nationalityId = placeDTO.id
-            print("Resolved country: \(placeDTO.name) with ID: \(placeDTO.id)")
-            
-            showingNextStep = true
-        } catch {
-            countryError = "Unable to save country. Please try again."
-        }
-        
-        isResolvingCountry = false
+        showingNextStep = true
     }
 }
 
