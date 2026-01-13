@@ -30,6 +30,9 @@ struct TravelerDetailsView: View {
     // Navigation
     @Environment(\.dismiss) var dismiss
     @State private var showingPassportPhoto = false
+    @State private var showingPassportPreview = false
+    @State private var showingPassportIssued = false
+    @State private var isSubmitting = false
     
     // Photo state (shared with PassportPhotoPageContent)
     @State private var selectedImage: UIImage? = nil
@@ -71,32 +74,53 @@ struct TravelerDetailsView: View {
         return allCountries.filter { $0.name.lowercased().contains(trimmed) }
     }
     
+    private var currentStep: Int {
+        if showingPassportPreview {
+            return 4
+        } else if showingPassportPhoto {
+            return 3
+        } else {
+            return 2
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             // Progress bar stays in place during transition
             AppBackgroundView {
                 RegistrationProgressBar(
-                    currentStep: showingPassportPhoto ? 3 : 2,
+                    currentStep: currentStep,
                     totalSteps: 4
                 )
             }
             .frame(height: 80)
-            .animation(.easeInOut(duration: 0.3), value: showingPassportPhoto)
+            .animation(.easeInOut(duration: 0.3), value: currentStep)
             
             // Page content with turn animation (only the form flips)
+            // Step 2 -> Step 3 transition
             PageTurnCover(isPresented: $showingPassportPhoto) {
                 travelerDetailsFormContent
             } destination: {
-                PassportPhotoFormContent(
-                    selectedImage: $selectedImage,
-                    showingImagePicker: $showingImagePicker,
-                    showingCamera: $showingCamera
-                )
+                // Step 3 -> Step 4 transition
+                PageTurnCover(isPresented: $showingPassportPreview) {
+                    PassportPhotoFormContent(
+                        selectedImage: $selectedImage,
+                        showingImagePicker: $showingImagePicker,
+                        showingCamera: $showingCamera
+                    )
+                } destination: {
+                    PassportPreviewFormContent(
+                        fullName: fullName,
+                        username: username,
+                        nationalityName: selectedCountry?.name ?? "",
+                        passportPhoto: selectedImage
+                    )
+                }
             }
             
             // Bottom navigation stays in place during transition
             bottomNavigation
-                .animation(.easeInOut(duration: 0.3), value: showingPassportPhoto)
+                .animation(.easeInOut(duration: 0.3), value: currentStep)
         }
         .background(AppTheme.Colors.backgroundDark)
         .ignoresSafeArea(edges: .bottom)
@@ -125,6 +149,20 @@ struct TravelerDetailsView: View {
                     }
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showingPassportIssued) {
+            PassportIssuedSheet(
+                fullName: fullName,
+                username: username,
+                nationalityName: selectedCountry?.name ?? "",
+                passportPhoto: selectedImage,
+                onContinue: {
+                    // TODO: Navigate to main app / home screen
+                    // For now, just dismiss the sheet
+                    showingPassportIssued = false
+                    dismiss()
+                }
+            )
         }
     }
     
@@ -422,13 +460,7 @@ struct TravelerDetailsView: View {
         HStack(spacing: AppTheme.Spacing.sm) {
             // Back button
             Button {
-                if showingPassportPhoto {
-                    // Go back to traveler details
-                    showingPassportPhoto = false
-                } else {
-                    // Go back to previous screen
-                    dismiss()
-                }
+                handleBack()
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxxs) {
                     Image(systemName: "arrow.left")
@@ -440,34 +472,71 @@ struct TravelerDetailsView: View {
             }
             .buttonStyle(SecondaryButtonStyle())
             .frame(width: 120)
+            .disabled(isSubmitting)
             
-            // Continue button
+            // Continue/Submit button
             Button {
-                if showingPassportPhoto {
-                    // Proceed from photo step
-                    proceedFromPhotoStep()
-                } else {
-                    // Proceed from traveler details step
-                    focusedField = nil
-                    Task {
-                        await proceedToNextStep()
-                    }
-                }
+                handleContinue()
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxxs) {
-                    Text("CONTINUE")
+                    if isSubmitting {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: AppTheme.Colors.backgroundDark))
+                            .scaleEffect(0.8)
+                    }
+                    Text(showingPassportPreview ? "SUBMIT" : "CONTINUE")
                         .font(AppTheme.Typography.button())
                         .tracking(1)
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 12, weight: .medium))
+                    if !isSubmitting {
+                        Image(systemName: showingPassportPreview ? "checkmark" : "arrow.right")
+                            .font(.system(size: 12, weight: .medium))
+                    }
                 }
             }
             .buttonStyle(PrimaryButtonStyle())
-            .disabled(showingPassportPhoto ? !hasPhoto : !isFormValid)
+            .disabled(isContinueDisabled)
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
         .padding(.vertical, AppTheme.Spacing.md)
         .background(AppTheme.Colors.backgroundDark)
+    }
+    
+    private var isContinueDisabled: Bool {
+        if isSubmitting { return true }
+        if showingPassportPreview { return false }
+        if showingPassportPhoto { return !hasPhoto }
+        return !isFormValid
+    }
+    
+    private func handleBack() {
+        if showingPassportPreview {
+            // Go back to photo step
+            showingPassportPreview = false
+        } else if showingPassportPhoto {
+            // Go back to traveler details
+            showingPassportPhoto = false
+        } else {
+            // Go back to previous screen
+            dismiss()
+        }
+    }
+    
+    private func handleContinue() {
+        if showingPassportPreview {
+            // Submit registration
+            Task {
+                await submitRegistration()
+            }
+        } else if showingPassportPhoto {
+            // Proceed to preview
+            proceedFromPhotoStep()
+        } else {
+            // Proceed from traveler details step
+            focusedField = nil
+            Task {
+                await proceedToNextStep()
+            }
+        }
     }
     
     private var hasPhoto: Bool {
@@ -476,9 +545,24 @@ struct TravelerDetailsView: View {
     
     private func proceedFromPhotoStep() {
         guard hasPhoto else { return }
-        // TODO: Upload photo to server
-        // TODO: Navigate to next step (Step 4)
-        print("Proceeding with photo to next step")
+        // Proceed to preview step (Step 4)
+        showingPassportPreview = true
+    }
+    
+    // MARK: - Submit Registration
+    private func submitRegistration() async {
+        guard selectedCountry != nil else { return }
+        
+        isSubmitting = true
+        
+        // TODO: Implement actual registration API call
+        // For now, simulate a delay
+        try? await Task.sleep(nanoseconds: 1_500_000_000)
+        
+        await MainActor.run {
+            isSubmitting = false
+            showingPassportIssued = true
+        }
     }
     
     // MARK: - Username Check
