@@ -102,9 +102,9 @@ class AuthManager: ObservableObject {
             currentUser = User(
                 id: profile.id,
                 email: profile.email,
-                displayName: profile.displayName,
-                avatarUrl: profile.avatarUrl,
-                createdAt: nil
+                name: profile.displayName,
+                userName: profile.displayName,
+                profilePictureUrl: profile.avatarUrl
             )
         } catch {
             // Token might be invalid, clear auth state

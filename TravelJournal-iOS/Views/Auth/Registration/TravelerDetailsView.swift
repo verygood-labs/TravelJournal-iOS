@@ -3,61 +3,33 @@ import SwiftUI
 // MARK: - Traveler Details View
 /// Step 2 of registration: Collect name, username, and home country
 struct TravelerDetailsView: View {
-    // Form data passed from previous step
-    let email: String
-    let password: String
+    // ViewModel handles all business logic
+    @StateObject private var viewModel: RegistrationViewModel
     
-    // Form state
-    @State private var fullName = ""
-    @State private var username = ""
-    @State private var selectedCountry: PlaceSummaryDTO? = nil
-    
-    // Loading/Error state
-    @State private var isCheckingUsername = false
-    @State private var usernameError: String? = nil
-    @State private var isUsernameAvailable: Bool? = nil
-    @State private var lastCheckedUsername: String = ""
-    
-    // Country dropdown state
-    @State private var allCountries: [PlaceSummaryDTO] = []
-    @State private var isLoadingCountries = false
-    @State private var countrySearchText = ""
-    @State private var showCountryDropdown = false
-    
-    // Focus state
+    // Focus state (UI-only, stays in view)
     @FocusState private var focusedField: Field?
+    
+    // Image picker state (UI-only)
+    @State private var showingImagePicker = false
+    @State private var showingCamera = false
     
     // Navigation
     @Environment(\.dismiss) var dismiss
-    @State private var showingPassportPhoto = false
-    @State private var showingPassportPreview = false
-    @State private var showingPassportIssued = false
-    @State private var isSubmitting = false
-    
-    // Photo state (shared with PassportPhotoPageContent)
-    @State private var selectedImage: UIImage? = nil
-    @State private var showingImagePicker = false
-    @State private var showingCamera = false
     
     enum Field {
         case fullName, username, country
     }
     
-    private var isFormValid: Bool {
-        !fullName.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !username.trimmingCharacters(in: .whitespaces).isEmpty &&
-        isValidUsername(username) &&
-        isUsernameAvailable == true &&
-        selectedCountry != nil
+    // MARK: - Initialization
+    
+    init(email: String, password: String) {
+        _viewModel = StateObject(wrappedValue: RegistrationViewModel(email: email, password: password))
     }
     
-    private func isValidUsername(_ username: String) -> Bool {
-        let pattern = "^[a-zA-Z0-9_]+$"
-        return username.range(of: pattern, options: .regularExpression) != nil
-    }
+    // MARK: - Computed Properties
     
     private var usernameBorderColor: Color {
-        if usernameError != nil {
+        if viewModel.usernameError != nil {
             return .red
         }
         return focusedField == .username
@@ -65,108 +37,92 @@ struct TravelerDetailsView: View {
             : AppTheme.Colors.passportInputBorder
     }
     
-    // Filter countries based on search text
-    private var filteredCountries: [PlaceSummaryDTO] {
-        let trimmed = countrySearchText.trimmingCharacters(in: .whitespaces).lowercased()
-        if trimmed.isEmpty {
-            return allCountries
-        }
-        return allCountries.filter { $0.name.lowercased().contains(trimmed) }
-    }
-    
-    private var currentStep: Int {
-        if showingPassportPreview {
-            return 4
-        } else if showingPassportPhoto {
-            return 3
-        } else {
-            return 2
-        }
-    }
+    // MARK: - Body
     
     var body: some View {
         VStack(spacing: 0) {
             // Progress bar stays in place during transition
             AppBackgroundView {
                 RegistrationProgressBar(
-                    currentStep: currentStep,
+                    currentStep: viewModel.currentStep,
                     totalSteps: 4
                 )
             }
             .frame(height: 80)
-            .animation(.easeInOut(duration: 0.3), value: currentStep)
+            .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
             
             // Page content with turn animation (only the form flips)
             // Step 2 -> Step 3 transition
-            PageTurnCover(isPresented: $showingPassportPhoto) {
+            PageTurnCover(isPresented: $viewModel.showingPassportPhoto) {
                 travelerDetailsFormContent
             } destination: {
                 // Step 3 -> Step 4 transition
-                PageTurnCover(isPresented: $showingPassportPreview) {
+                PageTurnCover(isPresented: $viewModel.showingPassportPreview) {
                     PassportPhotoFormContent(
-                        selectedImage: $selectedImage,
+                        selectedImage: $viewModel.selectedImage,
                         showingImagePicker: $showingImagePicker,
                         showingCamera: $showingCamera
                     )
                 } destination: {
                     PassportPreviewFormContent(
-                        fullName: fullName,
-                        username: username,
-                        nationalityName: selectedCountry?.name ?? "",
-                        passportPhoto: selectedImage
+                        fullName: viewModel.fullName,
+                        username: viewModel.username,
+                        nationalityName: viewModel.selectedCountry?.name ?? "",
+                        passportPhoto: viewModel.selectedImage
                     )
                 }
             }
             
             // Bottom navigation stays in place during transition
             bottomNavigation
-                .animation(.easeInOut(duration: 0.3), value: currentStep)
+                .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
         }
         .background(AppTheme.Colors.backgroundDark)
         .ignoresSafeArea(edges: .bottom)
         .navigationBarHidden(true)
         .onAppear {
             Task {
-                await loadCountries()
+                await viewModel.loadCountries()
             }
         }
         .onTapGesture {
             focusedField = nil
         }
-        .onChange(of: username) { _, _ in
-            usernameError = nil
-            isUsernameAvailable = nil
+        .onChange(of: viewModel.username) { _, _ in
+            viewModel.onUsernameChanged()
         }
         .onChange(of: focusedField) { oldValue, newValue in
             // Check username when user leaves the username field
             if oldValue == .username && newValue != .username {
-                let trimmedUsername = username.trimmingCharacters(in: .whitespaces)
-                if !trimmedUsername.isEmpty && 
-                   isValidUsername(trimmedUsername) && 
-                   trimmedUsername != lastCheckedUsername {
-                    Task {
-                        await checkUsernameAvailability()
-                    }
+                Task {
+                    await viewModel.checkUsernameAvailability()
                 }
             }
         }
-        .fullScreenCover(isPresented: $showingPassportIssued) {
+        .fullScreenCover(isPresented: $viewModel.showingPassportIssued) {
             PassportIssuedSheet(
-                fullName: fullName,
-                username: username,
-                nationalityName: selectedCountry?.name ?? "",
-                passportPhoto: selectedImage,
+                fullName: viewModel.fullName,
+                username: viewModel.username,
+                nationalityName: viewModel.selectedCountry?.name ?? "",
+                passportPhoto: viewModel.selectedImage,
                 onContinue: {
                     // TODO: Navigate to main app / home screen
-                    // For now, just dismiss the sheet
-                    showingPassportIssued = false
+                    viewModel.showingPassportIssued = false
                     dismiss()
                 }
             )
         }
+        .alert("Registration Error", isPresented: .init(
+            get: { viewModel.registrationError != nil },
+            set: { if !$0 { viewModel.registrationError = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(viewModel.registrationError ?? "")
+        }
     }
     
-    // MARK: - Traveler Details Form Content (only the passport page that flips)
+    // MARK: - Traveler Details Form Content
     private var travelerDetailsFormContent: some View {
         PassportPageBackgroundView {
             ScrollView {
@@ -218,7 +174,7 @@ struct TravelerDetailsView: View {
                 
                 TextField(
                     "",
-                    text: $fullName,
+                    text: $viewModel.fullName,
                     prompt: Text("Your name as it appears")
                         .foregroundColor(AppTheme.Colors.passportTextPlaceholder)
                 )
@@ -247,7 +203,7 @@ struct TravelerDetailsView: View {
                     
                     TextField(
                         "",
-                        text: $username,
+                        text: $viewModel.username,
                         prompt: Text("wanderlust")
                             .foregroundColor(AppTheme.Colors.passportTextPlaceholder)
                     )
@@ -260,15 +216,15 @@ struct TravelerDetailsView: View {
                     .padding(.vertical, 14)
                     
                     // Status indicator
-                    if isCheckingUsername {
+                    if viewModel.isCheckingUsername {
                         ProgressView()
                             .scaleEffect(0.8)
                             .padding(.trailing, AppTheme.Spacing.sm)
-                    } else if isUsernameAvailable == true {
+                    } else if viewModel.isUsernameAvailable == true {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
                             .padding(.trailing, AppTheme.Spacing.sm)
-                    } else if isUsernameAvailable == false {
+                    } else if viewModel.isUsernameAvailable == false {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.red)
                             .padding(.trailing, AppTheme.Spacing.sm)
@@ -289,7 +245,7 @@ struct TravelerDetailsView: View {
                 .cornerRadius(AppTheme.CornerRadius.medium)
                 .animation(.easeInOut(duration: AppTheme.Animation.fast), value: focusedField)
                 
-                if let error = usernameError {
+                if let error = viewModel.usernameError {
                     Text(error)
                         .font(AppTheme.Typography.monoCaption())
                         .foregroundColor(.red)
@@ -310,7 +266,7 @@ struct TravelerDetailsView: View {
                 VStack(spacing: 0) {
                     // Input field
                     HStack {
-                        if let country = selectedCountry {
+                        if let country = viewModel.selectedCountry {
                             // Show selected country
                             Text(country.name)
                                 .font(AppTheme.Typography.monoMedium())
@@ -319,8 +275,7 @@ struct TravelerDetailsView: View {
                             Spacer()
                             
                             Button {
-                                selectedCountry = nil
-                                countrySearchText = ""
+                                viewModel.clearSelectedCountry()
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.system(size: 16))
@@ -334,8 +289,8 @@ struct TravelerDetailsView: View {
                             
                             TextField(
                                 "",
-                                text: $countrySearchText,
-                                prompt: Text(isLoadingCountries ? "Loading countries..." : "Search for a country...")
+                                text: $viewModel.countrySearchText,
+                                prompt: Text(viewModel.isLoadingCountries ? "Loading countries..." : "Search for a country...")
                                     .foregroundColor(AppTheme.Colors.passportTextPlaceholder)
                             )
                             .font(AppTheme.Typography.monoMedium())
@@ -343,14 +298,14 @@ struct TravelerDetailsView: View {
                             .focused($focusedField, equals: .country)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.words)
-                            .disabled(isLoadingCountries)
+                            .disabled(viewModel.isLoadingCountries)
                             .onTapGesture {
-                                if !isLoadingCountries {
-                                    showCountryDropdown = true
+                                if !viewModel.isLoadingCountries {
+                                    viewModel.showCountryDropdown = true
                                 }
                             }
                             
-                            if isLoadingCountries {
+                            if viewModel.isLoadingCountries {
                                 ProgressView()
                                     .scaleEffect(0.8)
                             }
@@ -360,7 +315,7 @@ struct TravelerDetailsView: View {
                     .padding(.vertical, 14)
                     .background(AppTheme.Colors.passportInputBackground)
                     .overlay(
-                        RoundedRectangle(cornerRadius: showCountryDropdown ? 0 : AppTheme.CornerRadius.medium)
+                        RoundedRectangle(cornerRadius: viewModel.showCountryDropdown ? 0 : AppTheme.CornerRadius.medium)
                             .stroke(
                                 focusedField == .country
                                     ? AppTheme.Colors.passportInputBorderFocused
@@ -369,18 +324,16 @@ struct TravelerDetailsView: View {
                             )
                     )
                     .clipShape(
-                        RoundedRectangle(cornerRadius: showCountryDropdown ? 0 : AppTheme.CornerRadius.medium)
+                        RoundedRectangle(cornerRadius: viewModel.showCountryDropdown ? 0 : AppTheme.CornerRadius.medium)
                     )
                     
                     // Dropdown list
-                    if showCountryDropdown && !filteredCountries.isEmpty {
+                    if viewModel.showCountryDropdown && !viewModel.filteredCountries.isEmpty {
                         ScrollView {
                             VStack(spacing: 0) {
-                                ForEach(filteredCountries) { country in
+                                ForEach(viewModel.filteredCountries) { country in
                                     Button {
-                                        selectedCountry = country
-                                        countrySearchText = ""
-                                        showCountryDropdown = false
+                                        viewModel.selectCountry(country)
                                         focusedField = nil
                                     } label: {
                                         HStack {
@@ -394,7 +347,7 @@ struct TravelerDetailsView: View {
                                         .background(AppTheme.Colors.passportInputBackground)
                                     }
                                     
-                                    if country.id != filteredCountries.last?.id {
+                                    if country.id != viewModel.filteredCountries.last?.id {
                                         Divider()
                                             .background(AppTheme.Colors.passportInputBorder)
                                     }
@@ -413,44 +366,24 @@ struct TravelerDetailsView: View {
                     }
                 }
                 
-                Text(selectedCountry != nil ? "Your home country for your passport" : "Type to search for your country")
+                Text(viewModel.selectedCountry != nil ? "Your home country for your passport" : "Type to search for your country")
                     .font(AppTheme.Typography.monoCaption())
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
             }
-            .onChange(of: countrySearchText) { _, newValue in
+            .onChange(of: viewModel.countrySearchText) { _, newValue in
                 // Show dropdown when user starts typing
-                if !newValue.isEmpty && selectedCountry == nil {
-                    showCountryDropdown = true
+                if !newValue.isEmpty && viewModel.selectedCountry == nil {
+                    viewModel.showCountryDropdown = true
                 }
             }
             .onChange(of: focusedField) { _, newValue in
                 if newValue == .country {
-                    showCountryDropdown = true
+                    viewModel.showCountryDropdown = true
                 } else {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        showCountryDropdown = false
+                        viewModel.showCountryDropdown = false
                     }
                 }
-            }
-        }
-    }
-    
-    // MARK: - Load Countries
-    private func loadCountries() async {
-        guard allCountries.isEmpty else { return }
-        
-        isLoadingCountries = true
-        
-        do {
-            let countries = try await PlaceService.shared.getAllCountries()
-            await MainActor.run {
-                allCountries = countries.sorted { $0.name < $1.name }
-                isLoadingCountries = false
-            }
-        } catch {
-            await MainActor.run {
-                isLoadingCountries = false
-                // Could show an error, but for now just leave empty
             }
         }
     }
@@ -460,7 +393,9 @@ struct TravelerDetailsView: View {
         HStack(spacing: AppTheme.Spacing.sm) {
             // Back button
             Button {
-                handleBack()
+                if viewModel.handleBack() {
+                    dismiss()
+                }
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxxs) {
                     Image(systemName: "arrow.left")
@@ -472,135 +407,36 @@ struct TravelerDetailsView: View {
             }
             .buttonStyle(SecondaryButtonStyle())
             .frame(width: 120)
-            .disabled(isSubmitting)
+            .disabled(viewModel.isSubmitting)
             
             // Continue/Submit button
             Button {
-                handleContinue()
+                focusedField = nil
+                Task {
+                    await viewModel.handleContinue()
+                }
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxxs) {
-                    if isSubmitting {
+                    if viewModel.isSubmitting {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: AppTheme.Colors.backgroundDark))
                             .scaleEffect(0.8)
                     }
-                    Text(showingPassportPreview ? "SUBMIT" : "CONTINUE")
+                    Text(viewModel.showingPassportPreview ? "SUBMIT" : "CONTINUE")
                         .font(AppTheme.Typography.button())
                         .tracking(1)
-                    if !isSubmitting {
-                        Image(systemName: showingPassportPreview ? "checkmark" : "arrow.right")
+                    if !viewModel.isSubmitting {
+                        Image(systemName: viewModel.showingPassportPreview ? "checkmark" : "arrow.right")
                             .font(.system(size: 12, weight: .medium))
                     }
                 }
             }
             .buttonStyle(PrimaryButtonStyle())
-            .disabled(isContinueDisabled)
+            .disabled(viewModel.isContinueDisabled)
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
         .padding(.vertical, AppTheme.Spacing.md)
         .background(AppTheme.Colors.backgroundDark)
-    }
-    
-    private var isContinueDisabled: Bool {
-        if isSubmitting { return true }
-        if showingPassportPreview { return false }
-        if showingPassportPhoto { return !hasPhoto }
-        return !isFormValid
-    }
-    
-    private func handleBack() {
-        if showingPassportPreview {
-            // Go back to photo step
-            showingPassportPreview = false
-        } else if showingPassportPhoto {
-            // Go back to traveler details
-            showingPassportPhoto = false
-        } else {
-            // Go back to previous screen
-            dismiss()
-        }
-    }
-    
-    private func handleContinue() {
-        if showingPassportPreview {
-            // Submit registration
-            Task {
-                await submitRegistration()
-            }
-        } else if showingPassportPhoto {
-            // Proceed to preview
-            proceedFromPhotoStep()
-        } else {
-            // Proceed from traveler details step
-            focusedField = nil
-            Task {
-                await proceedToNextStep()
-            }
-        }
-    }
-    
-    private var hasPhoto: Bool {
-        selectedImage != nil
-    }
-    
-    private func proceedFromPhotoStep() {
-        guard hasPhoto else { return }
-        // Proceed to preview step (Step 4)
-        showingPassportPreview = true
-    }
-    
-    // MARK: - Submit Registration
-    private func submitRegistration() async {
-        guard selectedCountry != nil else { return }
-        
-        isSubmitting = true
-        
-        // TODO: Implement actual registration API call
-        // For now, simulate a delay
-        try? await Task.sleep(nanoseconds: 1_500_000_000)
-        
-        await MainActor.run {
-            isSubmitting = false
-            showingPassportIssued = true
-        }
-    }
-    
-    // MARK: - Username Check
-    private func checkUsernameAvailability() async {
-        let trimmedUsername = username.trimmingCharacters(in: .whitespaces)
-        guard !trimmedUsername.isEmpty else { return }
-        
-        isCheckingUsername = true
-        usernameError = nil
-        isUsernameAvailable = nil
-        
-        do {
-            let response = try await AuthService.shared.checkUsername(userName: trimmedUsername)
-            lastCheckedUsername = trimmedUsername
-            
-            if response.available {
-                isUsernameAvailable = true
-            } else {
-                isUsernameAvailable = false
-                usernameError = response.message ?? "This username is already taken."
-            }
-        } catch {
-            isUsernameAvailable = nil
-            usernameError = "Unable to verify username. Please try again."
-        }
-        
-        isCheckingUsername = false
-    }
-    
-    // MARK: - Proceed to Next Step
-    private func proceedToNextStep() async {
-        guard let country = selectedCountry else { return }
-        
-        // Country already has UUID from pre-seeded data
-        // nationalityId = country.id
-        print("Selected country: \(country.name) with ID: \(country.id)")
-        
-        showingPassportPhoto = true
     }
 }
 

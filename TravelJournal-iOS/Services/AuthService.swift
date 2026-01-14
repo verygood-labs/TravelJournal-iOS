@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 final class AuthService: @unchecked Sendable {
     static let shared = AuthService()
@@ -40,21 +41,29 @@ final class AuthService: @unchecked Sendable {
         name: String,
         userName: String,
         nationalityId: String? = nil,
-        profilePictureUrl: String? = nil
+        profilePicture: UIImage? = nil
     ) async throws -> AuthResponse {
-        let request = RegisterRequest(
-            email: email,
-            password: password,
-            name: name,
-            userName: userName,
-            nationalityId: nationalityId,
-            profilePictureUrl: profilePictureUrl
-        )
+        var fields: [String: String] = [
+            "email": email,
+            "password": password,
+            "name": name,
+            "userName": userName
+        ]
         
-        let response: AuthResponse = try await api.request(
+        if let nationalityId = nationalityId {
+            fields["nationalityId"] = nationalityId
+        }
+        
+        // Convert image to JPEG data
+        let imageData = profilePicture?.jpegData(compressionQuality: 0.8)
+        
+        let response: AuthResponse = try await api.uploadMultipart(
             endpoint: "/auth/register",
-            method: "POST",
-            body: request,
+            fields: fields,
+            imageData: imageData,
+            imageFieldName: "profilePicture",
+            imageFileName: "profile.jpg",
+            imageMimeType: "image/jpeg",
             authenticated: false
         )
         

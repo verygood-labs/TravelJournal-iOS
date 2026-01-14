@@ -279,7 +279,6 @@ struct AccountCredentialsView: View {
             } label: {
                 if isCheckingEmail {
                     HStack(spacing: AppTheme.Spacing.xxs) {
-                        Text("🛫")
                         Text("CHECKING...")
                     }
                 } else {

@@ -3,16 +3,16 @@ import Foundation
 struct User: Codable, Identifiable {
     let id: UUID
     let email: String
-    let displayName: String
-    let avatarUrl: String?
-    let createdAt: Date?
+    let name: String
+    let userName: String
+    let profilePictureUrl: String?
     
     enum CodingKeys: String, CodingKey {
         case id
         case email
-        case displayName
-        case avatarUrl
-        case createdAt
+        case name
+        case userName
+        case profilePictureUrl
     }
 }
 
