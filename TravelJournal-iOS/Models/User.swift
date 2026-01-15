@@ -16,6 +16,12 @@ struct User: Codable, Identifiable {
     }
 }
 
+struct NationalityInfo: Codable {
+    let id: String
+    let name: String
+    let countryCode: String
+}
+
 struct UserProfile: Codable {
     let userId: UUID
     let email: String
@@ -23,7 +29,7 @@ struct UserProfile: Codable {
     let name: String
     let bio: String?
     let profilePictureUrl: String?
-    let nationalityId: String?
+    let nationality: NationalityInfo?
     let preferredLanguage: String?
     let preferredCurrency: String?
     let createdAt: Date
