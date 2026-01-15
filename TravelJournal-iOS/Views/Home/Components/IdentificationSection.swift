@@ -21,7 +21,7 @@ struct IdentificationSection: View {
                 Spacer()
             }
             .padding(.horizontal, AppTheme.Spacing.lg)
-            .padding(.bottom, AppTheme.Spacing.lg)
+            .padding(.bottom, AppTheme.Spacing.md) // Changed from .lg to .md
             
             // Stats row
             statsRow
@@ -32,7 +32,7 @@ struct IdentificationSection: View {
     // MARK: - Section Header
     private var sectionHeader: some View {
         VStack(spacing: AppTheme.Spacing.xxxs) {
-            Text("✦ IDENTIFICATION ✦")
+            Text("IDENTIFICATION")
                 .font(AppTheme.Typography.monoSmall())
                 .tracking(2)
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
@@ -87,46 +87,44 @@ struct IdentificationSection: View {
                     .foregroundColor(AppTheme.Colors.passportTextMuted.opacity(0.3))
             )
     }
-    
+
     // MARK: - Details Section
     private var detailsSection: some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
-            // Label
-            Text("TRAVELER NAME")
-                .font(AppTheme.Typography.monoCaption())
-                .tracking(1)
-                .foregroundColor(AppTheme.Colors.passportTextMuted)
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+            // Row 1: Traveler Name (full width)
+            DetailField(
+                label: "TRAVELER NAME",
+                value: viewModel.displayName,
+                useSerifFont: false,
+                valueFont: AppTheme.Typography.monoMedium() // or monoLarge() for even bigger
+            )
             
-            // Full name
-            Text(viewModel.displayName)
-                .font(AppTheme.Typography.serifSmall())
-                .foregroundColor(AppTheme.Colors.passportTextPrimary)
+            // Row 2: Username and Nationality (side by side)
+            HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
+                DetailField(
+                    label: "PASSPORT NO.",
+                    value: "@\(viewModel.username)",
+                    useSerifFont: false
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                DetailField(
+                    label: "NATIONALITY",
+                    value: viewModel.nationalityName,
+                    useSerifFont: false
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
             
-            Spacer()
-                .frame(height: AppTheme.Spacing.xxxs)
-            
-            // Username
-            Text("USERNAME")
-                .font(AppTheme.Typography.monoCaption())
-                .tracking(1)
-                .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
-            Text("@\(viewModel.username)")
-                .font(AppTheme.Typography.monoSmall())
-                .foregroundColor(AppTheme.Colors.passportTextPrimary)
-            
-            Spacer()
-                .frame(height: AppTheme.Spacing.xxxs)
-            
-            // Nationality
-            Text("NATIONALITY")
-                .font(AppTheme.Typography.monoCaption())
-                .tracking(1)
-                .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
-            Text(viewModel.nationalityName)
-                .font(AppTheme.Typography.monoSmall())
-                .foregroundColor(AppTheme.Colors.passportTextPrimary)
+            // Row 3: Passport Number and Date Issued (side by side)
+            HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
+                DetailField(
+                    label: "ISSUED",
+                    value: viewModel.dateIssued,
+                    useSerifFont: false
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
     }
     
@@ -148,6 +146,12 @@ struct IdentificationSection: View {
                 label: "TRIPS"
             )
         }
+        .padding(.vertical, AppTheme.Spacing.sm)
+        .padding(.horizontal, AppTheme.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                .fill(AppTheme.Colors.passportInputBackground.opacity(1.5))
+        )
     }
 }
 
@@ -159,7 +163,7 @@ private struct StatItem: View {
     var body: some View {
         VStack(spacing: AppTheme.Spacing.xxxs) {
             Text("\(value)")
-                .font(AppTheme.Typography.serifMedium())
+                .font(AppTheme.Typography.monoLarge())
                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
             
             Text(label)
@@ -212,6 +216,27 @@ private struct PhotoCornerBrackets: View {
                 }
                 .stroke(AppTheme.Colors.primary, lineWidth: lineWidth)
             }
+        }
+    }
+}
+
+// MARK: - Detail Field Component
+private struct DetailField: View {
+    let label: String
+    let value: String
+    var useSerifFont: Bool = true
+    var valueFont: Font? = nil // New parameter for custom font
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(AppTheme.Typography.monoCaption())
+                .tracking(1)
+                .foregroundColor(AppTheme.Colors.passportTextMuted)
+            
+            Text(value)
+                .font(valueFont ?? (useSerifFont ? AppTheme.Typography.serifSmall() : AppTheme.Typography.monoSmall()))
+                .foregroundColor(AppTheme.Colors.passportTextPrimary)
         }
     }
 }

@@ -31,6 +31,13 @@ final class PassportHomeViewModel: ObservableObject {
     userProfile?.nationality?.name ?? "Unknown"
     }
 
+    var dateIssued: String {
+        guard let createdAt = userProfile?.createdAt else { return "N/A" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM yyyy"
+        return formatter.string(from: createdAt)
+    }
+
     var countryCode: String? {
         userProfile?.nationality?.countryCode
     }

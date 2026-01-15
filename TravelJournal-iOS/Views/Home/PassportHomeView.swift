@@ -7,17 +7,17 @@ struct PassportHomeView: View {
     var body: some View {
         ZStack {
             if viewModel.isLoadingProfile || viewModel.isLoadingStats {
-                // Loading state
                 loadingView
             } else if let error = viewModel.error {
-                // Error state
                 errorView(message: error)
             } else {
-                // Main content
                 VStack(spacing: 0) {
                     // Header section (dark background)
                     headerSection
                         .frame(height: 160)
+                    
+                    // Gold decorative border
+                    GoldBorder()
                     
                     // Body section (passport page background)
                     ScrollView {
@@ -25,6 +25,9 @@ struct PassportHomeView: View {
                             // Identification section
                             IdentificationSection(viewModel: viewModel)
                                 .padding(.top, AppTheme.Spacing.lg)
+                            
+                            // Divider between sections
+                            SectionDivider()
                             
                             // Visas & Entries section
                             VisasSection()
@@ -118,7 +121,7 @@ struct PassportHomeView: View {
                 AnimatedGlobeView(size: 60)
                 
                 // "PASSPORT" text
-                Text("PASSPORT")
+                Text("YOUR PASSPORT")
                     .font(AppTheme.Typography.monoMedium())
                     .tracking(4)
                     .foregroundColor(AppTheme.Colors.primary)
