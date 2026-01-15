@@ -100,11 +100,11 @@ class AuthManager: ObservableObject {
         do {
             let profile = try await ProfileService.shared.getProfile()
             currentUser = User(
-                id: profile.id,
+                id: profile.userId,  // Changed from profile.id
                 email: profile.email,
-                name: profile.displayName,
-                userName: profile.displayName,
-                profilePictureUrl: profile.avatarUrl
+                name: profile.name,
+                userName: profile.userName,
+                profilePictureUrl: profile.profilePictureUrl
             )
         } catch {
             // Token might be invalid, clear auth state
