@@ -409,4 +409,25 @@ final class APIService: @unchecked Sendable {
         
         return try handleResponse(data: data, response: httpResponse)
     }
+
+    var mediaBaseURL: String {
+        #if DEBUG
+        return "http://127.0.0.1:5151"
+        #else
+        return "https://api.yourdomain.com"
+        #endif
+    }
+
+    // Add this helper method
+    func fullMediaURL(for path: String?) -> URL? {
+        guard let path = path else { return nil }
+        
+        // If already a full URL, return as-is
+        if path.hasPrefix("http://") || path.hasPrefix("https://") {
+            return URL(string: path)
+        }
+        
+        // Otherwise, prepend base URL
+        return URL(string: mediaBaseURL + path)
+    }
 }

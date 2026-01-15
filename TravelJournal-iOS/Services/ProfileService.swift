@@ -10,13 +10,31 @@ class ProfileService {
         return try await api.request(endpoint: "/profile")
     }
     
-    func updateProfile(displayName: String? = nil, bio: String? = nil) async throws -> UserProfile {
+    func updateProfile(
+        name: String? = nil,
+        bio: String? = nil,
+        profilePictureUrl: String? = nil,
+        nationalityId: String? = nil,
+        preferredLanguage: String? = nil,
+        preferredCurrency: String? = nil
+    ) async throws -> UserProfile {
         struct UpdateProfileRequest: Codable {
-            let displayName: String?
+            let name: String?
             let bio: String?
+            let profilePictureUrl: String?
+            let nationalityId: String?
+            let preferredLanguage: String?
+            let preferredCurrency: String?
         }
         
-        let request = UpdateProfileRequest(displayName: displayName, bio: bio)
+        let request = UpdateProfileRequest(
+            name: name,
+            bio: bio,
+            profilePictureUrl: profilePictureUrl,
+            nationalityId: nationalityId,
+            preferredLanguage: preferredLanguage,
+            preferredCurrency: preferredCurrency
+        )
         
         return try await api.request(
             endpoint: "/profile",
