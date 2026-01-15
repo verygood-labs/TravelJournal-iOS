@@ -17,16 +17,23 @@ struct User: Codable, Identifiable {
 }
 
 struct UserProfile: Codable {
-    let id: UUID
+    let userId: UUID
     let email: String
-    let displayName: String
-    let avatarUrl: String?
+    let userName: String
+    let name: String
     let bio: String?
+    let profilePictureUrl: String?
+    let nationalityId: String?
+    let preferredLanguage: String?
+    let preferredCurrency: String?
+    let createdAt: Date
+    let updatedAt: Date?
 }
 
 struct UserStats: Codable {
     let totalTrips: Int
-    let totalCountries: Int
-    let totalCities: Int
+    let totalEntries: Int
+    let countriesVisited: Int
+    let totalPhotos: Int
     let totalDistance: Double?
 }
