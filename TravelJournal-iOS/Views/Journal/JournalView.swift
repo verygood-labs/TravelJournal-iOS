@@ -5,8 +5,9 @@ struct JournalView: View {
     @State private var showingAddTrip = false
     
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack(alignment: .bottomTrailing) {
+            // Main content
+            AppBackgroundView {
                 if viewModel.isLoading {
                     loadingView
                 } else if let error = viewModel.error {
@@ -17,64 +18,121 @@ struct JournalView: View {
                     tripsList
                 }
             }
-            .navigationTitle("Journal")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingAddTrip = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(AppTheme.Colors.primary)
-                    }
+            
+            // Floating Action Button
+            if !viewModel.trips.isEmpty {
+                floatingAddButton
+                    .padding(.trailing, AppTheme.Spacing.lg)
+                    .padding(.bottom, AppTheme.Spacing.lg)
+            }
+        }
+        .sheet(isPresented: $showingAddTrip) {
+            AddTripView { trip in
+                Task {
+                    await viewModel.addTrip(trip)
                 }
             }
-            .sheet(isPresented: $showingAddTrip) {
-                AddTripView(onSave: { trip in
-                    Task {
-                        await viewModel.addTrip(trip)
-                    }
-                })
-            }
-            .task {
-                await viewModel.loadTrips()
-            }
-            .refreshable {
-                await viewModel.loadTrips()
-            }
+        }
+        .task {
+            await viewModel.loadTrips()
+        }
+        .refreshable {
+            await viewModel.loadTrips()
         }
     }
     
     // MARK: - Trips List
     private var tripsList: some View {
         ScrollView {
-            LazyVStack(spacing: AppTheme.Spacing.md) {
-                ForEach(viewModel.trips) { trip in
-                    TripCard(trip: trip)
-                        .padding(.horizontal, AppTheme.Spacing.lg)
+            VStack(spacing: 0) {
+                // Header
+                headerSection
+                    .padding(.top, AppTheme.Spacing.lg)
+                    .padding(.bottom, AppTheme.Spacing.md)
+                
+                // Trip Cards
+                LazyVStack(spacing: AppTheme.Spacing.lg) {
+                    ForEach(viewModel.trips) { trip in
+                        JournalTripCard(
+                            trip: trip,
+                            onView: {
+                                handleViewTrip(trip)
+                            },
+                            onEdit: {
+                                handleEditTrip(trip)
+                            }
+                        )
+                    }
                 }
+                .padding(.horizontal, AppTheme.Spacing.lg)
+                .padding(.bottom, AppTheme.Spacing.xxxl + 60) // Extra space for FAB
             }
-            .padding(.vertical, AppTheme.Spacing.md)
         }
-        .background(AppTheme.Colors.backgroundLight)
+    }
+    
+    // MARK: - Header Section
+    private var headerSection: some View {
+        VStack(spacing: AppTheme.Spacing.xs) {
+            Text("TRAVEL JOURNAL")
+                .font(AppTheme.Typography.monoSmall())
+                .tracking(3)
+                .foregroundColor(AppTheme.Colors.primary.opacity(0.7))
+            
+            Text("Your Adventures")
+                .font(AppTheme.Typography.serifMedium())
+                .foregroundColor(AppTheme.Colors.primary)
+            
+            Text("\(viewModel.trips.count) \(viewModel.trips.count == 1 ? "journey" : "journeys") documented")
+                .font(AppTheme.Typography.monoSmall())
+                .foregroundColor(AppTheme.Colors.textSecondary)
+        }
+    }
+    
+    // MARK: - Floating Add Button
+    private var floatingAddButton: some View {
+        Button {
+            showingAddTrip = true
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(AppTheme.Colors.primary)
+                    .frame(width: 56, height: 56)
+                    .shadow(color: AppTheme.Colors.primary.opacity(0.4), radius: 8, y: 4)
+                
+                Image(systemName: "plus")
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundColor(AppTheme.Colors.backgroundDark)
+            }
+        }
+        .buttonStyle(.plain)
     }
     
     // MARK: - Empty State
     private var emptyStateView: some View {
         VStack(spacing: AppTheme.Spacing.lg) {
-            Image(systemName: "book.pages")
-                .font(.system(size: 70))
-                .foregroundColor(AppTheme.Colors.primary.opacity(0.4))
+            Spacer()
+            
+            // Decorative icon
+            ZStack {
+                Circle()
+                    .fill(AppTheme.Colors.primary.opacity(0.1))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "book.pages")
+                    .font(.system(size: 50, weight: .light))
+                    .foregroundColor(AppTheme.Colors.primary.opacity(0.6))
+            }
             
             VStack(spacing: AppTheme.Spacing.xs) {
-                Text("No Trips Yet")
+                Text("No Journeys Yet")
                     .font(AppTheme.Typography.serifMedium())
-                    .foregroundColor(AppTheme.Colors.textPrimary)
+                    .foregroundColor(AppTheme.Colors.primary)
                 
-                Text("Start documenting your adventures")
+                Text("Start documenting your adventures\nand create lasting memories")
                     .font(AppTheme.Typography.monoSmall())
                     .foregroundColor(AppTheme.Colors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
             }
             
             Button {
@@ -82,15 +140,19 @@ struct JournalView: View {
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxs) {
                     Image(systemName: "plus")
-                    Text("ADD YOUR FIRST TRIP")
+                        .font(.system(size: 14, weight: .medium))
+                    Text("CREATE YOUR FIRST JOURNAL")
                         .font(AppTheme.Typography.button())
                         .tracking(1)
                 }
             }
             .buttonStyle(PrimaryButtonStyle())
+            .padding(.horizontal, AppTheme.Spacing.xl)
             .padding(.top, AppTheme.Spacing.sm)
+            
+            Spacer()
         }
-        .padding(.horizontal, AppTheme.Spacing.xl)
+        .padding(.horizontal, AppTheme.Spacing.lg)
     }
     
     // MARK: - Loading View
@@ -101,7 +163,7 @@ struct JournalView: View {
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: AppTheme.Colors.primary))
             
-            Text("Loading journal...")
+            Text("Loading your journals...")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
         }
@@ -109,20 +171,24 @@ struct JournalView: View {
     
     // MARK: - Error View
     private func errorView(message: String) -> some View {
-        VStack(spacing: AppTheme.Spacing.md) {
+        VStack(spacing: AppTheme.Spacing.lg) {
+            Spacer()
+            
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 50))
                 .foregroundColor(AppTheme.Colors.primary.opacity(0.6))
             
-            Text("Unable to Load Journal")
-                .font(AppTheme.Typography.serifSmall())
-                .foregroundColor(AppTheme.Colors.textPrimary)
-            
-            Text(message)
-                .font(AppTheme.Typography.monoSmall())
-                .foregroundColor(AppTheme.Colors.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, AppTheme.Spacing.xl)
+            VStack(spacing: AppTheme.Spacing.xs) {
+                Text("Unable to Load Journals")
+                    .font(AppTheme.Typography.serifSmall())
+                    .foregroundColor(AppTheme.Colors.primary)
+                
+                Text(message)
+                    .font(AppTheme.Typography.monoSmall())
+                    .foregroundColor(AppTheme.Colors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppTheme.Spacing.xl)
+            }
             
             Button {
                 Task {
@@ -131,57 +197,29 @@ struct JournalView: View {
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxs) {
                     Image(systemName: "arrow.clockwise")
-                    Text("RETRY")
+                        .font(.system(size: 14, weight: .medium))
+                    Text("TRY AGAIN")
                         .font(AppTheme.Typography.button())
                         .tracking(1)
                 }
             }
             .buttonStyle(PrimaryButtonStyle())
+            .frame(width: 180)
+            
+            Spacer()
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
     }
-}
-
-// MARK: - Trip Card
-struct TripCard: View {
-    let trip: Trip
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
-            // Trip header
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
-                    Text(trip.title)
-                        .font(AppTheme.Typography.serifMedium())
-                        .foregroundColor(AppTheme.Colors.textPrimary)
-                    
-                    Text(trip.dateRange)
-                        .font(AppTheme.Typography.monoSmall())
-                        .foregroundColor(AppTheme.Colors.textSecondary)
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14))
-                    .foregroundColor(AppTheme.Colors.primary.opacity(0.5))
-            }
-            
-            // Trip description preview (if available)
-            if let description = trip.description, !description.isEmpty {
-                Text(description)
-                    .font(AppTheme.Typography.monoSmall())
-                    .foregroundColor(AppTheme.Colors.textSecondary)
-                    .lineLimit(2)
-                    .padding(.top, AppTheme.Spacing.xxs)
-            }
-        }
-        .padding(AppTheme.Spacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
-        )
+    // MARK: - Actions
+    private func handleViewTrip(_ trip: Trip) {
+        print("👁️ View trip: \(trip.title)")
+        // TODO: Navigate to trip detail view
+    }
+    
+    private func handleEditTrip(_ trip: Trip) {
+        print("✏️ Edit trip: \(trip.title)")
+        // TODO: Navigate to trip edit view
     }
 }
 
