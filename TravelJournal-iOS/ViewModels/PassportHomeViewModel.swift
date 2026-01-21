@@ -7,6 +7,8 @@ final class PassportHomeViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var userProfile: UserProfile?
     @Published var userStats: UserStats?
+    @Published var countryStamps: [CountryStamp] = []
+    @Published var isLoadingStamps = false
     @Published var isLoadingProfile = false
     @Published var isLoadingStats = false
     @Published var error: String?
@@ -59,6 +61,7 @@ final class PassportHomeViewModel: ObservableObject {
     func loadData() async {
         await loadProfile()
         await loadStats()
+        await loadCountryStamps()
     }
     
     private func loadProfile() async {
@@ -86,6 +89,19 @@ final class PassportHomeViewModel: ObservableObject {
         }
         
         isLoadingStats = false
+    }
+    
+    private func loadCountryStamps() async {
+        isLoadingStamps = true
+        
+        do {
+            let response = try await profileService.getCountryStamps()
+            countryStamps = response.countryStamps
+        } catch {
+            print("Country stamps load error: \(error)")
+        }
+        
+        isLoadingStamps = false
     }
     
     func refresh() async {

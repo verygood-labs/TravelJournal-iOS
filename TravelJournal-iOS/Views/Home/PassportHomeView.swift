@@ -30,11 +30,14 @@ struct PassportHomeView: View {
                             SectionDivider()
                             
                             // Visas & Entries section
-                            VisasSection()
+                            VisasSection(viewModel: viewModel)
                                 .padding(.bottom, AppTheme.Spacing.xl)
                         }
                     }
-                    .background(PassportPageBackgroundView { Color.clear })
+                    .background(
+                        PassportPageBackgroundView { Color.clear }
+                            .ignoresSafeArea(edges: .bottom)
+                    )
                 }
             }
         }

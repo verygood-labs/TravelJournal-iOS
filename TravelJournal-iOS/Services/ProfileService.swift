@@ -46,4 +46,8 @@ class ProfileService {
     func getStats() async throws -> UserStats {
         return try await api.request(endpoint: "/profile/stats")
     }
+    
+    func getCountryStamps() async throws -> CountryStampsResponse {
+        return try await api.request(endpoint: "/profile/country-stamps")
+    }
 }

@@ -31,12 +31,7 @@ struct IdentificationSection: View {
     
     // MARK: - Section Header
     private var sectionHeader: some View {
-        VStack(spacing: AppTheme.Spacing.xxxs) {
-            Text("IDENTIFICATION")
-                .font(AppTheme.Typography.monoSmall())
-                .tracking(2)
-                .foregroundColor(AppTheme.Colors.passportTextMuted)
-        }
+        SectionHeader(title: "IDENTIFICATION")
     }
     
     // MARK: - Profile Photo Section

@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct VisasSection: View {
+    @ObservedObject var viewModel: PassportHomeViewModel
+
     var body: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             // Section header
@@ -12,23 +14,10 @@ struct VisasSection: View {
                 .padding(.horizontal, AppTheme.Spacing.lg)
         }
     }
-    
+
     // MARK: - Section Header
     private var sectionHeader: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: AppTheme.Spacing.xxxs) {
-                Text("✦ VISAS & ENTRIES ✦")
-                    .font(AppTheme.Typography.monoSmall())
-                    .tracking(2)
-                    .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
-                Text("Your travel stamps")
-                    .font(AppTheme.Typography.monoCaption())
-                    .foregroundColor(AppTheme.Colors.passportTextSecondary)
-            }
-            
-            Spacer()
-        }
+        SectionHeader(title: "VISAS & ENTRIES", subtitle: "Your travel stamps")
     }
     
     // MARK: - Stamp Grid
@@ -41,13 +30,18 @@ struct VisasSection: View {
             ],
             spacing: AppTheme.Spacing.xs
         ) {
-            // Placeholder stamps (we'll replace these with real data later)
-            ForEach(0..<6, id: \.self) { index in
-                PlaceholderStamp(index: index)
+            if viewModel.countryStamps.isEmpty {
+                // Empty state - show "Add More" button only
+                AddMoreStamp()
+            } else {
+                // Real stamps
+                ForEach(viewModel.countryStamps) { stamp in
+                    CountryStampView(stamp: stamp)
+                }
+                
+                // Add more button at the end
+                AddMoreStamp()
             }
-            
-            // Add more button
-            AddMoreStamp()
         }
     }
 }
@@ -158,7 +152,7 @@ private struct AddMoreStamp: View {
 // MARK: - Preview
 #Preview {
     PassportPageBackgroundView {
-        VisasSection()
+        VisasSection(viewModel: PassportHomeViewModel())
             .padding(.vertical, AppTheme.Spacing.lg)
     }
 }

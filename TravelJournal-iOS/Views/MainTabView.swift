@@ -34,6 +34,7 @@ struct MainTabView: View {
                 .tag(3)
         }
         .tint(AppTheme.Colors.primary)
+        .toolbarBackground(.hidden, for: .tabBar)
     }
 }
 
