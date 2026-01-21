@@ -56,6 +56,8 @@ final class PassportHomeViewModel: ObservableObject {
         userStats?.totalTrips ?? 0
     }
     
+    var isPreview = false
+    
     // MARK: - Methods
     
     func loadData() async {

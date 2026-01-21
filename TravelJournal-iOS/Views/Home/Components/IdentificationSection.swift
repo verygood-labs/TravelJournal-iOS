@@ -94,7 +94,7 @@ struct IdentificationSection: View {
                 valueFont: AppTheme.Typography.monoMedium() // or monoLarge() for even bigger
             )
             
-            // Row 2: Username and Nationality (side by side)
+            // Row 2: Passport Number and Date Issued (side by side)
             HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
                 DetailField(
                     label: "PASSPORT NO.",
@@ -102,20 +102,20 @@ struct IdentificationSection: View {
                     useSerifFont: false
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
-                
+
                 DetailField(
-                    label: "NATIONALITY",
-                    value: viewModel.nationalityName,
+                    label: "ISSUED",
+                    value: viewModel.dateIssued,
                     useSerifFont: false
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             
-            // Row 3: Passport Number and Date Issued (side by side)
+            // Row 3: Nationality
             HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
                 DetailField(
-                    label: "ISSUED",
-                    value: viewModel.dateIssued,
+                    label: "NATIONALITY",
+                    value: viewModel.nationalityName,
                     useSerifFont: false
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)

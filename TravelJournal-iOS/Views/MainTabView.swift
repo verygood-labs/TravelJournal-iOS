@@ -6,7 +6,7 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             // Passport Tab
-            PassportHomeView()
+            PassportHomeView(selectedTab: $selectedTab)
                 .tabItem {
                     Label("Passport", systemImage: "book.closed.fill")
                 }

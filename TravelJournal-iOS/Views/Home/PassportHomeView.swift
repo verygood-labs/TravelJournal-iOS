@@ -1,8 +1,23 @@
 import SwiftUI
 
 struct PassportHomeView: View {
-    @StateObject private var viewModel = PassportHomeViewModel()
+    @StateObject private var viewModel: PassportHomeViewModel
+    @Binding var selectedTab: Int
     @State private var showingAddTrip = false
+    
+    // Default initializer for normal use
+    init(selectedTab: Binding<Int>) {
+        self._selectedTab = selectedTab
+        self._viewModel = StateObject(wrappedValue: PassportHomeViewModel())
+    }
+    
+    // Preview initializer with injected view model
+    init(selectedTab: Binding<Int>, previewViewModel: PassportHomeViewModel) {
+        self._selectedTab = selectedTab
+        previewViewModel.isPreview = true
+        self._viewModel = StateObject(wrappedValue: previewViewModel)
+    }
+
 
     var body: some View {
         ZStack {
@@ -14,7 +29,7 @@ struct PassportHomeView: View {
                 VStack(spacing: 0) {
                     // Header section (dark background)
                     headerSection
-                        .frame(height: 160)
+                        .frame(height: 140)
                     
                     // Gold decorative border
                     GoldBorder()
@@ -30,8 +45,10 @@ struct PassportHomeView: View {
                             SectionDivider()
                             
                             // Visas & Entries section
-                            VisasSection(viewModel: viewModel)
-                                .padding(.bottom, AppTheme.Spacing.xl)
+                            VisasSection(viewModel: viewModel) {
+                                selectedTab = 2 // Journal tab index
+                            }
+                            .padding(.bottom, AppTheme.Spacing.xl)
                         }
                     }
                     .background(
@@ -42,7 +59,9 @@ struct PassportHomeView: View {
             }
         }
         .task {
-            await viewModel.loadData()
+            if !viewModel.isPreview {
+                await viewModel.loadData()
+            }
         }
         .refreshable {
             await viewModel.refresh()
@@ -113,8 +132,6 @@ struct PassportHomeView: View {
     private var headerSection: some View {
         AppBackgroundView {
             VStack(spacing: AppTheme.Spacing.xs) {
-                Spacer()
-                
                 // Animated globe
                 AnimatedGlobeView(size: 60)
                 
@@ -123,30 +140,7 @@ struct PassportHomeView: View {
                     .font(AppTheme.Typography.monoMedium())
                     .tracking(4)
                     .foregroundColor(AppTheme.Colors.primary)
-                
-                Spacer()
             }
-            .overlay(
-                // Add trip button (top right)
-                HStack {
-                    Spacer()
-                    Button {
-                        handleAddTrip()
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(AppTheme.Colors.primary)
-                            .frame(width: 44, height: 44)
-                            .background(
-                                Circle()
-                                    .stroke(AppTheme.Colors.primary.opacity(0.4), lineWidth: 1.5)
-                            )
-                    }
-                    .padding(.trailing, AppTheme.Spacing.lg)
-                    .padding(.top, AppTheme.Spacing.lg)
-                }
-                , alignment: .topTrailing
-            )
         }
     }
     
@@ -157,6 +151,45 @@ struct PassportHomeView: View {
     }
 }
 
-#Preview {
-    PassportHomeView()
+#Preview("Empty State") {
+    PassportHomeView(selectedTab: .constant(0))
+}
+
+#Preview("With Data") {
+    let vm = PassportHomeViewModel()
+    
+    vm.userProfile = UserProfile(
+        userId: UUID(),
+        email: "traveler@example.com",
+        userName: "wanderlust",
+        name: "Alex Thompson",
+        bio: "Adventure seeker",
+        profilePictureUrl: nil,
+        nationality: NationalityInfo(id: "1", name: "United States", countryCode: "US"),
+        preferredLanguage: "en",
+        preferredCurrency: "USD",
+        createdAt: Date().addingTimeInterval(-86400 * 365),
+        updatedAt: Date()
+    )
+    
+    vm.userStats = UserStats(
+        totalTrips: 12,
+        totalEntries: 47,
+        countriesVisited: 8,
+        totalPhotos: 234,
+        totalDistance: 45000
+    )
+    
+    vm.countryStamps = [
+        CountryStamp(countryCode: "JP", countryName: "Japan", visitCount: 2, stampImageUrl: nil),
+        CountryStamp(countryCode: "IT", countryName: "Italy", visitCount: 1, stampImageUrl: nil),
+        CountryStamp(countryCode: "KR", countryName: "Korea", visitCount: 1, stampImageUrl: nil),
+        CountryStamp(countryCode: "TH", countryName: "Thailand", visitCount: 3, stampImageUrl: nil),
+        CountryStamp(countryCode: "MX", countryName: "Mexico", visitCount: 1, stampImageUrl: nil),
+        CountryStamp(countryCode: "FR", countryName: "France", visitCount: 2, stampImageUrl: nil),
+        CountryStamp(countryCode: "ES", countryName: "Spain", visitCount: 1, stampImageUrl: nil),
+        CountryStamp(countryCode: "DE", countryName: "Germany", visitCount: 1, stampImageUrl: nil)
+    ]
+    
+    return PassportHomeView(selectedTab: .constant(0), previewViewModel: vm)
 }
