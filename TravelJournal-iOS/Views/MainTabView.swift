@@ -35,7 +35,7 @@ struct MainTabView: View {
         }
         .tint(AppTheme.Colors.primary)
     }
-}git 
+}
 
 #Preview {
     MainTabView()
