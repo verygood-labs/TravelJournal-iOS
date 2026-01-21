@@ -56,3 +56,23 @@ struct UpdateTripRequest: Codable {
     let startDate: Date?
     let endDate: Date?
 }
+// MARK: - Trip Extension
+extension Trip {
+    var dateRange: String {
+        guard let start = startDate, let end = endDate else {
+            return "No dates set"
+        }
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        
+        let startString = formatter.string(from: start)
+        let endString = formatter.string(from: end)
+        
+        let yearFormatter = DateFormatter()
+        yearFormatter.dateFormat = "yyyy"
+        let year = yearFormatter.string(from: end)
+        
+        return "\(startString) - \(endString), \(year)"
+    }
+}

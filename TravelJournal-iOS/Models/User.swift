@@ -43,3 +43,11 @@ struct UserStats: Codable {
     let totalPhotos: Int
     let totalDistance: Double?
 }
+// MARK: - UserProfile Extension
+extension UserProfile {
+    var memberSince: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: createdAt)
+    }
+}

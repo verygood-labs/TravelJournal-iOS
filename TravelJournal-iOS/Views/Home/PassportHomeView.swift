@@ -31,10 +31,6 @@ struct PassportHomeView: View {
                             
                             // Visas & Entries section
                             VisasSection()
-                            
-                            // View Map button
-                            viewMapButton
-                                .padding(.horizontal, AppTheme.Spacing.lg)
                                 .padding(.bottom, AppTheme.Spacing.xl)
                         }
                     }
@@ -42,7 +38,6 @@ struct PassportHomeView: View {
                 }
             }
         }
-        .background(AppTheme.Colors.backgroundDark)
         .task {
             await viewModel.loadData()
         }
@@ -152,23 +147,10 @@ struct PassportHomeView: View {
         }
     }
     
-    // MARK: - View Map Button
-    private var viewMapButton: some View {
-        Button {
-            // TODO: Navigate to map view
-        } label: {
-            Text("VIEW MAP")
-                .font(AppTheme.Typography.button())
-                .tracking(1)
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(PrimaryButtonStyle())
-    }
-
     // MARK: - Actions
     private func handleAddTrip() {
         print("➕ Add Trip button tapped - will open journal drafting space")
-        // TODO: Navigate to trip creation/journal drafting
+        // TODO: Navigate to journal tab or show trip creation modal
     }
 }
 
