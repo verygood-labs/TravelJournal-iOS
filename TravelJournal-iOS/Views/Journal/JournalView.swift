@@ -46,7 +46,7 @@ struct JournalView: View {
             }
         }
         .sheet(isPresented: $showingAddTrip) {
-            AddTripView(viewModel: viewModel)
+            AddTripView()
         }
         .task {
             await viewModel.loadTrips()

@@ -2,83 +2,154 @@ import SwiftUI
 
 struct AddTripView: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var viewModel: JournalViewModel
+    @StateObject private var viewModel = AddTripViewModel()
     
-    @State private var title = ""
-    @State private var startDate = Date()
-    @State private var endDate = Date()
-    @State private var description = ""
-    @State private var isSaving = false
-    @State private var errorMessage: String?
+    @State private var showingPreview = false
     
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Trip Details") {
-                    TextField("Title (e.g., Paris, France)", text: $title)
-                    
-                    DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
-                    
-                    DatePicker("End Date", selection: $endDate, displayedComponents: .date)
-                }
+        AppBackgroundView {
+            VStack(spacing: 0) {
+                // Header
+                headerSection
                 
-                Section("Description") {
-                    TextEditor(text: $description)
-                        .frame(minHeight: 100)
-                }
-                
-                if let error = errorMessage {
-                    Section {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .font(AppTheme.Typography.monoSmall())
-                    }
-                }
-            }
-            .navigationTitle("New Trip")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .disabled(isSaving)
-                }
-                
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        Task {
-                            await saveTrip()
+                // Content
+                ScrollView {
+                    VStack(spacing: AppTheme.Spacing.lg) {
+                        // Search field
+                        searchSection
+                        
+                        // Added stops
+                        if !viewModel.stops.isEmpty {
+                            stopsSection
                         }
+                        
+                        // Bottom padding for button
+                        Spacer()
+                            .frame(height: 100)
                     }
-                    .disabled(title.isEmpty || isSaving)
+                    .padding(.horizontal, AppTheme.Spacing.lg)
+                    .padding(.top, AppTheme.Spacing.md)
+                }
+                
+                // Bottom button
+                if !viewModel.stops.isEmpty {
+                    bottomButton
                 }
             }
-            .interactiveDismissDisabled(isSaving)
+        }
+        .onChange(of: viewModel.searchText) { _, _ in
+            viewModel.onSearchTextChanged()
+        }
+        .fullScreenCover(isPresented: $showingPreview) {
+            TripPreviewView(
+                viewModel: viewModel,
+                onTripCreated: {
+                    showingPreview = false
+                    dismiss()
+                }
+            )
+        }
+        .alert("Error", isPresented: .init(
+            get: { viewModel.error != nil },
+            set: { if !$0 { viewModel.error = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(viewModel.error ?? "")
         }
     }
     
-    private func saveTrip() async {
-        isSaving = true
-        errorMessage = nil
-        
-        let success = await viewModel.createTrip(
-            title: title,
-            description: description.isEmpty ? nil : description,
-            startDate: startDate,
-            endDate: endDate
-        )
-        
-        isSaving = false
-        
-        if success {
-            dismiss()
-        } else {
-            errorMessage = viewModel.error ?? "Failed to create trip. Please try again."
+    // MARK: - Header Section
+    private var headerSection: some View {
+        HStack {
+            Button {
+                dismiss()
+            } label: {
+                Text("← Back")
+            }
+            .buttonStyle(BackButtonStyle())
+            
+            Spacer()
+            
+            Text("NEW JOURNAL")
+                .font(AppTheme.Typography.monoSmall())
+                .tracking(2)
+                .foregroundColor(AppTheme.Colors.primary)
+            
+            Spacer()
+            
+            // Invisible button for balance
+            Text("← Back")
+                .opacity(0)
         }
+        .padding(.horizontal, AppTheme.Spacing.lg)
+        .padding(.vertical, AppTheme.Spacing.md)
+    }
+    
+    // MARK: - Search Section
+    private var searchSection: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+            Text("DESTINATIONS")
+                .font(AppTheme.Typography.monoCaption())
+                .tracking(1)
+                .foregroundColor(AppTheme.Colors.textSecondary)
+            
+            CitySearchField(
+                searchText: $viewModel.searchText,
+                searchResults: viewModel.searchResults,
+                isSearching: viewModel.isSearching,
+                onCitySelected: { city in
+                    viewModel.addStop(city: city)
+                }
+            )
+        }
+    }
+    
+    // MARK: - Stops Section
+    private var stopsSection: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+            Text("YOUR STOPS")
+                .font(AppTheme.Typography.monoCaption())
+                .tracking(1)
+                .foregroundColor(AppTheme.Colors.textSecondary)
+            
+            ForEach(Array(viewModel.stops.enumerated()), id: \.element.id) { index, stop in
+                TripStopCard(
+                    stopNumber: index + 1,
+                    stop: $viewModel.stops[index],
+                    onRemove: {
+                        withAnimation(.easeInOut(duration: AppTheme.Animation.fast)) {
+                            viewModel.removeStop(at: index)
+                        }
+                    }
+                )
+            }
+        }
+    }
+    
+    // MARK: - Bottom Button
+    private var bottomButton: some View {
+        VStack(spacing: AppTheme.Spacing.xs) {
+            Button {
+                showingPreview = true
+            } label: {
+                HStack(spacing: AppTheme.Spacing.xxs) {
+                    Text("CONTINUE")
+                        .font(AppTheme.Typography.button())
+                        .tracking(1)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .medium))
+                }
+            }
+            .buttonStyle(PrimaryButtonStyle())
+        }
+        .padding(.horizontal, AppTheme.Spacing.lg)
+        .padding(.vertical, AppTheme.Spacing.md)
+        .background(AppTheme.Colors.backgroundDark)
     }
 }
 
+// MARK: - Preview
 #Preview {
-    AddTripView(viewModel: JournalViewModel())
+    AddTripView()
 }
