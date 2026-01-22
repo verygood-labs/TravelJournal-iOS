@@ -13,15 +13,20 @@ struct JournalTripCard: View {
     let trip: Trip
     var onView: () -> Void = {}
     var onEdit: () -> Void = {}
+    var onDelete: () -> Void = {}
 
     var body: some View {
-        // Whole card is tappable for view
         Button {
             onView()
         } label: {
             cardContent
         }
         .buttonStyle(.plain)
+        .tripContextMenu(
+            onView: onView,
+            onEdit: onEdit,
+            onDelete: onDelete
+        )
     }
     
     // MARK: - Card Content
@@ -69,8 +74,8 @@ struct JournalTripCard: View {
     
     // MARK: - Cover Image Section
     private var coverImageSection: some View {
-        ZStack(alignment: .topTrailing) {
-            // Cover image or placeholder
+        // Cover image or placeholder
+        Group {
             if let coverUrl = trip.coverImageUrl,
                let url = APIService.shared.fullMediaURL(for: coverUrl) {
                 AsyncImage(url: url) { phase in
@@ -82,7 +87,7 @@ struct JournalTripCard: View {
                         image
                             .resizable()
                             .scaledToFill()
-                            .frame(height: 160)  // ← Changed from 120
+                            .frame(height: 160)
                             .clipped()
                     case .failure:
                         coverPlaceholder
@@ -93,12 +98,8 @@ struct JournalTripCard: View {
             } else {
                 coverPlaceholder
             }
-            
-            // Action buttons overlay
-            actionButtons
-                .padding(AppTheme.Spacing.xs)
         }
-        .frame(height: 160)  // ← Changed from 120
+        .frame(height: 160)
     }
     
     private var coverPlaceholder: some View {

@@ -3,6 +3,7 @@ import SwiftUI
 struct JournalView: View {
     @StateObject private var viewModel = JournalViewModel()
     @State private var showingAddTrip = false
+    @State private var viewMode: JournalViewMode = .card
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -15,7 +16,23 @@ struct JournalView: View {
                 } else if viewModel.trips.isEmpty {
                     emptyStateView
                 } else {
-                    tripsList
+                    VStack(spacing: 0) {
+                        // Fixed header
+                        headerSection
+                            .padding(.top, AppTheme.Spacing.lg)
+                            .padding(.bottom, AppTheme.Spacing.md)
+                        
+                        // Toggle tabs
+                        JournalViewToggle(selectedMode: $viewMode)
+                            .padding(.horizontal, AppTheme.Spacing.lg)
+                            .padding(.bottom, AppTheme.Spacing.md)
+                        
+                        // Scrollable content
+                        ScrollView {
+                            tripsList
+                                .padding(.bottom, AppTheme.Spacing.xxxl + 60) // Extra space for FAB
+                        }
+                    }
                 }
             }
             
@@ -43,31 +60,28 @@ struct JournalView: View {
     
     // MARK: - Trips List
     private var tripsList: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // Header
-                headerSection
-                    .padding(.top, AppTheme.Spacing.lg)
-                    .padding(.bottom, AppTheme.Spacing.md)
-                
-                // Trip Cards
-                LazyVStack(spacing: AppTheme.Spacing.lg) {
-                    ForEach(viewModel.trips) { trip in
+        LazyVStack(spacing: viewMode == .card ? AppTheme.Spacing.lg : AppTheme.Spacing.xs) {
+            ForEach(viewModel.trips) { trip in
+                Group {
+                    if viewMode == .card {
                         JournalTripCard(
                             trip: trip,
-                            onView: {
-                                handleViewTrip(trip)
-                            },
-                            onEdit: {
-                                handleEditTrip(trip)
-                            }
+                            onView: { handleViewTrip(trip) },
+                            onEdit: { handleEditTrip(trip) },
+                            onDelete: { handleDeleteTrip(trip) }
+                        )
+                    } else {
+                        JournalTripRow(
+                            trip: trip,
+                            onView: { handleViewTrip(trip) },
+                            onEdit: { handleEditTrip(trip) },
+                            onDelete: { handleDeleteTrip(trip) }
                         )
                     }
                 }
-                .padding(.horizontal, AppTheme.Spacing.lg)
-                .padding(.bottom, AppTheme.Spacing.xxxl + 60) // Extra space for FAB
             }
         }
+        .padding(.horizontal, AppTheme.Spacing.lg)
     }
     
     // MARK: - Header Section
@@ -220,6 +234,11 @@ struct JournalView: View {
     private func handleEditTrip(_ trip: Trip) {
         print("✏️ Edit trip: \(trip.title)")
         // TODO: Navigate to trip edit view
+    }
+    
+    private func handleDeleteTrip(_ trip: Trip) {
+        print("🗑️ Delete trip: \(trip.title)")
+        // TODO: Show confirmation and delete trip
     }
 }
 
