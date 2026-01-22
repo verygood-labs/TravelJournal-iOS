@@ -166,8 +166,6 @@ struct JournalView: View {
                 showingAddTrip = true
             } label: {
                 HStack(spacing: AppTheme.Spacing.xxs) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 14, weight: .medium))
                     Text("START YOUR JOURNAL")
                         .font(AppTheme.Typography.button())
                         .tracking(1)
