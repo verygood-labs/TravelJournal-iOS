@@ -2,12 +2,14 @@ import SwiftUI
 
 struct AddTripView: View {
     @Environment(\.dismiss) private var dismiss
-    let onSave: (Trip) -> Void
+    @ObservedObject var viewModel: JournalViewModel
     
     @State private var title = ""
     @State private var startDate = Date()
     @State private var endDate = Date()
     @State private var description = ""
+    @State private var isSaving = false
+    @State private var errorMessage: String?
     
     var body: some View {
         NavigationStack {
@@ -24,6 +26,14 @@ struct AddTripView: View {
                     TextEditor(text: $description)
                         .frame(minHeight: 100)
                 }
+                
+                if let error = errorMessage {
+                    Section {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .font(AppTheme.Typography.monoSmall())
+                    }
+                }
             }
             .navigationTitle("New Trip")
             .navigationBarTitleDisplayMode(.inline)
@@ -32,38 +42,43 @@ struct AddTripView: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .disabled(isSaving)
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        saveTrip()
+                        Task {
+                            await saveTrip()
+                        }
                     }
-                    .disabled(title.isEmpty)
+                    .disabled(title.isEmpty || isSaving)
                 }
             }
+            .interactiveDismissDisabled(isSaving)
         }
     }
     
-    private func saveTrip() {
-        let now = Date()
-        let trip = Trip(
-            id: UUID(),
+    private func saveTrip() async {
+        isSaving = true
+        errorMessage = nil
+        
+        let success = await viewModel.createTrip(
             title: title,
             description: description.isEmpty ? nil : description,
-            coverImageUrl: nil,
-            status: .draft,
             startDate: startDate,
-            endDate: endDate,
-            createdAt: now,
-            updatedAt: now,
-            stops: nil
+            endDate: endDate
         )
         
-        onSave(trip)
-        dismiss()
+        isSaving = false
+        
+        if success {
+            dismiss()
+        } else {
+            errorMessage = viewModel.error ?? "Failed to create trip. Please try again."
+        }
     }
 }
 
 #Preview {
-    AddTripView { _ in }
+    AddTripView(viewModel: JournalViewModel())
 }

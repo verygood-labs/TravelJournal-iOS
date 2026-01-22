@@ -4,6 +4,8 @@ struct JournalView: View {
     @StateObject private var viewModel = JournalViewModel()
     @State private var showingAddTrip = false
     @State private var viewMode: JournalViewMode = .card
+    @State private var tripToDelete: Trip?
+    @State private var showingDeleteConfirmation = false
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -44,17 +46,28 @@ struct JournalView: View {
             }
         }
         .sheet(isPresented: $showingAddTrip) {
-            AddTripView { trip in
-                Task {
-                    await viewModel.addTrip(trip)
-                }
-            }
+            AddTripView(viewModel: viewModel)
         }
         .task {
             await viewModel.loadTrips()
         }
         .refreshable {
             await viewModel.loadTrips()
+        }
+        .alert("Delete Trip", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {
+                tripToDelete = nil
+            }
+            Button("Delete", role: .destructive) {
+                if let trip = tripToDelete {
+                    Task {
+                        await viewModel.deleteTrip(trip)
+                    }
+                }
+                tripToDelete = nil
+            }
+        } message: {
+            Text("Are you sure you want to delete \"\(tripToDelete?.title ?? "")\"? This action cannot be undone.")
         }
     }
     
@@ -155,7 +168,7 @@ struct JournalView: View {
                 HStack(spacing: AppTheme.Spacing.xxs) {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .medium))
-                    Text("CREATE YOUR FIRST JOURNAL")
+                    Text("START YOUR JOURNAL")
                         .font(AppTheme.Typography.button())
                         .tracking(1)
                 }
@@ -237,8 +250,8 @@ struct JournalView: View {
     }
     
     private func handleDeleteTrip(_ trip: Trip) {
-        print("🗑️ Delete trip: \(trip.title)")
-        // TODO: Show confirmation and delete trip
+        tripToDelete = trip
+        showingDeleteConfirmation = true
     }
 }
 
