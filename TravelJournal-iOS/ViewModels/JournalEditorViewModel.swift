@@ -1,3 +1,11 @@
+//
+//  JournalEditorViewModel.swift
+//  TravelJournal-iOS
+//
+//  Created by John Apale on 1/22/26.
+//
+
+
 import SwiftUI
 import Combine
 
@@ -83,15 +91,13 @@ final class JournalEditorViewModel: ObservableObject {
             blocks[index] = block
         } else {
             // Add new block with correct order
-            var newBlock = block
-            // Create new block with updated order
             let updatedBlock = JournalBlock(
-                id: newBlock.id,
-                type: newBlock.type,
-                content: newBlock.content,
-                imageUrl: newBlock.imageUrl,
+                id: block.id,
+                type: block.type,
+                content: block.content,
+                imageUrl: block.imageUrl,
                 order: blocks.count,
-                createdAt: newBlock.createdAt
+                createdAt: block.createdAt
             )
             blocks.append(updatedBlock)
         }
@@ -176,10 +182,13 @@ final class JournalEditorViewModel: ObservableObject {
         error = nil
         
         do {
-            // TODO: Save all changes to API
+            // TODO: Implement actual API save
             // - Upload cover image if changed
             // - Save blocks
             // - Update trip metadata
+            
+            // This will throw when implemented
+            try await saveTripToAPI()
             
             isSaving = false
             return true
@@ -188,6 +197,11 @@ final class JournalEditorViewModel: ObservableObject {
             isSaving = false
             return false
         }
+    }
+
+    private func saveTripToAPI() async throws {
+        // TODO: Implement - this will throw errors when real API calls are added
+        try? await Task.sleep(nanoseconds: 500_000_000)
     }
 }
 
