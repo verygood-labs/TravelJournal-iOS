@@ -1,78 +1,83 @@
 import SwiftUI
 
+// MARK: - Profile View
+/// Main profile/settings screen with profile card and settings sections
 struct ProfileView: View {
     @EnvironmentObject var authManager: AuthManager
     @StateObject private var viewModel = ProfileViewModel()
-    @State private var showingLogoutAlert = false
     
     var body: some View {
         NavigationStack {
-            List {
-                // User Profile Section
-                Section {
-                    if let user = viewModel.userProfile {
-                        userInfoRow(label: "Name", value: user.name)
-                        userInfoRow(label: "Email", value: user.email)
-                        userInfoRow(label: "Member Since", value: user.memberSince)
-                    } else {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, alignment: .center)
+            AppBackgroundView {
+                ScrollView {
+                    VStack(spacing: AppTheme.Spacing.lg) {
+                        // Profile Card Section
+                        ProfileCardSection(viewModel: viewModel)
+                        
+                        // Account Section
+                        AccountSection(viewModel: viewModel)
+                        
+                        // Preferences Section
+                        PreferencesSection(viewModel: viewModel)
+                        
+                        // Support Section
+                        SupportSection();
+                        
+                        // App Version
+                        appVersionSection
+                        
+                        // Danger Zone
+                        dangerZoneSection
+                        
+                        // Bottom padding for tab bar
+                        Spacer()
+                            .frame(height: AppTheme.Spacing.xxxl)
                     }
-                }
-                
-                // Statistics Section
-                Section("Travel Statistics") {
-                    if let stats = viewModel.userStats {
-                        statisticRow(icon: "globe.americas.fill", label: "Countries Visited", value: "\(stats.countriesVisited)")
-                        statisticRow(icon: "airplane", label: "Total Trips", value: "\(stats.totalTrips)")
-                        statisticRow(icon: "mappin.and.ellipse", label: "Places Visited", value: "\(stats.totalEntries)")
-                    } else {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                }
-                
-                // Settings Section
-                Section("Settings") {
-                    NavigationLink {
-                        Text("Edit Profile")
-                            .navigationTitle("Edit Profile")
-                    } label: {
-                        settingRow(icon: "person.fill", label: "Edit Profile")
-                    }
-                    
-                    NavigationLink {
-                        Text("Notifications")
-                            .navigationTitle("Notifications")
-                    } label: {
-                        settingRow(icon: "bell.fill", label: "Notifications")
-                    }
-                    
-                    NavigationLink {
-                        Text("Privacy")
-                            .navigationTitle("Privacy")
-                    } label: {
-                        settingRow(icon: "lock.fill", label: "Privacy")
-                    }
-                }
-                
-                // Account Section
-                Section {
-                    Button(role: .destructive) {
-                        showingLogoutAlert = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                            Text("Log Out")
-                        }
-                    }
+                    .padding(.horizontal, AppTheme.Spacing.md)
+                    .padding(.top, AppTheme.Spacing.md)
                 }
             }
-            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Settings")
+                        .font(AppTheme.Typography.serifMedium())
+                        .foregroundColor(AppTheme.Colors.textPrimary)
+                }
+            }
+            .navigationBarTitleDisplayMode(.large)
             .task {
-                await viewModel.loadUserProfile()
+                await viewModel.loadProfile()
             }
-            .alert("Log Out", isPresented: $showingLogoutAlert) {
+            .refreshable {
+                await viewModel.loadProfile()
+            }
+            // Currency Picker Sheet
+            .sheet(isPresented: $viewModel.showingCurrencyPicker) {
+                OptionPickerSheet(
+                    title: "Currency",
+                    options: Currency.allCases,
+                    selectedOption: viewModel.selectedCurrency,
+                    optionLabel: { $0.displayName },
+                    onSelect: { viewModel.updateCurrency($0) }
+                )
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+            }
+            // Distance Unit Picker Sheet
+            .sheet(isPresented: $viewModel.showingDistanceUnitPicker) {
+                OptionPickerSheet(
+                    title: "Distance Units",
+                    options: DistanceUnit.allCases,
+                    selectedOption: viewModel.selectedDistanceUnit,
+                    optionLabel: { $0.displayName },
+                    onSelect: { viewModel.updateDistanceUnit($0) }
+                )
+                .presentationDetents([.height(250)])
+                .presentationDragIndicator(.visible)
+            }
+            // Logout Alert
+            .alert("Log Out", isPresented: $viewModel.showingLogoutAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Log Out", role: .destructive) {
                     Task {
@@ -82,50 +87,73 @@ struct ProfileView: View {
             } message: {
                 Text("Are you sure you want to log out?")
             }
+            // Delete Account Alert
+            .alert("Delete Account", isPresented: $viewModel.showingDeleteAccountAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Continue", role: .destructive) {
+                    viewModel.showingDeleteConfirmation = true
+                }
+            } message: {
+                Text("This will permanently delete your account and all your data. This action cannot be undone.")
+            }
+            // Delete Confirmation Sheet
+            .sheet(isPresented: $viewModel.showingDeleteConfirmation) {
+                DeleteAccountSheet(viewModel: viewModel, authManager: authManager)
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
+            }
         }
     }
     
-    // MARK: - Helper Views
-    private func userInfoRow(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
+    // MARK: - App Version Section
+    
+    private var appVersionSection: some View {
+        VStack(spacing: 0) {
+            Text("TravelJournal")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
-            Text(value)
-                .font(AppTheme.Typography.monoMedium())
-                .foregroundColor(AppTheme.Colors.textPrimary)
+            
+            Text(viewModel.appVersion)
+                .font(AppTheme.Typography.monoCaption())
+                .foregroundColor(AppTheme.Colors.textMuted)
         }
-        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, AppTheme.Spacing.md)
     }
     
-    private func statisticRow(icon: String, label: String, value: String) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(AppTheme.Colors.primary)
-                .frame(width: 24)
-            
-            Text(label)
-                .font(AppTheme.Typography.monoMedium())
-            
-            Spacer()
-            
-            Text(value)
-                .font(AppTheme.Typography.serifSmall())
-                .foregroundColor(AppTheme.Colors.primary)
-        }
-    }
+    // MARK: - Danger Zone Section
     
-    private func settingRow(icon: String, label: String) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(AppTheme.Colors.primary)
-                .frame(width: 24)
+    private var dangerZoneSection: some View {
+        SettingsSection {
+            Button {
+                viewModel.showingLogoutAlert = true
+            } label: {
+                SettingsRow(
+                    icon: "rectangle.portrait.and.arrow.right",
+                    label: "Log Out",
+                    isDanger: true,
+                    showChevron: false
+                )
+            }
+            .buttonStyle(.plain)
             
-            Text(label)
-                .font(AppTheme.Typography.monoMedium())
+            SettingsDivider()
+            
+            Button {
+                viewModel.showingDeleteAccountAlert = true
+            } label: {
+                SettingsRow(
+                    icon: "trash.fill",
+                    label: "Delete Account",
+                    isDanger: true
+                )
+            }
+            .buttonStyle(.plain)
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     ProfileView()
