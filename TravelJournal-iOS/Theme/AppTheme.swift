@@ -24,6 +24,15 @@ struct AppTheme {
         static let textPlaceholder = Color.white.opacity(0.35)
         static let textAccent = Color(hex: "c9a227")
         static let textAccentMuted = Color(hex: "c9a227").opacity(0.8)
+        static let textMuted = Color.white.opacity(0.35)
+        
+        // Card/Surface colors
+        static let cardBackground = Color.white.opacity(0.08)
+
+        // Semantic colors
+        static let error = Color(hex: "dc3545")
+        static let success = Color(hex: "28a745")
+        static let warning = Color(hex: "ffc107")
         
         // UI Element colors
         static let inputBackground = Color.white.opacity(0.05)
