@@ -297,6 +297,14 @@ final class APIService: @unchecked Sendable {
         case 404:
             return .notFound
         case 400, 422:
+            // Try new validation format first
+            if let validationResponse = try? decoder.decode(ValidationErrorResponse.self, from: data),
+               let fieldErrors = validationResponse.errors, !fieldErrors.isEmpty {
+                let errors = Dictionary(grouping: fieldErrors, by: { $0.field })
+                    .mapValues { $0.map { $0.message } }
+                return .validationError(errors: errors)
+            }
+            // Fall back to ProblemDetails format
             if let problemDetails = try? decoder.decode(ProblemDetails.self, from: data) {
                 if let errors = problemDetails.errors {
                     return .validationError(errors: errors)

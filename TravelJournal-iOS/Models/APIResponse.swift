@@ -20,6 +20,16 @@ struct ProblemDetails: Codable {
     let errors: [String: [String]]?
 }
 
+struct ValidationErrorResponse: Codable {
+    let message: String?
+    let errors: [FieldError]?
+    
+    struct FieldError: Codable {
+        let field: String
+        let message: String
+    }
+}
+
 enum APIError: Error, LocalizedError {
     case unauthorized
     case forbidden

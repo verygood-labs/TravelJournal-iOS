@@ -45,14 +45,6 @@ struct TripPreviewView: View {
             bottomButton
         }
         .background(AppTheme.Colors.backgroundDark)
-        .alert("Error", isPresented: .init(
-            get: { viewModel.error != nil },
-            set: { if !$0 { viewModel.error = nil } }
-        )) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(viewModel.error ?? "")
-        }
     }
     
     // MARK: - Header Section
@@ -232,6 +224,16 @@ struct TripPreviewView: View {
     // MARK: - Bottom Button
     private var bottomButton: some View {
         VStack(spacing: AppTheme.Spacing.xs) {
+            // Error message
+            if let error = viewModel.error {
+                Text(error)
+                    .font(AppTheme.Typography.monoCaption())
+                    .foregroundColor(AppTheme.Colors.error)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, AppTheme.Spacing.md)
+                    .padding(.bottom, AppTheme.Spacing.xs)
+            }
+            
             Button {
                 Task {
                     let success = await viewModel.saveTrip()
