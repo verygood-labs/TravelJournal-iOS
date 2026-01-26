@@ -9,7 +9,7 @@ struct LocationSearchResult: Codable, Identifiable, Equatable {
     let osmId: Int64
     let latitude: Double
     let longitude: Double
-    let placeType: Int
+    let placeType: PlaceType
     let countryCode: String?
     let boundingBox: BoundingBox?
     
@@ -46,12 +46,12 @@ struct BoundingBox: Codable, Equatable {
 }
 
 // MARK: - Place Types
-enum PlaceType: Int, Codable {
-    case country = 0
-    case region = 1
-    case city = 2
-    case district = 3
-    case venue = 4
+enum PlaceType: String, Codable {
+    case country = "Country"
+    case region = "Region"
+    case city = "City"
+    case district = "District"
+    case venue = "Venue"
 }
 
 // MARK: - Get or Create Request
