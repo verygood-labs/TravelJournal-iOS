@@ -133,6 +133,7 @@ struct JournalEditorView: View {
         description: "Island hopping adventure",
         coverImageUrl: nil,
         status: .draft,
+        tripMode: .live,
         startDate: Date(),
         endDate: Date().addingTimeInterval(86400 * 14),
         createdAt: Date(),
@@ -145,7 +146,7 @@ struct JournalEditorView: View {
         ]
     )
     
-    return JournalEditorView(trip: sampleTrip)
+    JournalEditorView(trip: sampleTrip)
 }
 
 #Preview("With Blocks") {
@@ -155,6 +156,7 @@ struct JournalEditorView: View {
         description: "Island hopping adventure",
         coverImageUrl: nil,
         status: .draft,
+        tripMode: .live,
         startDate: Date(),
         endDate: Date().addingTimeInterval(86400 * 14),
         createdAt: Date(),
@@ -167,7 +169,7 @@ struct JournalEditorView: View {
         ]
     )
     
-    return JournalEditorViewPreview(trip: sampleTrip)
+    JournalEditorViewPreview(trip: sampleTrip)
 }
 
 // MARK: - Preview Helper
