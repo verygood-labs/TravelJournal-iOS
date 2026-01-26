@@ -46,8 +46,21 @@ struct TripStop: Codable, Identifiable {
 struct CreateTripRequest: Codable {
     let title: String
     let description: String?
-    let startDate: Date?
-    let endDate: Date?
+    let tripMode: Int
+    let startDate: String?  // DateOnly format: "yyyy-MM-dd"
+    let endDate: String?    // DateOnly format: "yyyy-MM-dd"
+    
+    init(title: String, description: String?, startDate: Date?, endDate: Date?) {
+        self.title = title
+        self.description = description
+        self.tripMode = 0
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        
+        self.startDate = startDate.map { formatter.string(from: $0) }
+        self.endDate = endDate.map { formatter.string(from: $0) }
+    }
 }
 
 struct UpdateTripRequest: Codable {
