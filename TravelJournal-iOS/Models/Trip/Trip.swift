@@ -1,0 +1,124 @@
+//
+//  Trip.swift
+//  TravelJournal-iOS
+//
+//  Created by John Apale on 1/25/26.
+//
+
+
+import Foundation
+
+struct Trip: Codable, Identifiable {
+    let id: UUID
+    let title: String
+    let description: String?
+    let coverImageUrl: String?
+    let status: TripStatus
+    let tripMode: TripMode?
+    let startDate: Date?
+    let endDate: Date?
+    let createdAt: Date
+    let updatedAt: Date?
+    let stops: [TripStop]?
+    let primaryDestination: String?
+    let saveCount: Int
+    let stopCount: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case id, title, description, coverImageUrl, status, tripMode
+        case startDate, endDate, createdAt, updatedAt, stops
+        case primaryDestination, saveCount, stopCount
+    }
+    
+    // MARK: - Decoder (handles DateOnly format for startDate/endDate)
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        id = try container.decode(UUID.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+        coverImageUrl = try container.decodeIfPresent(String.self, forKey: .coverImageUrl)
+        status = try container.decode(TripStatus.self, forKey: .status)
+        tripMode = try container.decodeIfPresent(TripMode.self, forKey: .tripMode)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt)
+        stops = try container.decodeIfPresent([TripStop].self, forKey: .stops)
+        primaryDestination = try container.decodeIfPresent(String.self, forKey: .primaryDestination)
+        saveCount = try container.decodeIfPresent(Int.self, forKey: .saveCount) ?? 0
+        stopCount = try container.decodeIfPresent(Int.self, forKey: .stopCount) ?? 0
+        
+        // Handle DateOnly format (yyyy-MM-dd)
+        let dateOnlyFormatter = DateFormatter()
+        dateOnlyFormatter.dateFormat = "yyyy-MM-dd"
+        dateOnlyFormatter.timeZone = TimeZone(identifier: "UTC")
+        
+        if let startDateString = try container.decodeIfPresent(String.self, forKey: .startDate) {
+            startDate = dateOnlyFormatter.date(from: startDateString)
+        } else {
+            startDate = nil
+        }
+        
+        if let endDateString = try container.decodeIfPresent(String.self, forKey: .endDate) {
+            endDate = dateOnlyFormatter.date(from: endDateString)
+        } else {
+            endDate = nil
+        }
+    }
+    
+    // MARK: - Memberwise Initializer (for previews)
+    
+    init(
+        id: UUID,
+        title: String,
+        description: String? = nil,
+        coverImageUrl: String? = nil,
+        status: TripStatus,
+        tripMode: TripMode? = nil,
+        startDate: Date? = nil,
+        endDate: Date? = nil,
+        createdAt: Date,
+        updatedAt: Date? = nil,
+        stops: [TripStop]? = nil,
+        primaryDestination: String? = nil,
+        saveCount: Int = 0,
+        stopCount: Int = 0
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.coverImageUrl = coverImageUrl
+        self.status = status
+        self.tripMode = tripMode
+        self.startDate = startDate
+        self.endDate = endDate
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.stops = stops
+        self.primaryDestination = primaryDestination
+        self.saveCount = saveCount
+        self.stopCount = stopCount
+    }
+}
+
+// MARK: - Computed Properties
+
+extension Trip {
+    var dateRange: String {
+        guard let start = startDate, let end = endDate else {
+            return "No dates set"
+        }
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        
+        let startString = formatter.string(from: start)
+        let endString = formatter.string(from: end)
+        
+        let yearFormatter = DateFormatter()
+        yearFormatter.dateFormat = "yyyy"
+        let year = yearFormatter.string(from: end)
+        
+        return "\(startString) - \(endString), \(year)"
+    }
+}
