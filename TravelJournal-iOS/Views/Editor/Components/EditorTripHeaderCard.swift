@@ -99,9 +99,9 @@ struct EditorTripHeaderCard: View {
         createdAt: Date(),
         updatedAt: Date(),
         stops: [
-            TripStop(id: UUID(), placeId: nil, placeName: "Manila", latitude: 0, longitude: 0, order: 0, arrivedAt: nil, departedAt: nil),
-            TripStop(id: UUID(), placeId: nil, placeName: "Palawan", latitude: 0, longitude: 0, order: 1, arrivedAt: nil, departedAt: nil),
-            TripStop(id: UUID(), placeId: nil, placeName: "Cebu", latitude: 0, longitude: 0, order: 2, arrivedAt: nil, departedAt: nil)
+            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH")),
+            TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH")),
+            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH"))
         ]
     )
     

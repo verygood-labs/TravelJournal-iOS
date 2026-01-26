@@ -54,7 +54,7 @@ final class JournalEditorViewModel: ObservableObject {
     
     var routeText: String? {
         guard !tripStops.isEmpty else { return nil }
-        return tripStops.map { $0.placeName }.joined(separator: " → ")
+        return tripStops.map { $0.place.name }.joined(separator: " → ")
     }
     
     var hasUnsavedChanges: Bool {
