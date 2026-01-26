@@ -282,7 +282,7 @@ struct TripPreviewView: View {
                         osmId: 123456,
                         latitude: 48.8566,
                         longitude: 2.3522,
-                        placeType: 2,
+                        placeType: .city,
                         countryCode: "FR",
                         boundingBox: nil
                     ),
@@ -297,7 +297,7 @@ struct TripPreviewView: View {
                         osmId: 234567,
                         latitude: 41.9028,
                         longitude: 12.4964,
-                        placeType: 2,
+                        placeType: .city,
                         countryCode: "IT",
                         boundingBox: nil
                     ),
