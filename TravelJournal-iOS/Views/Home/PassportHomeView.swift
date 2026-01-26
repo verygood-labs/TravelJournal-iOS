@@ -3,7 +3,6 @@ import SwiftUI
 struct PassportHomeView: View {
     @StateObject private var viewModel: PassportHomeViewModel
     @Binding var selectedTab: Int
-    @State private var showingAddTrip = false
     
     // Default initializer for normal use
     init(selectedTab: Binding<Int>) {
@@ -57,6 +56,9 @@ struct PassportHomeView: View {
                     )
                 }
             }
+        }
+        .sheet(isPresented: $viewModel.showingAddTrip) {
+            AddTripView()
         }
         .task {
             if !viewModel.isPreview {

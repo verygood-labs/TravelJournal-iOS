@@ -103,7 +103,7 @@ struct VisasSection: View {
         VStack(spacing: AppTheme.Spacing.md) {
             
             Button {
-                onViewAllTapped?()
+                viewModel.showingAddTrip = true
             } label: {
                 Text("ADD NEW JOURNAL")
                     .font(AppTheme.Typography.button())

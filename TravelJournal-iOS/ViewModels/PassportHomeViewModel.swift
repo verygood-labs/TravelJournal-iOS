@@ -11,6 +11,7 @@ final class PassportHomeViewModel: ObservableObject {
     @Published var isLoadingStamps = false
     @Published var isLoadingProfile = false
     @Published var isLoadingStats = false
+    @Published var showingAddTrip = false
     @Published var error: String?
     
     // MARK: - Services
