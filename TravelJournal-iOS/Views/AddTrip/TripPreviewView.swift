@@ -4,7 +4,7 @@ struct TripPreviewView: View {
     @ObservedObject var viewModel: AddTripViewModel
     @Environment(\.dismiss) private var dismiss
     
-    let onTripCreated: () -> Void
+    let onTripCreated: (Trip) -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -236,9 +236,8 @@ struct TripPreviewView: View {
             
             Button {
                 Task {
-                    let success = await viewModel.saveTrip()
-                    if success {
-                        onTripCreated()
+                    if let createdTrip = await viewModel.saveTrip() {
+                        onTripCreated(createdTrip)
                     }
                 }
             } label: {
@@ -307,6 +306,5 @@ struct TripPreviewView: View {
             ]
             return vm
         }(),
-        onTripCreated: { print("Trip created!") }
-    )
+        onTripCreated: { trip in print("Trip created: \(trip.title)") }    )
 }

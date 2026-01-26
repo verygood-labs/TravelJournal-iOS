@@ -5,6 +5,7 @@ struct AddTripView: View {
     @StateObject private var viewModel = AddTripViewModel()
     
     @State private var showingPreview = false
+    var onTripCreated: ((Trip) -> Void)?
     
     var body: some View {
         AppBackgroundView {
@@ -43,9 +44,10 @@ struct AddTripView: View {
         .fullScreenCover(isPresented: $showingPreview) {
             TripPreviewView(
                 viewModel: viewModel,
-                onTripCreated: {
+                onTripCreated: { trip in
                     showingPreview = false
                     dismiss()
+                    onTripCreated?(trip)
                 }
             )
         }

@@ -190,8 +190,8 @@ final class AddTripViewModel: ObservableObject {
     }
     
     // MARK: - Save Trip
-    func saveTrip() async -> Bool {
-        guard canSave else { return false }
+    func saveTrip() async -> Trip? {
+        guard canSave else { return nil }
         
         isSubmitting = true
         error = nil
@@ -211,7 +211,7 @@ final class AddTripViewModel: ObservableObject {
             }
             
             // Create the trip with stops in one atomic request
-            _ = try await tripService.createTrip(
+            let createdTrip = try await tripService.createTrip(
                 title: displayTitle,
                 description: tripDescription.isEmpty ? nil : tripDescription,
                 startDate: startDate,
@@ -220,16 +220,16 @@ final class AddTripViewModel: ObservableObject {
             )
             
             isSubmitting = false
-            return true
+            return createdTrip
             
         } catch let apiError as APIError {
             error = apiError.localizedDescription
             isSubmitting = false
-            return false
+            return nil
         } catch {
             self.error = "Failed to create trip. Please try again."
             isSubmitting = false
-            return false
+            return nil
         }
     }
 }

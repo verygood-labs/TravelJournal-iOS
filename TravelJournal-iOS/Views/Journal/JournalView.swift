@@ -3,6 +3,8 @@ import SwiftUI
 struct JournalView: View {
     @StateObject private var viewModel = JournalViewModel()
     @State private var showingAddTrip = false
+    @State private var tripToEdit: Trip?
+    @State private var showingEditor = false
     @State private var viewMode: JournalViewMode = .card
     @State private var tripToDelete: Trip?
     @State private var showingDeleteConfirmation = false
@@ -46,7 +48,20 @@ struct JournalView: View {
             }
         }
         .sheet(isPresented: $showingAddTrip) {
-            AddTripView()
+            AddTripView(onTripCreated: { trip in
+                tripToEdit = trip
+                showingEditor = true
+            })
+        }
+        .fullScreenCover(isPresented: $showingEditor, onDismiss: {
+            tripToEdit = nil
+            Task {
+                await viewModel.loadTrips()
+            }
+        }) {
+            if let trip = tripToEdit {
+                JournalEditorView(trip: trip)
+            }
         }
         .task {
             await viewModel.loadTrips()
