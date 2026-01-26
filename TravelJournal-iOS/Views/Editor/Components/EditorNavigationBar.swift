@@ -62,6 +62,7 @@ struct EditorNavigationBar: View {
         description: nil,
         coverImageUrl: nil,
         status: .draft,
+        tripMode: .live,
         startDate: Date(),
         endDate: Date(),
         createdAt: Date(),
@@ -69,7 +70,7 @@ struct EditorNavigationBar: View {
         stops: nil
     )
     
-    return EditorNavigationBar(
+    EditorNavigationBar(
         viewModel: JournalEditorViewModel(trip: trip),
         onCancel: {},
         onDone: {}

@@ -93,6 +93,7 @@ struct EditorTripHeaderCard: View {
         description: nil,
         coverImageUrl: nil,
         status: .draft,
+        tripMode: .live,
         startDate: Date(),
         endDate: Date(),
         createdAt: Date(),
@@ -104,7 +105,7 @@ struct EditorTripHeaderCard: View {
         ]
     )
     
-    return ZStack {
+    ZStack {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
         

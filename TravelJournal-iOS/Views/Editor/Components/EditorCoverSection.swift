@@ -192,6 +192,7 @@ struct EditorCoverSection: View {
         description: nil,
         coverImageUrl: nil,
         status: .draft,
+        tripMode: .live,
         startDate: Date(),
         endDate: Date(),
         createdAt: Date(),
