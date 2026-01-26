@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 struct Trip: Codable, Identifiable {
     let id: UUID
@@ -6,10 +7,11 @@ struct Trip: Codable, Identifiable {
     let description: String?
     let coverImageUrl: String?
     let status: TripStatus
+    let tripMode: TripMode?
     let startDate: Date?
     let endDate: Date?
     let createdAt: Date
-    let updatedAt: Date
+    let updatedAt: Date?
     let stops: [TripStop]?
     
     enum CodingKeys: String, CodingKey {
@@ -18,6 +20,7 @@ struct Trip: Codable, Identifiable {
         case description
         case coverImageUrl
         case status
+        case tripMode
         case startDate
         case endDate
         case createdAt
@@ -29,7 +32,31 @@ struct Trip: Codable, Identifiable {
 enum TripStatus: String, Codable {
     case draft = "Draft"
     case `private` = "Private"
+    case unlisted = "Unlisted"
     case `public` = "Public"
+    case archived = "Archived"
+}
+
+extension TripStatus {
+    var color: Color {
+        switch self {
+        case .draft:
+            return .orange
+        case .private:
+            return .blue
+        case .unlisted:
+            return .yellow
+        case .public:
+            return .green
+        case .archived:
+            return .red
+        }
+    }
+}
+
+enum TripMode: String, Codable {
+    case past = "Past"
+    case live = "Live"
 }
 
 struct TripStop: Codable, Identifiable {
