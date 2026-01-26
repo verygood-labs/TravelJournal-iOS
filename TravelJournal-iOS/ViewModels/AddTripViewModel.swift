@@ -190,7 +190,6 @@ final class AddTripViewModel: ObservableObject {
     }
     
     // MARK: - Save Trip
-    
     func saveTrip() async -> Bool {
         guard canSave else { return false }
         
@@ -202,24 +201,23 @@ final class AddTripViewModel: ObservableObject {
             let startDate = stops.map { $0.startDate }.min()
             let endDate = stops.map { $0.endDate }.max()
             
-            // Create the trip
-            let trip = try await tripService.createTrip(
+            // Build initial stops from OSM data
+            let initialStops = stops.map { stop in
+                CreateTripStopRequest(
+                    osmType: stop.city.osmType,
+                    osmId: stop.city.osmId,
+                    arrivalDate: stop.startDate
+                )
+            }
+            
+            // Create the trip with stops in one atomic request
+            _ = try await tripService.createTrip(
                 title: displayTitle,
                 description: tripDescription.isEmpty ? nil : tripDescription,
                 startDate: startDate,
-                endDate: endDate
+                endDate: endDate,
+                initialStops: initialStops
             )
-            
-            // Add stops to the trip
-            for stop in stops {
-                _ = try await tripService.addStop(
-                    tripId: trip.id,
-                    placeName: stop.city.name,
-                    latitude: stop.city.latitude,
-                    longitude: stop.city.longitude,
-                    placeId: nil // We could get this from getOrCreate if needed
-                )
-            }
             
             isSubmitting = false
             return true

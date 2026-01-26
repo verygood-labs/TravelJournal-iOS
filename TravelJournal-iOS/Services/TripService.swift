@@ -18,12 +18,19 @@ class TripService {
         return try await api.request(endpoint: "/trips/\(id)")
     }
     
-    func createTrip(title: String, description: String? = nil, startDate: Date? = nil, endDate: Date? = nil) async throws -> Trip {
+    func createTrip(
+        title: String,
+        description: String? = nil,
+        startDate: Date? = nil,
+        endDate: Date? = nil,
+        initialStops: [CreateTripStopRequest]? = nil
+    ) async throws -> Trip {
         let request = CreateTripRequest(
             title: title,
             description: description,
             startDate: startDate,
-            endDate: endDate
+            endDate: endDate,
+            initialStops: initialStops
         )
         
         return try await api.request(
