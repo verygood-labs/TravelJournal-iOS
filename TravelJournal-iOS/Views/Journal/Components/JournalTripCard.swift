@@ -155,31 +155,20 @@ struct JournalTripCard: View {
     private var statusBadge: some View {
         HStack(spacing: 3) {
             Circle()
-                .fill(statusColor)
+                .fill(trip.status.color)
                 .frame(width: 5, height: 5)
             
             Text(trip.status.rawValue.uppercased())
                 .font(AppTheme.Typography.monoCaption())
                 .tracking(0.5)
         }
-        .foregroundColor(statusColor)
+        .foregroundColor(trip.status.color)
         .padding(.horizontal, AppTheme.Spacing.xxs)
         .padding(.vertical, 3)
         .background(
             Capsule()
-                .fill(statusColor.opacity(0.1))
+                .fill(trip.status.color.opacity(0.1))
         )
-    }
-    
-    private var statusColor: Color {
-        switch trip.status {
-        case .draft:
-            return .orange
-        case .private:
-            return .blue
-        case .public:
-            return .green
-        }
     }
     
     // MARK: - Date Range Row
@@ -207,7 +196,7 @@ struct JournalTripCard: View {
             Spacer()
             
             // Updated date
-            Text("Updated \(formatRelativeDate(trip.updatedAt))")
+            Text("Updated \(formatRelativeDate(trip.updatedAt ?? trip.createdAt))")
                 .font(AppTheme.Typography.monoCaption())
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
         }
@@ -240,6 +229,7 @@ struct JournalTripCard: View {
         description: "An amazing week exploring the city of lights.",
         coverImageUrl: nil,
         status: .public,
+        tripMode: .live,
         startDate: Date().addingTimeInterval(-86400 * 30),
         endDate: Date().addingTimeInterval(-86400 * 23),
         createdAt: Date().addingTimeInterval(-86400 * 30),
@@ -267,6 +257,7 @@ struct JournalTripCard: View {
         description: nil,
         coverImageUrl: nil,
         status: .draft,
+        tripMode: .live,
         startDate: Date(),
         endDate: Date().addingTimeInterval(86400 * 7),
         createdAt: Date(),
@@ -294,6 +285,7 @@ struct JournalTripCard: View {
         description: "From New York to Los Angeles, experiencing the diverse landscapes and cultures along the way. Stopped at countless diners and motels.",
         coverImageUrl: nil,
         status: .private,
+        tripMode: .live,
         startDate: Date().addingTimeInterval(-86400 * 90),
         endDate: Date().addingTimeInterval(-86400 * 60),
         createdAt: Date().addingTimeInterval(-86400 * 90),
@@ -322,6 +314,7 @@ struct JournalTripCard: View {
             description: "City of lights adventure.",
             coverImageUrl: nil,
             status: .public,
+            tripMode: .live,
             startDate: Date().addingTimeInterval(-86400 * 30),
             endDate: Date().addingTimeInterval(-86400 * 23),
             createdAt: Date().addingTimeInterval(-86400 * 30),
@@ -334,6 +327,7 @@ struct JournalTripCard: View {
             description: nil,
             coverImageUrl: nil,
             status: .draft,
+            tripMode: .live,
             startDate: Date(),
             endDate: Date(),
             createdAt: Date(),
@@ -346,6 +340,7 @@ struct JournalTripCard: View {
             description: "Gaudi architecture and beach vibes.",
             coverImageUrl: nil,
             status: .private,
+            tripMode: .live,
             startDate: Date().addingTimeInterval(-86400 * 60),
             endDate: Date().addingTimeInterval(-86400 * 55),
             createdAt: Date().addingTimeInterval(-86400 * 60),
