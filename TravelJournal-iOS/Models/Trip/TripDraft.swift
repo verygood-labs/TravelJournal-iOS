@@ -24,21 +24,8 @@ struct JournalBlock: Codable, Identifiable {
     let createdAt: Date
 }
 
-enum BlockType: String, Codable {
-    case text = "Text"
-    case image = "Image"
-    case moment = "Moment"
-    case recommendation = "Recommendation"
-    case tip = "Tip"
-}
-
 struct CreateBlockRequest: Codable {
     let type: BlockType
-    let content: String?
-    let imageUrl: String?
-}
-
-struct UpdateBlockRequest: Codable {
     let content: String?
     let imageUrl: String?
 }

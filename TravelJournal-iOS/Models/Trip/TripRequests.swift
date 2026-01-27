@@ -52,12 +52,3 @@ struct CreateTripStopRequest: Codable {
         self.arrivalDate = arrivalDate.map { formatter.string(from: $0) }
     }
 }
-
-// MARK: - Update Trip
-
-struct UpdateTripRequest: Codable {
-    let title: String?
-    let description: String?
-    let startDate: Date?
-    let endDate: Date?
-}
