@@ -2,37 +2,39 @@
 //  MomentBlockSheet.swift
 //  TravelJournal-iOS
 //
-//  Created by John Apale on 1/22/26.
-//
 
-import Foundation
 import SwiftUI
 
 struct MomentBlockSheet: View {
-    let existingBlock: JournalBlock?
-    let onSave: (JournalBlock) -> Void
+    let existingBlock: EditorBlock?
+    let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
     
     @Environment(\.dismiss) private var dismiss
     
     @State private var title: String = ""
-    @State private var description: String = ""
+    @State private var content: String = ""
+    @State private var date: String = ""
     
-    init(existingBlock: JournalBlock? = nil, onSave: @escaping (JournalBlock) -> Void, onDelete: (() -> Void)? = nil) {
+    init(
+        existingBlock: EditorBlock? = nil,
+        onSave: @escaping (EditorBlock) -> Void,
+        onDelete: (() -> Void)? = nil
+    ) {
         self.existingBlock = existingBlock
         self.onSave = onSave
         self.onDelete = onDelete
         
-        if let block = existingBlock, let content = block.content {
-            let parts = content.components(separatedBy: "\n\n")
-            _title = State(initialValue: parts.first ?? "")
-            _description = State(initialValue: parts.count > 1 ? parts.dropFirst().joined(separator: "\n\n") : "")
+        if let block = existingBlock {
+            _title = State(initialValue: block.data.title ?? "")
+            _content = State(initialValue: block.data.content ?? "")
+            _date = State(initialValue: block.data.date ?? "")
         }
     }
     
     private var isValid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        !description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     private var sheetTitle: String {
@@ -57,7 +59,7 @@ struct MomentBlockSheet: View {
                     
                     BlockFormSection(label: "DESCRIPTION") {
                         BlockTextEditor(
-                            text: $description,
+                            text: $content,
                             placeholder: "Describe this moment...",
                             minHeight: 100
                         )
@@ -79,21 +81,23 @@ struct MomentBlockSheet: View {
     }
     
     private func saveAndDismiss() {
-        var finalContent = title
-        if !description.isEmpty {
-            finalContent += finalContent.isEmpty ? description : "\n\n" + description
-        }
-        
-        let block = JournalBlock(
-            id: existingBlock?.id ?? UUID(),
-            type: .moment,
-            content: finalContent.isEmpty ? nil : finalContent,
-            imageUrl: nil,
+        let block = EditorBlock.newMoment(
             order: existingBlock?.order ?? 0,
-            createdAt: existingBlock?.createdAt ?? Date()
+            date: date.isEmpty ? nil : date,
+            title: title.isEmpty ? nil : title,
+            content: content.isEmpty ? nil : content
         )
         
-        onSave(block)
+        // Preserve the ID if editing
+        let finalBlock = EditorBlock(
+            id: existingBlock?.id ?? block.id,
+            order: block.order,
+            type: block.type,
+            location: existingBlock?.location,
+            data: block.data
+        )
+        
+        onSave(finalBlock)
         dismiss()
     }
 }

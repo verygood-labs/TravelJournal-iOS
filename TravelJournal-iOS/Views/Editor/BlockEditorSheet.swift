@@ -3,14 +3,14 @@ import SwiftUI
 /// Routes to the appropriate block sheet based on block type
 struct BlockEditorSheet: View {
     let blockType: BlockType
-    let existingBlock: JournalBlock?
-    let onSave: (JournalBlock) -> Void
+    let existingBlock: EditorBlock?
+    let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
     
     init(
         blockType: BlockType,
-        existingBlock: JournalBlock? = nil,
-        onSave: @escaping (JournalBlock) -> Void,
+        existingBlock: EditorBlock? = nil,
+        onSave: @escaping (EditorBlock) -> Void,
         onDelete: (() -> Void)? = nil
     ) {
         self.blockType = blockType
@@ -21,20 +21,14 @@ struct BlockEditorSheet: View {
     
     var body: some View {
         switch blockType {
-        case .text:
-            TextBlockSheet(
-                existingBlock: existingBlock,
-                onSave: onSave,
-                onDelete: onDelete
-            )
         case .moment:
             MomentBlockSheet(
                 existingBlock: existingBlock,
                 onSave: onSave,
                 onDelete: onDelete
             )
-        case .image:
-            ImageBlockSheet(
+        case .photo:
+            PhotoBlockSheet(
                 existingBlock: existingBlock,
                 onSave: onSave,
                 onDelete: onDelete
@@ -47,6 +41,12 @@ struct BlockEditorSheet: View {
             )
         case .tip:
             TipBlockSheet(
+                existingBlock: existingBlock,
+                onSave: onSave,
+                onDelete: onDelete
+            )
+        case .divider:
+            DividerBlockSheet(
                 existingBlock: existingBlock,
                 onSave: onSave,
                 onDelete: onDelete
@@ -64,6 +64,6 @@ struct BlockEditorSheet: View {
     BlockEditorSheet(blockType: .moment, onSave: { _ in })
 }
 
-#Preview("Image") {
-    BlockEditorSheet(blockType: .image, onSave: { _ in })
+#Preview("Photo") {
+    BlockEditorSheet(blockType: .photo, onSave: { _ in })
 }

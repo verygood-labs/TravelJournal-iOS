@@ -2,37 +2,42 @@
 //  RecommendationBlockSheet.swift
 //  TravelJournal-iOS
 //
-//  Created by John Apale on 1/22/26.
-//
-
 
 import SwiftUI
 
 struct RecommendationBlockSheet: View {
-    let existingBlock: JournalBlock?
-    let onSave: (JournalBlock) -> Void
+    let existingBlock: EditorBlock?
+    let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
     
     @Environment(\.dismiss) private var dismiss
     
-    @State private var placeName: String = ""
-    @State private var recommendation: String = ""
+    @State private var name: String = ""
+    @State private var category: RecommendationCategory = .eat
+    @State private var rating: Rating? = nil
+    @State private var priceLevel: Int? = nil
+    @State private var note: String = ""
     
-    init(existingBlock: JournalBlock? = nil, onSave: @escaping (JournalBlock) -> Void, onDelete: (() -> Void)? = nil) {
+    init(
+        existingBlock: EditorBlock? = nil,
+        onSave: @escaping (EditorBlock) -> Void,
+        onDelete: (() -> Void)? = nil
+    ) {
         self.existingBlock = existingBlock
         self.onSave = onSave
         self.onDelete = onDelete
         
-        if let block = existingBlock, let content = block.content {
-            let parts = content.components(separatedBy: "\n\n")
-            _placeName = State(initialValue: parts.first ?? "")
-            _recommendation = State(initialValue: parts.count > 1 ? parts.dropFirst().joined(separator: "\n\n") : "")
+        if let block = existingBlock {
+            _name = State(initialValue: block.data.name ?? "")
+            _category = State(initialValue: block.data.category ?? .eat)
+            _rating = State(initialValue: block.data.rating)
+            _priceLevel = State(initialValue: block.data.priceLevel)
+            _note = State(initialValue: block.data.note ?? "")
         }
     }
     
     private var isValid: Bool {
-        !placeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        !recommendation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     private var sheetTitle: String {
@@ -51,13 +56,21 @@ struct RecommendationBlockSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
                     BlockFormSection(label: "PLACE NAME") {
-                        TextField("e.g., Cafe de Flore", text: $placeName)
+                        TextField("e.g., Cafe de Flore", text: $name)
                             .textFieldStyle(BlockTextFieldStyle())
+                    }
+                    
+                    BlockFormSection(label: "CATEGORY") {
+                        CategoryPicker(selection: $category)
+                    }
+                    
+                    BlockFormSection(label: "RATING (OPTIONAL)") {
+                        RatingPicker(selection: $rating)
                     }
                     
                     BlockFormSection(label: "WHY YOU RECOMMEND IT") {
                         BlockTextEditor(
-                            text: $recommendation,
+                            text: $note,
                             placeholder: "Share why others should visit...",
                             minHeight: 100
                         )
@@ -79,22 +92,119 @@ struct RecommendationBlockSheet: View {
     }
     
     private func saveAndDismiss() {
-        var finalContent = placeName
-        if !recommendation.isEmpty {
-            finalContent += finalContent.isEmpty ? recommendation : "\n\n" + recommendation
-        }
-        
-        let block = JournalBlock(
-            id: existingBlock?.id ?? UUID(),
-            type: .recommendation,
-            content: finalContent.isEmpty ? nil : finalContent,
-            imageUrl: nil,
+        let block = EditorBlock.newRecommendation(
             order: existingBlock?.order ?? 0,
-            createdAt: existingBlock?.createdAt ?? Date()
+            name: name,
+            category: category,
+            rating: rating,
+            priceLevel: priceLevel,
+            note: note.isEmpty ? nil : note
         )
         
-        onSave(block)
+        // Preserve the ID if editing
+        let finalBlock = EditorBlock(
+            id: existingBlock?.id ?? block.id,
+            order: block.order,
+            type: block.type,
+            location: existingBlock?.location,
+            data: block.data
+        )
+        
+        onSave(finalBlock)
         dismiss()
+    }
+}
+
+// MARK: - Category Picker
+
+private struct CategoryPicker: View {
+    @Binding var selection: RecommendationCategory
+    
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.xs) {
+            ForEach(RecommendationCategory.allCases, id: \.self) { category in
+                CategoryButton(
+                    category: category,
+                    isSelected: selection == category
+                ) {
+                    selection = category
+                }
+            }
+        }
+    }
+}
+
+private struct CategoryButton: View {
+    let category: RecommendationCategory
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: category.icon)
+                    .font(.system(size: 16))
+                Text(category.displayName)
+                    .font(AppTheme.Typography.monoCaption())
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, AppTheme.Spacing.sm)
+            .background(isSelected ? AppTheme.Colors.primary.opacity(0.2) : AppTheme.Colors.passportInputBackground)
+            .foregroundColor(isSelected ? AppTheme.Colors.primary : AppTheme.Colors.passportTextSecondary)
+            .cornerRadius(AppTheme.CornerRadius.medium)
+            .overlay(
+                RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                    .stroke(isSelected ? AppTheme.Colors.primary : AppTheme.Colors.passportInputBorder, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Rating Picker
+
+private struct RatingPicker: View {
+    @Binding var selection: Rating?
+    
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.xs) {
+            ForEach(Rating.allCases, id: \.self) { rating in
+                RatingButton(
+                    rating: rating,
+                    isSelected: selection == rating
+                ) {
+                    if selection == rating {
+                        selection = nil
+                    } else {
+                        selection = rating
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct RatingButton: View {
+    let rating: Rating
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(rating.displayName)
+                .font(AppTheme.Typography.monoSmall())
+                .fontWeight(.semibold)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppTheme.Spacing.sm)
+                .background(isSelected ? rating.color.opacity(0.2) : AppTheme.Colors.passportInputBackground)
+                .foregroundColor(isSelected ? rating.color : AppTheme.Colors.passportTextSecondary)
+                .cornerRadius(AppTheme.CornerRadius.medium)
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                        .stroke(isSelected ? rating.color : AppTheme.Colors.passportInputBorder, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
     }
 }
 

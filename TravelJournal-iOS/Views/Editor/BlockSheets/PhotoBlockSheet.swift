@@ -2,6 +2,14 @@
 //  PhotoBlockSheet.swift
 //  TravelJournal-iOS
 //
+//  Created by John Apale on 1/26/26.
+//
+
+
+//
+//  PhotoBlockSheet.swift
+//  TravelJournal-iOS
+//
 
 import SwiftUI
 

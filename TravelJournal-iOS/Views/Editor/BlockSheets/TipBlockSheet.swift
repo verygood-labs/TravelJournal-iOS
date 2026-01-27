@@ -2,38 +2,37 @@
 //  TipBlockSheet.swift
 //  TravelJournal-iOS
 //
-//  Created by John Apale on 1/22/26.
-//
 
-import Foundation
 import SwiftUI
 
 struct TipBlockSheet: View {
-    let existingBlock: JournalBlock?
-    let onSave: (JournalBlock) -> Void
+    let existingBlock: EditorBlock?
+    let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
     
     @Environment(\.dismiss) private var dismiss
     
     @State private var title: String = ""
-    @State private var advice: String = ""
+    @State private var content: String = ""
     
-    init(existingBlock: JournalBlock? = nil, onSave: @escaping (JournalBlock) -> Void, onDelete: (() -> Void)? = nil) {
+    init(
+        existingBlock: EditorBlock? = nil,
+        onSave: @escaping (EditorBlock) -> Void,
+        onDelete: (() -> Void)? = nil
+    ) {
         self.existingBlock = existingBlock
         self.onSave = onSave
         self.onDelete = onDelete
         
-        if let block = existingBlock, let content = block.content {
-            // Parse title and advice from content if editing
-            let parts = content.components(separatedBy: "\n\n")
-            _title = State(initialValue: parts.first ?? "")
-            _advice = State(initialValue: parts.count > 1 ? parts.dropFirst().joined(separator: "\n\n") : "")
+        if let block = existingBlock {
+            _title = State(initialValue: block.data.title ?? "")
+            _content = State(initialValue: block.data.content ?? "")
         }
     }
     
     private var isValid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        !advice.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     private var sheetTitle: String {
@@ -58,7 +57,7 @@ struct TipBlockSheet: View {
                     
                     BlockFormSection(label: "ADVICE") {
                         BlockTextEditor(
-                            text: $advice,
+                            text: $content,
                             placeholder: "Share your helpful tip..."
                         )
                     }
@@ -79,41 +78,27 @@ struct TipBlockSheet: View {
     }
     
     private func saveAndDismiss() {
-        var finalContent = title
-        if !advice.isEmpty {
-            finalContent += finalContent.isEmpty ? advice : "\n\n" + advice
-        }
-        
-        let block = JournalBlock(
-            id: existingBlock?.id ?? UUID(),
-            type: .tip,
-            content: finalContent.isEmpty ? nil : finalContent,
-            imageUrl: nil,
+        let block = EditorBlock.newTip(
             order: existingBlock?.order ?? 0,
-            createdAt: existingBlock?.createdAt ?? Date()
+            title: title.isEmpty ? nil : title,
+            content: content.isEmpty ? nil : content
         )
         
-        onSave(block)
+        // Preserve the ID if editing
+        let finalBlock = EditorBlock(
+            id: existingBlock?.id ?? block.id,
+            order: block.order,
+            type: block.type,
+            location: block.location,
+            data: block.data
+        )
+        
+        onSave(finalBlock)
         dismiss()
     }
 }
 
 // MARK: - Preview
-#Preview("New Tip") {
+#Preview {
     TipBlockSheet(onSave: { _ in })
-}
-
-#Preview("Edit Tip") {
-    TipBlockSheet(
-        existingBlock: JournalBlock(
-            id: UUID(),
-            type: .tip,
-            content: "Getting Around\n\nUse Grab for affordable transportation. Much cheaper than taxis!",
-            imageUrl: nil,
-            order: 0,
-            createdAt: Date()
-        ),
-        onSave: { _ in },
-        onDelete: {}
-    )
 }

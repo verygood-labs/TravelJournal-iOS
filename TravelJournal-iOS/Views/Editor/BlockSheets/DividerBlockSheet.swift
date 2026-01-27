@@ -2,6 +2,14 @@
 //  DividerBlockSheet.swift
 //  TravelJournal-iOS
 //
+//  Created by John Apale on 1/26/26.
+//
+
+
+//
+//  DividerBlockSheet.swift
+//  TravelJournal-iOS
+//
 
 import SwiftUI
 
