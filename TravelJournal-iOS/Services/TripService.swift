@@ -40,20 +40,6 @@ class TripService {
         )
     }
     
-    func updateTrip(id: UUID, title: String? = nil, description: String? = nil, startDate: Date? = nil, endDate: Date? = nil) async throws -> Trip {
-        let request = UpdateTripRequest(
-            title: title,
-            description: description,
-            startDate: startDate,
-            endDate: endDate
-        )
-        
-        return try await api.request(
-            endpoint: "/trips/\(id)",
-            method: "PUT",
-            body: request
-        )
-    }
     
     func deleteTrip(id: UUID) async throws {
         try await api.requestVoid(
@@ -124,34 +110,52 @@ class TripService {
     }
     
     // MARK: - Trip Draft/Journal
-    
-    func getDraft(tripId: UUID) async throws -> TripDraft {
+
+    func getDraft(tripId: UUID) async throws -> EditorResponse {
         return try await api.request(endpoint: "/trips/\(tripId)/draft")
     }
-    
-    func addBlock(tripId: UUID, block: CreateBlockRequest) async throws -> JournalBlock {
+
+    func addBlock(tripId: UUID, block: AddBlockRequest) async throws -> EditorBlock {
         return try await api.request(
             endpoint: "/trips/\(tripId)/draft/blocks",
             method: "POST",
             body: block
         )
     }
-    
-    func updateBlock(tripId: UUID, blockId: UUID, block: UpdateBlockRequest) async throws -> JournalBlock {
+
+    func updateBlock(tripId: UUID, blockId: UUID, request: UpdateBlockRequest) async throws -> EditorBlock {
         return try await api.request(
             endpoint: "/trips/\(tripId)/draft/blocks/\(blockId)",
             method: "PUT",
-            body: block
+            body: request
         )
     }
-    
+
     func deleteBlock(tripId: UUID, blockId: UUID) async throws {
         try await api.requestVoid(
             endpoint: "/trips/\(tripId)/draft/blocks/\(blockId)",
             method: "DELETE"
         )
     }
-    
+
+    func saveDraft(tripId: UUID, content: EditorContent) async throws {
+        let request = SaveDraftRequest(content: content)
+        try await api.requestVoid(
+            endpoint: "/trips/\(tripId)/draft",
+            method: "PUT",
+            body: request
+        )
+    }
+
+    func reorderBlocks(tripId: UUID, blockIds: [UUID]) async throws {
+        let request = ReorderBlocksRequest(blockIds: blockIds)
+        try await api.requestVoid(
+            endpoint: "/trips/\(tripId)/draft/blocks/reorder",
+            method: "PUT",
+            body: request
+        )
+    }
+
     func publishDraft(tripId: UUID) async throws -> Trip {
         return try await api.request(
             endpoint: "/trips/\(tripId)/publish",
