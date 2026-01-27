@@ -45,8 +45,6 @@ struct AddTripView: View {
             TripPreviewView(
                 viewModel: viewModel,
                 onTripCreated: { trip in
-                    showingPreview = false
-                    dismiss()
                     onTripCreated?(trip)
                 }
             )

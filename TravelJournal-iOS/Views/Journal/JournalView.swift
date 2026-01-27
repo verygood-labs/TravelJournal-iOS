@@ -47,21 +47,25 @@ struct JournalView: View {
                     .padding(.bottom, AppTheme.Spacing.lg)
             }
         }
-        .sheet(isPresented: $showingAddTrip) {
-            AddTripView(onTripCreated: { trip in
-                tripToEdit = trip
+        .sheet(isPresented: $showingAddTrip, onDismiss: {
+            // After AddTripView dismisses, check if we should show editor
+            if tripToEdit != nil {
                 showingEditor = true
+            }
+        }) {
+            AddTripView(onTripCreated: { trip in
+                print("📥 JournalView received trip: \(trip.id)")
+                tripToEdit = trip
+                showingAddTrip = false  // ← Dismiss by setting this to false
             })
         }
-        .fullScreenCover(isPresented: $showingEditor, onDismiss: {
-            tripToEdit = nil
+        .fullScreenCover(item: $tripToEdit, onDismiss: {
             Task {
                 await viewModel.loadTrips()
             }
-        }) {
-            if let trip = tripToEdit {
-                JournalEditorView(trip: trip)
-            }
+        }) { trip in
+            let _ = print("🎯 Opening editor with trip: \(trip.id), title: \(trip.title)")
+            JournalEditorView(trip: trip)
         }
         .task {
             await viewModel.loadTrips()
@@ -258,8 +262,7 @@ struct JournalView: View {
     }
     
     private func handleEditTrip(_ trip: Trip) {
-        print("✏️ Edit trip: \(trip.title)")
-        // TODO: Navigate to trip edit view
+        tripToEdit = trip
     }
     
     private func handleDeleteTrip(_ trip: Trip) {
