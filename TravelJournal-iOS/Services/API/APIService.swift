@@ -1,0 +1,280 @@
+//
+//  APIService.swift
+//  TravelJournal-iOS
+//
+//  Created by John Apale on 1/26/26.
+//
+
+import Foundation
+
+final class APIService: @unchecked Sendable {
+    static let shared = APIService()
+    
+    let baseURL: String
+    let session: URLSession
+    let decoder: JSONDecoder
+    private let encoder: JSONEncoder
+    private let errorParser: APIErrorParser
+    
+    // Enable/disable API logging
+    var enableLogging: Bool = true
+    
+    private init() {
+        #if DEBUG
+        self.baseURL = "http://127.0.0.1:5151/api"
+        #else
+        self.baseURL = "https://api.yourdomain.com/api"
+        #endif
+        
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 60
+        configuration.waitsForConnectivity = true
+        self.session = URLSession(configuration: configuration)
+        
+        self.decoder = JSONDecoder()
+        self.decoder.dateDecodingStrategy = .iso8601
+        
+        self.encoder = JSONEncoder()
+        self.encoder.dateEncodingStrategy = .iso8601
+        
+        self.errorParser = APIErrorParser(decoder: self.decoder)
+    }
+    
+    // MARK: - Token Management
+    
+    var accessToken: String? {
+        get { KeychainService.shared.get(key: "accessToken") }
+        set {
+            if let token = newValue {
+                KeychainService.shared.save(key: "accessToken", value: token)
+            } else {
+                KeychainService.shared.delete(key: "accessToken")
+            }
+        }
+    }
+    
+    private var refreshToken: String? {
+        get { KeychainService.shared.get(key: "refreshToken") }
+        set {
+            if let token = newValue {
+                KeychainService.shared.save(key: "refreshToken", value: token)
+            } else {
+                KeychainService.shared.delete(key: "refreshToken")
+            }
+        }
+    }
+    
+    func setTokens(access: String, refresh: String) {
+        self.accessToken = access
+        self.refreshToken = refresh
+    }
+    
+    func clearTokens() {
+        self.accessToken = nil
+        self.refreshToken = nil
+    }
+    
+    var isAuthenticated: Bool {
+        accessToken != nil
+    }
+    
+    // MARK: - Media URL
+    
+    var mediaBaseURL: String {
+        #if DEBUG
+        return "http://127.0.0.1:5151"
+        #else
+        return "https://api.yourdomain.com"
+        #endif
+    }
+    
+    func fullMediaURL(for path: String?) -> URL? {
+        guard let path = path else { return nil }
+        
+        if path.hasPrefix("http://") || path.hasPrefix("https://") {
+            return URL(string: path)
+        }
+        
+        return URL(string: mediaBaseURL + path)
+    }
+    
+    // MARK: - Request Building
+    
+    private func buildRequest(
+        endpoint: String,
+        method: String,
+        body: Data? = nil,
+        authenticated: Bool = true
+    ) -> URLRequest {
+        let url = URL(string: "\(baseURL)\(endpoint)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if authenticated, let token = accessToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        request.httpBody = body
+        return request
+    }
+    
+    // MARK: - Request Execution
+    
+    func request<T: Codable>(
+        endpoint: String,
+        method: String = "GET",
+        body: Encodable? = nil,
+        authenticated: Bool = true,
+        retryCount: Int = 0
+    ) async throws -> T {
+        var bodyData: Data? = nil
+        if let body = body {
+            bodyData = try encoder.encode(body)
+        }
+        
+        let request = buildRequest(
+            endpoint: endpoint,
+            method: method,
+            body: bodyData,
+            authenticated: authenticated
+        )
+        
+        logRequest(
+            method: method,
+            url: request.url!,
+            headers: request.allHTTPHeaderFields ?? [:],
+            body: bodyData
+        )
+        
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            logError(error, url: request.url!)
+            throw APIError.networkError(error)
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.unknown
+        }
+        
+        logResponse(statusCode: httpResponse.statusCode, data: data, url: request.url!)
+        
+        if httpResponse.statusCode == 401 && authenticated && retryCount == 0 {
+            if try await refreshAccessToken() {
+                return try await self.request(
+                    endpoint: endpoint,
+                    method: method,
+                    body: body,
+                    authenticated: authenticated,
+                    retryCount: retryCount + 1
+                )
+            } else {
+                throw APIError.unauthorized
+            }
+        }
+        
+        return try handleResponse(data: data, response: httpResponse)
+    }
+    
+    func requestVoid(
+        endpoint: String,
+        method: String = "GET",
+        body: Encodable? = nil,
+        authenticated: Bool = true,
+        retryCount: Int = 0
+    ) async throws {
+        var bodyData: Data? = nil
+        if let body = body {
+            bodyData = try encoder.encode(body)
+        }
+        
+        let request = buildRequest(
+            endpoint: endpoint,
+            method: method,
+            body: bodyData,
+            authenticated: authenticated
+        )
+        
+        logRequest(
+            method: method,
+            url: request.url!,
+            headers: request.allHTTPHeaderFields ?? [:],
+            body: bodyData
+        )
+        
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            logError(error, url: request.url!)
+            throw APIError.networkError(error)
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.unknown
+        }
+        
+        logResponse(statusCode: httpResponse.statusCode, data: data, url: request.url!)
+        
+        if httpResponse.statusCode == 401 && authenticated && retryCount == 0 {
+            if try await refreshAccessToken() {
+                return try await self.requestVoid(
+                    endpoint: endpoint,
+                    method: method,
+                    body: body,
+                    authenticated: authenticated,
+                    retryCount: retryCount + 1
+                )
+            } else {
+                throw APIError.unauthorized
+            }
+        }
+        
+        if !(200...299).contains(httpResponse.statusCode) {
+            throw errorParser.parseError(data: data, statusCode: httpResponse.statusCode)
+        }
+    }
+    
+    // MARK: - Response Handling
+    
+    func handleResponse<T: Codable>(data: Data, response: HTTPURLResponse) throws -> T {
+        switch response.statusCode {
+        case 200...299:
+            do {
+                return try decoder.decode(T.self, from: data)
+            } catch {
+                throw APIError.decodingError(error)
+            }
+        default:
+            throw errorParser.parseError(data: data, statusCode: response.statusCode)
+        }
+    }
+    
+    // MARK: - Token Refresh
+    
+    private func refreshAccessToken() async throws -> Bool {
+        guard let refreshToken = refreshToken else {
+            return false
+        }
+        
+        let request = RefreshTokenRequest(refreshToken: refreshToken)
+        
+        do {
+            let response: AuthResponse = try await self.request(
+                endpoint: "/auth/refresh-token",
+                method: "POST",
+                body: request,
+                authenticated: false
+            )
+            
+            setTokens(access: response.accessToken, refresh: response.refreshToken)
+            return true
+        } catch {
+            clearTokens()
+            return false
+        }
+    }
+}
