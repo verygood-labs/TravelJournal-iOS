@@ -13,9 +13,7 @@ struct EditorBlockToolbar: View {
     
     // Toolbar items based on existing BlockType enum
     private let toolbarItems: [(type: BlockType, icon: String, label: String)] = [
-        (.text, "doc.text", "Text"),
         (.moment, "sparkles", "Moment"),
-        (.image, "camera.fill", "Photo"),
         (.recommendation, "star.fill", "Rec"),
         (.tip, "lightbulb.fill", "Tip")
     ]

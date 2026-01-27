@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct JournalBlockCard: View {
-    let block: JournalBlock
+    let block: EditorBlock
     let onTap: () -> Void
     
     var body: some View {
@@ -21,8 +21,8 @@ struct JournalBlockCard: View {
                         .foregroundColor(AppTheme.Colors.passportTextMuted)
                     
                     // Block title/content preview
-                    if let content = block.content, !content.isEmpty {
-                        Text(content)
+                    if let preview = blockPreviewText, !preview.isEmpty {
+                        Text(preview)
                             .font(AppTheme.Typography.monoMedium())
                             .foregroundColor(AppTheme.Colors.passportTextPrimary)
                             .lineLimit(3)
@@ -60,7 +60,25 @@ struct JournalBlockCard: View {
         .buttonStyle(.plain)
     }
     
+    // MARK: - Block Preview Text
+    
+    private var blockPreviewText: String? {
+        switch block.type {
+        case .moment:
+            return block.data.title ?? block.data.content
+        case .recommendation:
+            return block.data.name
+        case .photo:
+            return block.data.caption
+        case .tip:
+            return block.data.title ?? block.data.content
+        case .divider:
+            return "───"
+        }
+    }
+    
     // MARK: - Block Number Badge
+    
     private var blockNumberBadge: some View {
         Text("\(block.order + 1)")
             .font(AppTheme.Typography.monoSmall())
@@ -72,28 +90,14 @@ struct JournalBlockCard: View {
     }
     
     // MARK: - Block Type Icon
+    
     private var blockTypeIcon: some View {
-        Image(systemName: iconForBlockType(block.type))
+        Image(systemName: block.type.icon)
             .font(.system(size: 16))
             .foregroundColor(AppTheme.Colors.primary)
             .frame(width: 32, height: 32)
             .background(AppTheme.Colors.primary.opacity(0.1))
             .cornerRadius(AppTheme.CornerRadius.small)
-    }
-    
-    private func iconForBlockType(_ type: BlockType) -> String {
-        switch type {
-        case .text:
-            return "doc.text"
-        case .moment:
-            return "sparkles"
-        case .image:
-            return "camera.fill"
-        case .recommendation:
-            return "star.fill"
-        case .tip:
-            return "lightbulb.fill"
-        }
     }
 }
 
@@ -102,38 +106,43 @@ struct JournalBlockCard: View {
     PassportPageBackgroundView {
         VStack(spacing: AppTheme.Spacing.md) {
             JournalBlockCard(
-                block: JournalBlock(
-                    id: UUID(),
-                    type: .moment,
-                    content: "Landed at NAIA around 6am, groggy but excited. The humidity hit immediately...",
-                    imageUrl: nil,
+                block: EditorBlock.newMoment(
                     order: 0,
-                    createdAt: Date()
+                    title: "Arrival Day",
+                    content: "Landed at NAIA around 6am, groggy but excited. The humidity hit immediately..."
                 ),
                 onTap: {}
             )
             
             JournalBlockCard(
-                block: JournalBlock(
-                    id: UUID(),
-                    type: .tip,
-                    content: "Book your island hopping tours at least 2 days in advance during peak season.",
-                    imageUrl: nil,
+                block: EditorBlock.newTip(
                     order: 1,
-                    createdAt: Date()
+                    title: "Booking Tips",
+                    content: "Book your island hopping tours at least 2 days in advance during peak season."
                 ),
                 onTap: {}
             )
             
             JournalBlockCard(
-                block: JournalBlock(
-                    id: UUID(),
-                    type: .image,
-                    content: nil,
-                    imageUrl: nil,
+                block: EditorBlock.newPhoto(
                     order: 2,
-                    createdAt: Date()
+                    caption: "Sunset at the beach"
                 ),
+                onTap: {}
+            )
+            
+            JournalBlockCard(
+                block: EditorBlock.newRecommendation(
+                    order: 3,
+                    name: "Aristocrat Restaurant",
+                    category: .eat,
+                    rating: .a
+                ),
+                onTap: {}
+            )
+            
+            JournalBlockCard(
+                block: EditorBlock.newDivider(order: 4),
                 onTap: {}
             )
         }

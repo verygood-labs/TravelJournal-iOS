@@ -190,45 +190,29 @@ private struct JournalEditorViewWithBlocks: View {
     init(trip: Trip) {
         let vm = JournalEditorViewModel(trip: trip)
         vm.blocks = [
-            JournalBlock(
-                id: UUID(),
-                type: .moment,
-                content: "Arrival & Intramuros\n\nLanded at NAIA around 6am, groggy but excited. The humidity hit immediately...",
-                imageUrl: nil,
+            EditorBlock.newMoment(
                 order: 0,
-                createdAt: Date()
+                title: "Arrival & Intramuros",
+                content: "Landed at NAIA around 6am, groggy but excited. The humidity hit immediately..."
             ),
-            JournalBlock(
-                id: UUID(),
-                type: .image,
-                content: "First glimpse of Manila skyline",
-                imageUrl: nil,
+            EditorBlock.newPhoto(
                 order: 1,
-                createdAt: Date()
+                caption: "First glimpse of Manila skyline"
             ),
-            JournalBlock(
-                id: UUID(),
-                type: .tip,
-                content: "Getting Around\n\nUse Grab for affordable transportation. Much cheaper and safer than regular taxis, especially from the airport.",
-                imageUrl: nil,
+            EditorBlock.newTip(
                 order: 2,
-                createdAt: Date()
+                title: "Getting Around",
+                content: "Use Grab for affordable transportation. Much cheaper and safer than regular taxis, especially from the airport."
             ),
-            JournalBlock(
-                id: UUID(),
-                type: .recommendation,
-                content: "Aristocrat Restaurant\n\nBest chicken barbecue in Manila! A must-visit institution since 1936.",
-                imageUrl: nil,
+            EditorBlock.newRecommendation(
                 order: 3,
-                createdAt: Date()
+                name: "Aristocrat Restaurant",
+                category: .eat,
+                note: "Best chicken barbecue in Manila! A must-visit institution since 1936."
             ),
-            JournalBlock(
-                id: UUID(),
-                type: .text,
-                content: "The street food scene here is incredible. Every corner has something new to try - from fish balls to balut (if you're brave enough!).",
-                imageUrl: nil,
+            EditorBlock.newMoment(
                 order: 4,
-                createdAt: Date()
+                content: "The street food scene here is incredible. Every corner has something new to try - from fish balls to balut (if you're brave enough!)."
             )
         ]
         _viewModel = StateObject(wrappedValue: vm)

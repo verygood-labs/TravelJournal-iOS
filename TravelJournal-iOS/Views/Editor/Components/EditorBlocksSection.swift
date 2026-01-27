@@ -86,21 +86,15 @@ struct EditorBlocksSection: View {
     
     let viewModel = JournalEditorViewModel(trip: trip)
     viewModel.blocks = [
-        JournalBlock(
-            id: UUID(),
-            type: .moment,
-            content: "Arrived at the airport, ready for adventure!",
-            imageUrl: nil,
+        EditorBlock.newMoment(
             order: 0,
-            createdAt: Date()
+            title: "Arrival",
+            content: "Arrived at the airport, ready for adventure!"
         ),
-        JournalBlock(
-            id: UUID(),
-            type: .tip,
-            content: "Getting Around\n\nUse Grab for easy transportation.",
-            imageUrl: nil,
+        EditorBlock.newTip(
             order: 1,
-            createdAt: Date()
+            title: "Getting Around",
+            content: "Use Grab for easy transportation."
         )
     ]
     
