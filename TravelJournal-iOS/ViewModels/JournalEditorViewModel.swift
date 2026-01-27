@@ -20,7 +20,7 @@ final class JournalEditorViewModel: ObservableObject {
     @Published var selectedCoverImage: UIImage?
     
     // Blocks
-    @Published var blocks: [JournalBlock] = []
+    @Published var blocks: [EditorBlock] = []
     
     // UI State
     @Published var editorMode: EditorMode = .edit
@@ -31,7 +31,7 @@ final class JournalEditorViewModel: ObservableObject {
     // Sheet state
     @Published var showingBlockSheet = false
     @Published var selectedBlockType: BlockType?
-    @Published var editingBlock: JournalBlock?
+    @Published var editingBlock: EditorBlock?
     
     // Cover image picker state
     @Published var showingCoverImagePicker = false
@@ -79,26 +79,20 @@ final class JournalEditorViewModel: ObservableObject {
         showingBlockSheet = true
     }
     
-    func editBlock(_ block: JournalBlock) {
+    func editBlock(_ block: EditorBlock) {
         selectedBlockType = block.type
         editingBlock = block
         showingBlockSheet = true
     }
     
-    func saveBlock(_ block: JournalBlock) {
+    func saveBlock(_ block: EditorBlock) {
         if let index = blocks.firstIndex(where: { $0.id == block.id }) {
             // Update existing block
             blocks[index] = block
         } else {
             // Add new block with correct order
-            let updatedBlock = JournalBlock(
-                id: block.id,
-                type: block.type,
-                content: block.content,
-                imageUrl: block.imageUrl,
-                order: blocks.count,
-                createdAt: block.createdAt
-            )
+            var updatedBlock = block
+            updatedBlock.order = blocks.count
             blocks.append(updatedBlock)
         }
         
@@ -113,20 +107,12 @@ final class JournalEditorViewModel: ObservableObject {
         }
     }
     
-    func deleteBlock(_ block: JournalBlock) {
+    func deleteBlock(_ block: EditorBlock) {
         blocks.removeAll { $0.id == block.id }
         
         // Reorder remaining blocks
-        for (index, _) in blocks.enumerated() {
-            let existingBlock = blocks[index]
-            blocks[index] = JournalBlock(
-                id: existingBlock.id,
-                type: existingBlock.type,
-                content: existingBlock.content,
-                imageUrl: existingBlock.imageUrl,
-                order: index,
-                createdAt: existingBlock.createdAt
-            )
+        for index in blocks.indices {
+            blocks[index].order = index
         }
         
         // Reset sheet state
