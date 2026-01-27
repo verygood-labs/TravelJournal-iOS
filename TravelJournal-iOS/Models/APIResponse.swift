@@ -30,6 +30,10 @@ struct ValidationErrorResponse: Codable {
     }
 }
 
+struct SimpleErrorResponse: Codable {
+    let error: String
+}
+
 enum APIError: Error, LocalizedError {
     case unauthorized
     case forbidden
