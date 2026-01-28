@@ -2,6 +2,14 @@
 //  EditorDividerRow.swift
 //  TravelJournal-iOS
 //
+//  Created by John Apale on 1/28/26.
+//
+
+
+//
+//  EditorDividerRow.swift
+//  TravelJournal-iOS
+//
 
 import SwiftUI
 
