@@ -26,7 +26,7 @@ struct EditorBlocksSection: View {
                 ForEach(Array(viewModel.blocks.enumerated()), id: \.element.id) { index, block in
                     let isDragging = draggingBlockId == block.id
                     
-                    JournalBlockCard(block: block) {
+                    EditorBlockCard(block: block) {
                         if draggingBlockId == nil {
                             viewModel.editBlock(block)
                         }
