@@ -74,6 +74,17 @@ final class JournalEditorViewModel: ObservableObject {
     // MARK: - Block Management
     
     func addBlock(type: BlockType) {
+        // Divider doesn't need a sheet - insert directly
+        if type == .divider {
+            let dividerBlock = EditorBlock.newDivider(order: blocks.count)
+            blocks.append(dividerBlock)
+            
+            Task {
+                await saveDraftToAPI()
+            }
+            return
+        }
+        
         selectedBlockType = type
         editingBlock = nil
         showingBlockSheet = true
