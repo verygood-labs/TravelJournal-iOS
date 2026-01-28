@@ -46,6 +46,7 @@ struct JournalEditorView: View {
                 BlockEditorSheet(
                     blockType: blockType,
                     existingBlock: viewModel.editingBlock,
+                    tripId: viewModel.tripId,
                     onSave: { block in
                         viewModel.saveBlock(block)
                     },
@@ -265,6 +266,7 @@ private struct JournalEditorViewWithBlocks: View {
                 BlockEditorSheet(
                     blockType: blockType,
                     existingBlock: viewModel.editingBlock,
+                    tripId: viewModel.tripId,
                     onSave: { block in
                         viewModel.saveBlock(block)
                     },

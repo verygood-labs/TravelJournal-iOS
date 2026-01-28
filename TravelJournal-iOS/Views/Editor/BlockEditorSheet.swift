@@ -4,17 +4,20 @@ import SwiftUI
 struct BlockEditorSheet: View {
     let blockType: BlockType
     let existingBlock: EditorBlock?
+    let tripId: UUID?
     let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
     
     init(
         blockType: BlockType,
         existingBlock: EditorBlock? = nil,
+        tripId: UUID? = nil,
         onSave: @escaping (EditorBlock) -> Void,
         onDelete: (() -> Void)? = nil
     ) {
         self.blockType = blockType
         self.existingBlock = existingBlock
+        self.tripId = tripId
         self.onSave = onSave
         self.onDelete = onDelete
     }
@@ -30,6 +33,7 @@ struct BlockEditorSheet: View {
         case .photo:
             PhotoBlockSheet(
                 existingBlock: existingBlock,
+                tripId: tripId ?? UUID(), // Fallback for preview
                 onSave: onSave,
                 onDelete: onDelete
             )
@@ -65,5 +69,5 @@ struct BlockEditorSheet: View {
 }
 
 #Preview("Photo") {
-    BlockEditorSheet(blockType: .photo, onSave: { _ in })
+    BlockEditorSheet(blockType: .photo, tripId: UUID(), onSave: { _ in })
 }
