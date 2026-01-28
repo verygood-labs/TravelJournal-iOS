@@ -42,6 +42,6 @@ enum BlockType: String, Codable, CaseIterable {
     
     /// Block types available in the editor toolbar
     static var toolbarItems: [BlockType] {
-        [.moment, .photo, .recommendation, .tip]
+        [.moment, .photo, .recommendation, .tip, .divider]
     }
 }
