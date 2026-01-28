@@ -10,34 +10,44 @@ struct EditorBlockCard: View {
     let onTap: () -> Void
     
     var body: some View {
-        HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
-            blockNumberBadge
-            
-            VStack(alignment: .leading, spacing: AppTheme.Spacing.xxxs) {
-                Text(block.type.rawValue.uppercased())
-                    .font(AppTheme.Typography.monoCaption())
-                    .tracking(1)
-                    .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
-                if let preview = blockPreviewText, !preview.isEmpty {
-                    Text(preview)
-                        .font(AppTheme.Typography.monoMedium())
-                        .foregroundColor(AppTheme.Colors.passportTextPrimary)
-                        .lineLimit(3)
-                        .multilineTextAlignment(.leading)
-                } else {
-                    Text("Tap to edit...")
-                        .font(AppTheme.Typography.monoSmall())
-                        .foregroundColor(AppTheme.Colors.passportTextPlaceholder)
-                        .italic()
-                }
+        VStack(spacing: 0) {
+            // Polaroid-style image for photo blocks
+            if block.type == .photo, let imageUrl = block.data.imageUrl, !imageUrl.isEmpty {
+                photoImageSection(imageUrl: imageUrl)
+                    .padding(.horizontal, AppTheme.Spacing.md)
+                    .padding(.top, AppTheme.Spacing.md)
             }
             
-            Spacer()
-            
-            blockTypeIcon
+            // Standard card content
+            HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
+                blockNumberBadge
+                
+                VStack(alignment: .leading, spacing: AppTheme.Spacing.xxxs) {
+                    Text(block.type.rawValue.uppercased())
+                        .font(AppTheme.Typography.monoCaption())
+                        .tracking(1)
+                        .foregroundColor(AppTheme.Colors.passportTextMuted)
+                    
+                    if let preview = blockPreviewText, !preview.isEmpty {
+                        Text(preview)
+                            .font(AppTheme.Typography.monoMedium())
+                            .foregroundColor(AppTheme.Colors.passportTextPrimary)
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
+                    } else {
+                        Text("Tap to edit...")
+                            .font(AppTheme.Typography.monoSmall())
+                            .foregroundColor(AppTheme.Colors.passportTextPlaceholder)
+                            .italic()
+                    }
+                }
+                
+                Spacer()
+                
+                blockTypeIcon
+            }
+            .padding(AppTheme.Spacing.md)
         }
-        .padding(AppTheme.Spacing.md)
         .background(
             LinearGradient(
                 colors: [
@@ -56,6 +66,49 @@ struct EditorBlockCard: View {
         .onTapGesture {
             onTap()
         }
+    }
+    
+    // MARK: - Photo Image Section
+    
+    private func photoImageSection(imageUrl: String) -> some View {
+        AsyncImage(url: APIService.shared.fullMediaURL(for: imageUrl)) { phase in
+            switch phase {
+            case .empty:
+                imagePlaceholder
+                    .overlay(ProgressView())
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .aspectRatio(1, contentMode: .fill)
+                    .clipped()
+                    .cornerRadius(AppTheme.CornerRadius.small)
+            case .failure:
+                imagePlaceholder
+                    .overlay(
+                        VStack(spacing: AppTheme.Spacing.xs) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 24))
+                            Text("Failed to load")
+                                .font(AppTheme.Typography.monoCaption())
+                        }
+                        .foregroundColor(AppTheme.Colors.passportTextMuted)
+                    )
+            @unknown default:
+                imagePlaceholder
+            }
+        }
+        .aspectRatio(1, contentMode: .fit)
+    }
+    
+    // MARK: - Image Placeholder
+    
+    private var imagePlaceholder: some View {
+        Rectangle()
+            .fill(AppTheme.Colors.passportInputBackground)
+            .aspectRatio(1, contentMode: .fit)
+            .cornerRadius(AppTheme.CornerRadius.small)
     }
     
     // MARK: - Block Preview Text
@@ -97,7 +150,6 @@ struct EditorBlockCard: View {
             .background(AppTheme.Colors.primary.opacity(0.1))
             .cornerRadius(AppTheme.CornerRadius.small)
     }
-
 }
 
 // MARK: - Preview
@@ -115,17 +167,26 @@ struct EditorBlockCard: View {
             )
             
             EditorBlockCard(
-                block: EditorBlock.newTip(
+                block: EditorBlock.newPhoto(
                     order: 1,
-                    title: "Booking Tips",
-                    content: "Book your island hopping tours at least 2 days in advance."
+                    imageUrl: "/media/sample.jpg",
+                    caption: "First glimpse of Manila skyline"
+                ),
+                onTap: {}
+            )
+            
+            EditorBlockCard(
+                block: EditorBlock.newPhoto(
+                    order: 2,
+                    imageUrl: nil,
+                    caption: nil
                 ),
                 onTap: {}
             )
             
             EditorBlockCard(
                 block: EditorBlock.newRecommendation(
-                    order: 2,
+                    order: 3,
                     name: "Aristocrat Restaurant",
                     category: .eat
                 ),
