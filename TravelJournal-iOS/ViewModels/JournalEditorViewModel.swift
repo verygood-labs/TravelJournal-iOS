@@ -126,6 +126,23 @@ final class JournalEditorViewModel: ObservableObject {
         }
     }
     
+    func moveBlock(fromIndex: Int, toIndex: Int) {
+        guard fromIndex != toIndex,
+              fromIndex >= 0,
+              fromIndex < blocks.count,
+              toIndex >= 0,
+              toIndex < blocks.count else { return }
+        
+        withAnimation(.default) {
+            let block = blocks.remove(at: fromIndex)
+            blocks.insert(block, at: toIndex)
+            
+            for index in blocks.indices {
+                blocks[index].order = index
+            }
+        }
+    }
+    
     // MARK: - Cover Image
     
     func selectCoverFromLibrary() {
