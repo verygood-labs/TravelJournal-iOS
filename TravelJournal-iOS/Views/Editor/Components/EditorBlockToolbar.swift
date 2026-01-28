@@ -11,13 +11,6 @@ import SwiftUI
 struct EditorBlockToolbar: View {
     @ObservedObject var viewModel: JournalEditorViewModel
     
-    // Toolbar items based on existing BlockType enum
-    private let toolbarItems: [(type: BlockType, icon: String, label: String)] = [
-        (.moment, "sparkles", "Moment"),
-        (.recommendation, "star.fill", "Rec"),
-        (.tip, "lightbulb.fill", "Tip")
-    ]
-    
     var body: some View {
         VStack(spacing: 0) {
             // Gold accent line
@@ -26,16 +19,16 @@ struct EditorBlockToolbar: View {
                 .frame(height: 2)
             
             HStack(spacing: 0) {
-                ForEach(toolbarItems, id: \.type) { item in
+                ForEach(BlockType.toolbarItems, id: \.self) { type in
                     Button {
-                        viewModel.addBlock(type: item.type)
+                        viewModel.addBlock(type: type)
                     } label: {
                         VStack(spacing: AppTheme.Spacing.xxxs) {
-                            Image(systemName: item.icon)
+                            Image(systemName: type.icon)
                                 .font(.system(size: 20))
                                 .foregroundColor(AppTheme.Colors.primary)
                             
-                            Text(item.label.uppercased())
+                            Text(type.label.uppercased())
                                 .font(AppTheme.Typography.monoCaption())
                                 .tracking(0.5)
                                 .foregroundColor(AppTheme.Colors.textSecondary)
@@ -48,27 +41,5 @@ struct EditorBlockToolbar: View {
             }
             .background(AppTheme.Colors.backgroundDark)
         }
-    }
-}
-
-// MARK: - Preview
-#Preview {
-    let trip = Trip(
-        id: UUID(),
-        title: "Test Trip",
-        description: nil,
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date(),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: nil
-    )
-    
-    return VStack {
-        Spacer()
-        EditorBlockToolbar(viewModel: JournalEditorViewModel(trip: trip))
     }
 }
