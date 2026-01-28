@@ -69,46 +69,45 @@ struct EditorBlockCard: View {
     }
     
     // MARK: - Photo Image Section
-    
+
     private func photoImageSection(imageUrl: String) -> some View {
-        AsyncImage(url: APIService.shared.fullMediaURL(for: imageUrl)) { phase in
-            switch phase {
-            case .empty:
-                imagePlaceholder
-                    .overlay(ProgressView())
-            case .success(let image):
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity)
-                    .aspectRatio(1, contentMode: .fill)
-                    .clipped()
-                    .cornerRadius(AppTheme.CornerRadius.small)
-            case .failure:
-                imagePlaceholder
-                    .overlay(
-                        VStack(spacing: AppTheme.Spacing.xs) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.system(size: 24))
-                            Text("Failed to load")
-                                .font(AppTheme.Typography.monoCaption())
-                        }
-                        .foregroundColor(AppTheme.Colors.passportTextMuted)
-                    )
-            @unknown default:
-                imagePlaceholder
+        GeometryReader { geometry in
+            AsyncImage(url: APIService.shared.fullMediaURL(for: imageUrl)) { phase in
+                switch phase {
+                case .empty:
+                    imagePlaceholder
+                        .overlay(ProgressView())
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width, height: geometry.size.width)
+                        .clipped()
+                case .failure:
+                    imagePlaceholder
+                        .overlay(
+                            VStack(spacing: AppTheme.Spacing.xs) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.system(size: 24))
+                                Text("Failed to load")
+                                    .font(AppTheme.Typography.monoCaption())
+                            }
+                            .foregroundColor(AppTheme.Colors.passportTextMuted)
+                        )
+                @unknown default:
+                    imagePlaceholder
+                }
             }
         }
         .aspectRatio(1, contentMode: .fit)
+        .cornerRadius(AppTheme.CornerRadius.small)
     }
-    
+
     // MARK: - Image Placeholder
-    
+
     private var imagePlaceholder: some View {
         Rectangle()
             .fill(AppTheme.Colors.passportInputBackground)
-            .aspectRatio(1, contentMode: .fit)
-            .cornerRadius(AppTheme.CornerRadius.small)
     }
     
     // MARK: - Block Preview Text
