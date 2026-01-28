@@ -16,6 +16,7 @@ struct EditorBlocksSection: View {
     
     // Fixed block height for calculations
     private let blockHeight: CGFloat = 88
+    private let dividerHeight: CGFloat = 44
     private let blockSpacing: CGFloat = AppTheme.Spacing.md
     
     var body: some View {
@@ -26,9 +27,19 @@ struct EditorBlocksSection: View {
                 ForEach(Array(viewModel.blocks.enumerated()), id: \.element.id) { index, block in
                     let isDragging = draggingBlockId == block.id
                     
-                    EditorBlockCard(block: block) {
-                        if draggingBlockId == nil {
-                            viewModel.editBlock(block)
+                    Group {
+                        if block.type == .divider {
+                            EditorDividerRow(block: block) {
+                                if draggingBlockId == nil {
+                                    viewModel.editBlock(block)
+                                }
+                            }
+                        } else {
+                            EditorBlockCard(block: block) {
+                                if draggingBlockId == nil {
+                                    viewModel.editBlock(block)
+                                }
+                            }
                         }
                     }
                     .zIndex(isDragging ? 1 : 0)
@@ -89,23 +100,31 @@ struct EditorBlocksSection: View {
             return 0
         }
         
-        let totalBlockHeight = blockHeight + blockSpacing
+        // Get the height of the dragging block
+        let draggingBlockHeight = heightForBlock(at: initial) + blockSpacing
         
         // Dragging down: blocks between initial and target shift up
         if initial < target {
             if index > initial && index <= target {
-                return -totalBlockHeight
+                return -draggingBlockHeight
             }
         }
         
         // Dragging up: blocks between target and initial shift down
         if initial > target {
             if index >= target && index < initial {
-                return totalBlockHeight
+                return draggingBlockHeight
             }
         }
         
         return 0
+    }
+
+    private func heightForBlock(at index: Int) -> CGFloat {
+        guard index >= 0 && index < viewModel.blocks.count else {
+            return blockHeight
+        }
+        return viewModel.blocks[index].type == .divider ? dividerHeight : blockHeight
     }
     
     // MARK: - Drag Actions
