@@ -46,7 +46,8 @@ struct BlockSheetNavigationBar: View {
             .disabled(!isValid)
         }
         .padding(.horizontal, AppTheme.Spacing.md)
-        .padding(.vertical, AppTheme.Spacing.sm)
+        .padding(.top, AppTheme.Spacing.xl)
+        .padding(.bottom, AppTheme.Spacing.sm)
         .background(AppTheme.Colors.backgroundDark)
     }
 }
