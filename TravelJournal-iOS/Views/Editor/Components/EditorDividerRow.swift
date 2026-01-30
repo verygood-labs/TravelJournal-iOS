@@ -2,41 +2,45 @@
 //  EditorDividerRow.swift
 //  TravelJournal-iOS
 //
-//  Created by John Apale on 1/28/26.
-//
-
-
-//
-//  EditorDividerRow.swift
-//  TravelJournal-iOS
-//
 
 import SwiftUI
 
 struct EditorDividerRow: View {
     let block: EditorBlock
+    var isDragging: Bool = false
     let onTap: () -> Void
+    
+    // Coordinate space name for hit testing (same as EditorBlockCard)
+    static let dragHandleCoordinateSpace = "dragHandle"
     
     var body: some View {
         HStack(spacing: AppTheme.Spacing.sm) {
-            Rectangle()
-                .fill(AppTheme.Colors.passportInputBorder)
-                .frame(height: 1)
+            // Drag handle with named coordinate space
+            DragHandle(isActive: isDragging)
+                .coordinateSpace(name: EditorDividerRow.dragHandleCoordinateSpace)
             
-            Image(systemName: "airplane")
-                .font(.system(size: 12))
-                .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
-            Rectangle()
-                .fill(AppTheme.Colors.passportInputBorder)
-                .frame(height: 1)
+            // Divider content
+            HStack(spacing: AppTheme.Spacing.sm) {
+                Rectangle()
+                    .fill(AppTheme.Colors.passportInputBorder)
+                    .frame(height: 1)
+                
+                Image(systemName: "airplane")
+                    .font(.system(size: 12))
+                    .foregroundColor(AppTheme.Colors.passportTextMuted)
+                
+                Rectangle()
+                    .fill(AppTheme.Colors.passportInputBorder)
+                    .frame(height: 1)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                onTap()
+            }
         }
-        .padding(.horizontal, AppTheme.Spacing.lg)
+        .padding(.leading, AppTheme.Spacing.md)
+        .padding(.trailing, AppTheme.Spacing.lg)
         .padding(.vertical, AppTheme.Spacing.md)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onTap()
-        }
     }
 }
 
@@ -50,6 +54,13 @@ struct EditorDividerRow: View {
         VStack(spacing: AppTheme.Spacing.md) {
             EditorDividerRow(
                 block: EditorBlock.newDivider(order: 0),
+                isDragging: false,
+                onTap: {}
+            )
+            
+            EditorDividerRow(
+                block: EditorBlock.newDivider(order: 1),
+                isDragging: true,
                 onTap: {}
             )
         }
