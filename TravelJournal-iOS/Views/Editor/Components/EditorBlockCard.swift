@@ -7,7 +7,11 @@ import SwiftUI
 
 struct EditorBlockCard: View {
     let block: EditorBlock
+    var isDragging: Bool = false
     let onTap: () -> Void
+    
+    // Coordinate space name for hit testing
+    static let dragHandleCoordinateSpace = "dragHandle"
     
     var body: some View {
         VStack(spacing: 0) {
@@ -20,8 +24,11 @@ struct EditorBlockCard: View {
             
             // Standard card content
             HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
-                blockNumberBadge
+                // Drag handle with named coordinate space
+                DragHandle(isActive: isDragging)
+                    .coordinateSpace(name: EditorBlockCard.dragHandleCoordinateSpace)
                 
+                // Content area
                 VStack(alignment: .leading, spacing: AppTheme.Spacing.xxxs) {
                     Text(block.type.rawValue.uppercased())
                         .font(AppTheme.Typography.monoCaption())
@@ -41,10 +48,17 @@ struct EditorBlockCard: View {
                             .italic()
                     }
                 }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onTap()
+                }
                 
                 Spacer()
                 
                 blockTypeIcon
+                    .onTapGesture {
+                        onTap()
+                    }
             }
             .padding(AppTheme.Spacing.md)
         }
@@ -63,9 +77,6 @@ struct EditorBlockCard: View {
                 .stroke(AppTheme.Colors.passportInputBorder, lineWidth: 1)
         )
         .cornerRadius(AppTheme.CornerRadius.medium)
-        .onTapGesture {
-            onTap()
-        }
     }
     
     // MARK: - Photo Image Section
@@ -101,6 +112,9 @@ struct EditorBlockCard: View {
         }
         .aspectRatio(1, contentMode: .fit)
         .cornerRadius(AppTheme.CornerRadius.small)
+        .onTapGesture {
+            onTap()
+        }
     }
 
     // MARK: - Image Placeholder
@@ -126,18 +140,6 @@ struct EditorBlockCard: View {
             return "───"
         }
     }
-    
-    // MARK: - Block Number Badge
-
-    private var blockNumberBadge: some View {
-        Text("\(block.order + 1)")
-            .font(AppTheme.Typography.monoSmall())
-            .fontWeight(.semibold)
-            .foregroundColor(AppTheme.Colors.backgroundDark)
-            .frame(width: 28, height: 28)
-            .background(AppTheme.Colors.primary)
-            .clipShape(Circle())
-    }
 
     // MARK: - Block Type Icon
 
@@ -162,15 +164,17 @@ struct EditorBlockCard: View {
                     title: "Arrival Day",
                     content: "Landed at NAIA around 6am, groggy but excited."
                 ),
+                isDragging: false,
                 onTap: {}
             )
             
             EditorBlockCard(
-                block: EditorBlock.newPhoto(
+                block: EditorBlock.newMoment(
                     order: 1,
-                    imageUrl: "/media/sample.jpg",
-                    caption: "First glimpse of Manila skyline"
+                    title: "Dragging State",
+                    content: "This card is being dragged"
                 ),
+                isDragging: true,
                 onTap: {}
             )
             
