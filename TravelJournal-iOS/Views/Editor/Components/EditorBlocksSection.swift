@@ -2,22 +2,27 @@
 //  EditorBlocksSection.swift
 //  TravelJournal-iOS
 //
-//  Created by John Apale on 1/22/26.
-//
 
 import SwiftUI
 
 struct EditorBlocksSection: View {
     @ObservedObject var viewModel: JournalEditorViewModel
     
+    // Drag state
     @State private var draggingBlockId: UUID?
     @State private var dragOffset: CGFloat = 0
     @State private var initialIndex: Int?
+    
+    // Track drag handle frames for hit testing
+    @State private var dragHandleFrames: [UUID: CGRect] = [:]
     
     // Fixed block height for calculations
     private let blockHeight: CGFloat = 88
     private let dividerHeight: CGFloat = 44
     private let blockSpacing: CGFloat = AppTheme.Spacing.md
+    
+    // Coordinate space for the entire section
+    private let sectionCoordinateSpace = "editorBlocksSection"
     
     var body: some View {
         VStack(spacing: blockSpacing) {
@@ -27,52 +32,73 @@ struct EditorBlocksSection: View {
                 ForEach(Array(viewModel.blocks.enumerated()), id: \.element.id) { index, block in
                     let isDragging = draggingBlockId == block.id
                     
-                    Group {
-                        if block.type == .divider {
-                            EditorDividerRow(block: block) {
-                                if draggingBlockId == nil {
-                                    viewModel.editBlock(block)
-                                }
-                            }
-                        } else {
-                            EditorBlockCard(block: block) {
-                                if draggingBlockId == nil {
-                                    viewModel.editBlock(block)
-                                }
-                            }
-                        }
-                    }
-                    .zIndex(isDragging ? 1 : 0)
-                    .scaleEffect(isDragging ? 1.03 : 1.0)
-                    .shadow(color: isDragging ? .black.opacity(0.2) : .clear, radius: 8, y: 4)
-                    .opacity(isDragging ? 0.95 : 1.0)
-                    .offset(y: offsetFor(index: index, blockId: block.id))
-                    .animation(.easeInOut(duration: 0.2), value: draggingBlockId)
-                    .animation(.easeInOut(duration: 0.2), value: currentTargetIndex)
-                    .gesture(
-                        LongPressGesture(minimumDuration: 0.15)
-                            .sequenced(before: DragGesture())
-                            .onChanged { value in
-                                switch value {
-                                case .first(true):
-                                    // Long press recognized, prepare for drag
-                                    break
-                                case .second(true, let drag?):
-                                    if draggingBlockId == nil {
-                                        startDrag(block: block, at: index)
-                                    }
-                                    dragOffset = drag.translation.height
-                                default:
-                                    break
-                                }
-                            }
-                            .onEnded { _ in
-                                endDrag()
-                            }
-                    )
+                    blockRow(block: block, index: index, isDragging: isDragging)
+                        .zIndex(isDragging ? 1 : 0)
+                        .scaleEffect(isDragging ? 1.03 : 1.0)
+                        .shadow(color: isDragging ? .black.opacity(0.2) : .clear, radius: 8, y: 4)
+                        .opacity(isDragging ? 0.95 : 1.0)
+                        .offset(y: offsetFor(index: index, blockId: block.id))
+                        .animation(.easeInOut(duration: 0.2), value: draggingBlockId)
+                        .animation(.easeInOut(duration: 0.2), value: currentTargetIndex)
                 }
             }
         }
+        .coordinateSpace(name: sectionCoordinateSpace)
+    }
+    
+    // MARK: - Block Row with Drag Handle Detection
+    
+    @ViewBuilder
+    private func blockRow(block: EditorBlock, index: Int, isDragging: Bool) -> some View {
+        let content = Group {
+            if block.type == .divider {
+                EditorDividerRow(
+                    block: block,
+                    isDragging: isDragging,
+                    onTap: {
+                        if draggingBlockId == nil {
+                            viewModel.editBlock(block)
+                        }
+                    }
+                )
+            } else {
+                EditorBlockCard(
+                    block: block,
+                    isDragging: isDragging,
+                    onTap: {
+                        if draggingBlockId == nil {
+                            viewModel.editBlock(block)
+                        }
+                    }
+                )
+            }
+        }
+        
+        // Overlay to capture drag handle gestures (on top so it receives touches)
+        content
+            .overlay(alignment: .leading) {
+                // Drag handle hit area (left side of card)
+                Color.clear
+                    .frame(width: 60)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 0, coordinateSpace: .named(sectionCoordinateSpace))
+                            .onChanged { value in
+                                if draggingBlockId == nil {
+                                    // Start drag
+                                    startDrag(block: block, at: index)
+                                }
+                                if draggingBlockId == block.id {
+                                    dragOffset = value.translation.height
+                                }
+                            }
+                            .onEnded { _ in
+                                if draggingBlockId == block.id {
+                                    endDrag()
+                                }
+                            }
+                    )
+            }
     }
     
     // MARK: - Drag Calculations
