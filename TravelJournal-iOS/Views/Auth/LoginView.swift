@@ -4,6 +4,7 @@ import SwiftUI
 /// Passport-themed login screen with email/password and social login options
 struct LoginView: View {
     @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var toastManager: ToastManager
     @Environment(\.dismiss) var dismiss
     
     // Form state
@@ -157,6 +158,9 @@ struct LoginView: View {
                 focusedField = nil
                 Task {
                     await authManager.login(email: email, password: password)
+                    if authManager.isAuthenticated {
+                        toastManager.success("Welcome back!")
+                    }
                 }
             } label: {
                 if authManager.isLoading {
@@ -195,4 +199,5 @@ struct LoginView: View {
 #Preview {
     LoginView()
         .environmentObject(AuthManager())
+        .environmentObject(ToastManager()) 
 }
