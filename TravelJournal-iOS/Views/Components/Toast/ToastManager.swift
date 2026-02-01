@@ -26,6 +26,9 @@ final class ToastManager: ObservableObject {
     /// Show a toast notification.
     /// - Parameter toast: The toast to display.
     func show(_ toast: Toast) {
+        print("🍞 ToastManager.show() called with: \(toast.message)")
+        print("🍞 Current toast before: \(String(describing: currentToast))")
+        
         // Cancel any pending dismiss
         dismissTask?.cancel()
         
@@ -33,6 +36,8 @@ final class ToastManager: ObservableObject {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             currentToast = toast
         }
+        
+        print("🍞 Current toast after: \(String(describing: currentToast))")
         
         // Schedule auto-dismiss
         dismissTask = Task {
@@ -55,6 +60,7 @@ final class ToastManager: ObservableObject {
     
     /// Show a success toast.
     func success(_ message: String, icon: String? = nil) {
+        print("🍞 success() called with: \(message)")
         show(.success(message, icon: icon))
     }
     
