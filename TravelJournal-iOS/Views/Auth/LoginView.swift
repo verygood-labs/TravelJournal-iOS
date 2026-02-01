@@ -158,14 +158,10 @@ struct LoginView: View {
                 focusedField = nil
                 Task {
                     await authManager.login(email: email, password: password)
-                    if authManager.isAuthenticated {
-                        toastManager.success("Welcome back!")
-                    }
                 }
             } label: {
                 if authManager.isLoading {
                     HStack(spacing: AppTheme.Spacing.xxs) {
-                        Text("✈️")
                         Text("BOARDING...")
                     }
                 } else {
