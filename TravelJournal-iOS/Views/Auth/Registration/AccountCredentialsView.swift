@@ -140,9 +140,9 @@ struct AccountCredentialsView: View {
         .fullScreenCover(isPresented: $showingTravelerDetails) {
             TravelerDetailsView(
                 email: email,
-                password: password
+                password: password,
+                authManager: authManager
             )
-            .environmentObject(authManager)
         }
         .onTapGesture {
             focusedField = nil

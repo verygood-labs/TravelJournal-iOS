@@ -7,6 +7,8 @@ import SwiftUI
 @MainActor
 final class RegistrationViewModel: ObservableObject {
     
+    private let authManager: AuthManager
+    
     // MARK: - Step 1: Account Credentials (passed from previous view)
     let email: String
     let password: String
@@ -81,9 +83,10 @@ final class RegistrationViewModel: ObservableObject {
     
     // MARK: - Initialization
     
-    init(email: String, password: String) {
+    init(email: String, password: String, authManager: AuthManager) {
         self.email = email
         self.password = password
+        self.authManager = authManager
     }
     
     // MARK: - Validation
@@ -150,7 +153,7 @@ final class RegistrationViewModel: ObservableObject {
         registrationError = nil
         
         do {
-            let _ = try await AuthService.shared.register(
+            let response = try await AuthService.shared.register(
                 email: email,
                 password: password,
                 name: fullName.trimmingCharacters(in: .whitespaces),
@@ -158,6 +161,10 @@ final class RegistrationViewModel: ObservableObject {
                 nationalityId: country.id,
                 profilePicture: selectedImage
             )
+            
+            // Update AuthManager with the response
+            authManager.currentUser = response.user
+            authManager.isAuthenticated = true
             
             showingPassportIssued = true
         } catch let error as APIError {

@@ -22,8 +22,12 @@ struct TravelerDetailsView: View {
     
     // MARK: - Initialization
     
-    init(email: String, password: String) {
-        _viewModel = StateObject(wrappedValue: RegistrationViewModel(email: email, password: password))
+    init(email: String, password: String, authManager: AuthManager) {
+        _viewModel = StateObject(wrappedValue: RegistrationViewModel(
+            email: email,
+            password: password,
+            authManager: authManager
+        ))
     }
     
     // MARK: - Computed Properties
@@ -444,6 +448,7 @@ struct TravelerDetailsView: View {
 #Preview {
     TravelerDetailsView(
         email: "test@example.com",
-        password: "password123"
+        password: "password123",
+        authManager: AuthManager()
     )
 }
