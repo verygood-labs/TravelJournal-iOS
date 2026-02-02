@@ -6,11 +6,12 @@ struct JournalEditorView: View {
 
     /// Environment
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var toastManager: ToastManager
 
     // MARK: - Initialization
 
-    init(trip: Trip) {
-        _viewModel = StateObject(wrappedValue: JournalEditorViewModel(trip: trip))
+    init(trip: Trip, toastManager: ToastManager) {
+        _viewModel = StateObject(wrappedValue: JournalEditorViewModel(trip: trip, toastManager: toastManager))
     }
 
     // MARK: - Body
@@ -20,8 +21,9 @@ struct JournalEditorView: View {
             // Top navigation bar
             EditorNavigationBar(
                 viewModel: viewModel,
-                onCancel: { dismiss() },
-                onDone: { handleDone() }
+                onClose: { handleClose() },
+                onSave: { viewModel.handleSave() },
+                onDone: { viewModel.handleDone() }
             )
 
             // Main content based on mode
@@ -41,6 +43,11 @@ struct JournalEditorView: View {
         .task {
             await viewModel.loadDraft()
         }
+        .onChange(of: viewModel.loadFailed) { _, failed in
+            if failed {
+                dismiss()
+            }
+        }
         .sheet(isPresented: $viewModel.showingBlockSheet) {
             if let blockType = viewModel.selectedBlockType {
                 BlockEditorSheet(
@@ -58,6 +65,23 @@ struct JournalEditorView: View {
                 )
             }
         }
+        .alert("Unsaved Changes", isPresented: $viewModel.showingCloseWarning) {
+            Button("Discard", role: .destructive) {
+                viewModel.discardChanges()
+                dismiss()
+            }
+            Button("Save & Close") {
+                Task {
+                    if await viewModel.saveAndClose() {
+                        dismiss()
+                    }
+                }
+            }
+            Button("Continue Editing", role: .cancel) { }
+        } message: {
+            Text("You have unsaved changes. What would you like to do?")
+        }
+        .modifier(ToastModifier(manager: toastManager, position: .bottom))
     }
 
     // MARK: - Edit Mode Content
@@ -105,13 +129,11 @@ struct JournalEditorView: View {
 
     // MARK: - Actions
 
-    private func handleDone() {
-        Task {
-            let success = await viewModel.saveAndClose()
-            if success {
-                dismiss()
-            }
+    private func handleClose() {
+        if viewModel.handleClose() {
+            dismiss()
         }
+        // If false, the viewModel will show the alert
     }
 
     private func handleDatesTapped() {
@@ -147,7 +169,8 @@ struct JournalEditorView: View {
         ]
     )
 
-    JournalEditorView(trip: sampleTrip)
+    JournalEditorView(trip: sampleTrip, toastManager: ToastManager())
+        .environmentObject(ToastManager())
 }
 
 #Preview("With Blocks") {
@@ -189,7 +212,7 @@ private struct JournalEditorViewWithBlocks: View {
     @Environment(\.dismiss) private var dismiss
 
     init(trip: Trip) {
-        let vm = JournalEditorViewModel(trip: trip)
+        let vm = JournalEditorViewModel(trip: trip, toastManager: ToastManager())
         vm.blocks = [
             EditorBlock.newMoment(
                 order: 0,
@@ -223,7 +246,8 @@ private struct JournalEditorViewWithBlocks: View {
         VStack(spacing: 0) {
             EditorNavigationBar(
                 viewModel: viewModel,
-                onCancel: { dismiss() },
+                onClose: { dismiss() },
+                onSave: {},
                 onDone: {}
             )
 
