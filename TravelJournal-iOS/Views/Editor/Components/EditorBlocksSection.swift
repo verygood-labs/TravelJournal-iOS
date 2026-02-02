@@ -227,11 +227,11 @@ struct EditorBlocksSection: View {
         stops: nil
     )
 
-    return ZStack {
+    ZStack {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
 
-        EditorBlocksSection(viewModel: JournalEditorViewModel(trip: trip))
+        EditorBlocksSection(viewModel: JournalEditorViewModel(trip: trip, toastManager: ToastManager()))
     }
 }
 
@@ -250,7 +250,7 @@ struct EditorBlocksSection: View {
         stops: nil
     )
 
-    let viewModel = JournalEditorViewModel(trip: trip)
+    let viewModel = JournalEditorViewModel(trip: trip, toastManager: ToastManager())
     viewModel.blocks = [
         EditorBlock.newMoment(
             order: 0,
@@ -288,7 +288,7 @@ struct EditorBlocksSection: View {
         stops: nil
     )
 
-    let viewModel = JournalEditorViewModel(trip: trip)
+    let viewModel = JournalEditorViewModel(trip: trip, toastManager: ToastManager())
     viewModel.blocks = [
         EditorBlock.newMoment(
             order: 0,

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct JournalView: View {
     @StateObject private var viewModel = JournalViewModel()
+    @EnvironmentObject private var toastManager: ToastManager
     @State private var showingAddTrip = false
     @State private var tripToEdit: Trip?
     @State private var showingEditor = false
@@ -65,7 +66,7 @@ struct JournalView: View {
             }
         }) { trip in
             let _ = print("🎯 Opening editor with trip: \(trip.id), title: \(trip.title)")
-            JournalEditorView(trip: trip)
+            JournalEditorView(trip: trip, toastManager: toastManager)
         }
         .task {
             await viewModel.loadTrips()

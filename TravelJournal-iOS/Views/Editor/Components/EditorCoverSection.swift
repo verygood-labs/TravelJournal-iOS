@@ -203,5 +203,5 @@ struct EditorCoverSection: View {
         stops: nil
     )
 
-    return EditorCoverSection(viewModel: JournalEditorViewModel(trip: trip))
+    EditorCoverSection(viewModel: JournalEditorViewModel(trip: trip, toastManager: ToastManager()))
 }

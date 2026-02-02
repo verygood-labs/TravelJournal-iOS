@@ -9,17 +9,32 @@ import SwiftUI
 
 struct EditorNavigationBar: View {
     @ObservedObject var viewModel: JournalEditorViewModel
-    let onCancel: () -> Void
+    let onClose: () -> Void
+    let onSave: () -> Void
     let onDone: () -> Void
+    
+    private var rightButtonText: String {
+        switch viewModel.editorMode {
+        case .edit: return "Save"
+        case .preview: return "Done"
+        }
+    }
+    
+    private var rightButtonAction: () -> Void {
+        switch viewModel.editorMode {
+        case .edit: return onSave
+        case .preview: return onDone
+        }
+    }
 
     var body: some View {
         HStack {
-            // Cancel button
+            // Close button (X icon)
             Button {
-                onCancel()
+                onClose()
             } label: {
-                Text("Cancel")
-                    .font(AppTheme.Typography.monoMedium())
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(AppTheme.Colors.primary)
             }
 
@@ -30,16 +45,16 @@ struct EditorNavigationBar: View {
 
             Spacer()
 
-            // Done button
+            // Right button (Save/Done)
             Button {
-                onDone()
+                rightButtonAction()
             } label: {
                 if viewModel.isSaving {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: AppTheme.Colors.primary))
                         .scaleEffect(0.8)
                 } else {
-                    Text("Done")
+                    Text(rightButtonText)
                         .font(AppTheme.Typography.monoMedium())
                         .fontWeight(.semibold)
                         .foregroundColor(AppTheme.Colors.primary)
@@ -71,8 +86,9 @@ struct EditorNavigationBar: View {
     )
 
     EditorNavigationBar(
-        viewModel: JournalEditorViewModel(trip: trip),
-        onCancel: {},
+        viewModel: JournalEditorViewModel(trip: trip, toastManager: ToastManager()),
+        onClose: {},
+        onSave: {},
         onDone: {}
     )
 }
