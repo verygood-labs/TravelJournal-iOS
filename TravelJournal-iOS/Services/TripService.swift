@@ -47,6 +47,29 @@ class TripService {
         )
     }
 
+    func updateTrip(
+        id: UUID,
+        title: String? = nil,
+        description: String? = nil,
+        coverImageUrl: String? = nil,
+        startDate: Date? = nil,
+        endDate: Date? = nil
+    ) async throws -> Trip {
+        let request = UpdateTripRequest(
+            title: title,
+            description: description,
+            coverImageUrl: coverImageUrl,
+            startDate: startDate,
+            endDate: endDate
+        )
+
+        return try await api.request(
+            endpoint: "/trips/\(id)",
+            method: "PUT",
+            body: request
+        )
+    }
+
     func updateTripStatus(id: UUID, status: TripStatus) async throws -> Trip {
         struct StatusRequest: Codable {
             let status: String

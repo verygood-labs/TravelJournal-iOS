@@ -51,3 +51,31 @@ struct CreateTripStopRequest: Codable {
         self.arrivalDate = arrivalDate.map { formatter.string(from: $0) }
     }
 }
+
+// MARK: - Update Trip
+
+struct UpdateTripRequest: Codable {
+    let title: String?
+    let description: String?
+    let coverImageUrl: String?
+    let startDate: String?
+    let endDate: String?
+
+    init(
+        title: String? = nil,
+        description: String? = nil,
+        coverImageUrl: String? = nil,
+        startDate: Date? = nil,
+        endDate: Date? = nil
+    ) {
+        self.title = title
+        self.description = description
+        self.coverImageUrl = coverImageUrl
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        self.startDate = startDate.map { formatter.string(from: $0) }
+        self.endDate = endDate.map { formatter.string(from: $0) }
+    }
+}

@@ -41,10 +41,14 @@ struct UpdateBlockRequest: Codable {
 
 /// Request body for PUT /trips/{tripId}/draft (full save)
 struct SaveDraftRequest: Codable {
-    let blocks: [EditorBlock]
+    let draft: DraftContent
 
     init(content: EditorContent) {
-        blocks = content.blocks
+        draft = DraftContent(blocks: content.blocks)
+    }
+
+    struct DraftContent: Codable {
+        let blocks: [EditorBlock]
     }
 }
 
