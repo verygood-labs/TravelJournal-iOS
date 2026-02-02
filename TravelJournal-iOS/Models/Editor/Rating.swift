@@ -15,14 +15,14 @@ import SwiftUI
 // MARK: - Rating
 
 /// Letter-grade rating system for recommendation blocks.
-/// Raw values match backend integer encoding.
-enum Rating: Int, Codable, CaseIterable {
-    case s = 0
-    case a = 1
-    case b = 2
-    case c = 3
-    case d = 4
-    case f = 5
+/// Raw values match backend string encoding.
+enum Rating: String, Codable, CaseIterable {
+    case s = "S"
+    case a = "A"
+    case b = "B"
+    case c = "C"
+    case d = "D"
+    case f = "F"
 
     // MARK: - Display Properties
 

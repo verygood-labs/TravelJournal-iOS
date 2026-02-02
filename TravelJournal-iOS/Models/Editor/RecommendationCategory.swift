@@ -10,12 +10,12 @@ import Foundation
 // MARK: - Recommendation Category
 
 /// Category types for recommendation blocks.
-/// Raw values match backend integer encoding.
-enum RecommendationCategory: Int, Codable, CaseIterable {
-    case stay = 0
-    case eat = 1
-    case `do` = 2
-    case shop = 3
+/// Raw values match backend string encoding.
+enum RecommendationCategory: String, Codable, CaseIterable {
+    case stay = "Stay"
+    case eat = "Eat"
+    case `do` = "Do"
+    case shop = "Shop"
 
     // MARK: - Display Properties
 
