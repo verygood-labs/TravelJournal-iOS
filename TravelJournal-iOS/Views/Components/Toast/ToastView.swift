@@ -5,7 +5,6 @@
 //  Created by John Apale on 1/29/26.
 //
 
-
 //
 //  ToastView.swift
 //  TravelJournal-iOS
@@ -19,7 +18,7 @@ import SwiftUI
 struct ToastView: View {
     let toast: Toast
     let onDismiss: () -> Void
-    
+
     var body: some View {
         HStack(spacing: AppTheme.Spacing.xs) {
             // Icon
@@ -28,13 +27,13 @@ struct ToastView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(toast.type.iconColor)
             }
-            
+
             // Message
             Text(toast.message)
                 .font(AppTheme.Typography.monoMedium())
                 .foregroundColor(.white)
                 .lineLimit(2)
-            
+
             Spacer(minLength: 0)
         }
         .padding(.horizontal, AppTheme.Spacing.md)
@@ -59,12 +58,12 @@ struct ToastView: View {
     ZStack {
         Color.gray.opacity(0.3)
             .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
-            ToastView(toast: .success("Draft saved successfully")) { }
-            ToastView(toast: .error("Failed to save draft")) { }
-            ToastView(toast: .warning("You have unsaved changes")) { }
-            ToastView(toast: .info("Tip: Tap to edit blocks")) { }
+            ToastView(toast: .success("Draft saved successfully")) {}
+            ToastView(toast: .error("Failed to save draft")) {}
+            ToastView(toast: .warning("You have unsaved changes")) {}
+            ToastView(toast: .info("Tip: Tap to edit blocks")) {}
         }
         .padding()
     }

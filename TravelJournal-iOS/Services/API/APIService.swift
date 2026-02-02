@@ -9,40 +9,40 @@ import Foundation
 
 final class APIService: @unchecked Sendable {
     static let shared = APIService()
-    
+
     let baseURL: String
     let session: URLSession
     let decoder: JSONDecoder
     private let encoder: JSONEncoder
     private let errorParser: APIErrorParser
-    
-    // Enable/disable API logging
+
+    /// Enable/disable API logging
     var enableLogging: Bool = true
-    
+
     private init() {
         #if DEBUG
-        self.baseURL = "http://127.0.0.1:5151/api"
+            baseURL = "http://127.0.0.1:5151/api"
         #else
-        self.baseURL = "https://api.yourdomain.com/api"
+            baseURL = "https://api.yourdomain.com/api"
         #endif
-        
+
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 60
         configuration.waitsForConnectivity = true
-        self.session = URLSession(configuration: configuration)
-        
-        self.decoder = JSONDecoder()
-        self.decoder.dateDecodingStrategy = .iso8601
-        
-        self.encoder = JSONEncoder()
-        self.encoder.dateEncodingStrategy = .iso8601
-        
-        self.errorParser = APIErrorParser(decoder: self.decoder)
+        session = URLSession(configuration: configuration)
+
+        decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+
+        errorParser = APIErrorParser(decoder: decoder)
     }
-    
+
     // MARK: - Token Management
-    
+
     var accessToken: String? {
         get { KeychainService.shared.get(key: "accessToken") }
         set {
@@ -53,7 +53,7 @@ final class APIService: @unchecked Sendable {
             }
         }
     }
-    
+
     private var refreshToken: String? {
         get { KeychainService.shared.get(key: "refreshToken") }
         set {
@@ -64,43 +64,43 @@ final class APIService: @unchecked Sendable {
             }
         }
     }
-    
+
     func setTokens(access: String, refresh: String) {
-        self.accessToken = access
-        self.refreshToken = refresh
+        accessToken = access
+        refreshToken = refresh
     }
-    
+
     func clearTokens() {
-        self.accessToken = nil
-        self.refreshToken = nil
+        accessToken = nil
+        refreshToken = nil
     }
-    
+
     var isAuthenticated: Bool {
         accessToken != nil
     }
-    
+
     // MARK: - Media URL
-    
+
     var mediaBaseURL: String {
         #if DEBUG
-        return "http://127.0.0.1:5151"
+            return "http://127.0.0.1:5151"
         #else
-        return "https://api.yourdomain.com"
+            return "https://api.yourdomain.com"
         #endif
     }
-    
+
     func fullMediaURL(for path: String?) -> URL? {
         guard let path = path else { return nil }
-        
+
         if path.hasPrefix("http://") || path.hasPrefix("https://") {
             return URL(string: path)
         }
-        
+
         return URL(string: mediaBaseURL + path)
     }
-    
+
     // MARK: - Request Building
-    
+
     private func buildRequest(
         endpoint: String,
         method: String,
@@ -111,17 +111,17 @@ final class APIService: @unchecked Sendable {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         if authenticated, let token = accessToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        
+
         request.httpBody = body
         return request
     }
-    
+
     // MARK: - Request Execution
-    
+
     func request<T: Codable>(
         endpoint: String,
         method: String = "GET",
@@ -133,21 +133,21 @@ final class APIService: @unchecked Sendable {
         if let body = body {
             bodyData = try encoder.encode(body)
         }
-        
+
         let request = buildRequest(
             endpoint: endpoint,
             method: method,
             body: bodyData,
             authenticated: authenticated
         )
-        
+
         logRequest(
             method: method,
             url: request.url!,
             headers: request.allHTTPHeaderFields ?? [:],
             body: bodyData
         )
-        
+
         let (data, response): (Data, URLResponse)
         do {
             (data, response) = try await session.data(for: request)
@@ -155,13 +155,13 @@ final class APIService: @unchecked Sendable {
             logError(error, url: request.url!)
             throw APIError.networkError(error)
         }
-        
+
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.unknown
         }
-        
+
         logResponse(statusCode: httpResponse.statusCode, data: data, url: request.url!)
-        
+
         if httpResponse.statusCode == 401 && authenticated && retryCount == 0 {
             if try await refreshAccessToken() {
                 return try await self.request(
@@ -175,10 +175,10 @@ final class APIService: @unchecked Sendable {
                 throw APIError.unauthorized
             }
         }
-        
+
         return try handleResponse(data: data, response: httpResponse)
     }
-    
+
     func requestVoid(
         endpoint: String,
         method: String = "GET",
@@ -190,21 +190,21 @@ final class APIService: @unchecked Sendable {
         if let body = body {
             bodyData = try encoder.encode(body)
         }
-        
+
         let request = buildRequest(
             endpoint: endpoint,
             method: method,
             body: bodyData,
             authenticated: authenticated
         )
-        
+
         logRequest(
             method: method,
             url: request.url!,
             headers: request.allHTTPHeaderFields ?? [:],
             body: bodyData
         )
-        
+
         let (data, response): (Data, URLResponse)
         do {
             (data, response) = try await session.data(for: request)
@@ -212,16 +212,16 @@ final class APIService: @unchecked Sendable {
             logError(error, url: request.url!)
             throw APIError.networkError(error)
         }
-        
+
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.unknown
         }
-        
+
         logResponse(statusCode: httpResponse.statusCode, data: data, url: request.url!)
-        
-        if httpResponse.statusCode == 401 && authenticated && retryCount == 0 {
+
+        if httpResponse.statusCode == 401, authenticated, retryCount == 0 {
             if try await refreshAccessToken() {
-                return try await self.requestVoid(
+                return try await requestVoid(
                     endpoint: endpoint,
                     method: method,
                     body: body,
@@ -232,17 +232,17 @@ final class APIService: @unchecked Sendable {
                 throw APIError.unauthorized
             }
         }
-        
-        if !(200...299).contains(httpResponse.statusCode) {
+
+        if !(200 ... 299).contains(httpResponse.statusCode) {
             throw errorParser.parseError(data: data, statusCode: httpResponse.statusCode)
         }
     }
-    
+
     // MARK: - Response Handling
-    
+
     func handleResponse<T: Codable>(data: Data, response: HTTPURLResponse) throws -> T {
         switch response.statusCode {
-        case 200...299:
+        case 200 ... 299:
             do {
                 return try decoder.decode(T.self, from: data)
             } catch {
@@ -252,16 +252,16 @@ final class APIService: @unchecked Sendable {
             throw errorParser.parseError(data: data, statusCode: response.statusCode)
         }
     }
-    
+
     // MARK: - Token Refresh
-    
+
     private func refreshAccessToken() async throws -> Bool {
         guard let refreshToken = refreshToken else {
             return false
         }
-        
+
         let request = RefreshTokenRequest(refreshToken: refreshToken)
-        
+
         do {
             let response: AuthResponse = try await self.request(
                 endpoint: "/auth/refresh-token",
@@ -269,7 +269,7 @@ final class APIService: @unchecked Sendable {
                 body: request,
                 authenticated: false
             )
-            
+
             setTokens(access: response.accessToken, refresh: response.refreshToken)
             return true
         } catch {

@@ -5,14 +5,13 @@
 //  Created by John Apale on 1/22/26.
 //
 
-
 import SwiftUI
 
 struct EditorNavigationBar: View {
     @ObservedObject var viewModel: JournalEditorViewModel
     let onCancel: () -> Void
     let onDone: () -> Void
-    
+
     var body: some View {
         HStack {
             // Cancel button
@@ -23,14 +22,14 @@ struct EditorNavigationBar: View {
                     .font(AppTheme.Typography.monoMedium())
                     .foregroundColor(AppTheme.Colors.primary)
             }
-            
+
             Spacer()
-            
+
             // Edit/Preview toggle
             EditorModeToggle(selectedMode: $viewModel.editorMode)
-            
+
             Spacer()
-            
+
             // Done button
             Button {
                 onDone()
@@ -55,6 +54,7 @@ struct EditorNavigationBar: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     let trip = Trip(
         id: UUID(),
@@ -69,7 +69,7 @@ struct EditorNavigationBar: View {
         updatedAt: Date(),
         stops: nil
     )
-    
+
     EditorNavigationBar(
         viewModel: JournalEditorViewModel(trip: trip),
         onCancel: {},

@@ -15,9 +15,9 @@ struct EditorResponse: Codable {
     let tripId: UUID
     let lastUpdatedAt: Date?
     let blocks: [EditorBlock]
-    
+
     // MARK: - Convenience
-    
+
     var content: EditorContent {
         EditorContent(blocks: blocks)
     }

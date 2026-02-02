@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Option Picker Sheet
+
 /// Reusable picker sheet for selecting from a list of options
 /// Styled to match the passport page aesthetic
 struct OptionPickerSheet<Option: Identifiable & Equatable>: View {
@@ -9,23 +10,23 @@ struct OptionPickerSheet<Option: Identifiable & Equatable>: View {
     let selectedOption: Option
     let optionLabel: (Option) -> String
     let onSelect: (Option) -> Void
-    
+
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
             headerView
-            
+
             Divider()
                 .background(AppTheme.Colors.passportInputBorder)
-            
+
             // Options List
             ScrollView {
                 VStack(spacing: 0) {
                     ForEach(options) { option in
                         optionRow(option)
-                        
+
                         if option.id as AnyHashable != options.last?.id as AnyHashable {
                             Divider()
                                 .background(AppTheme.Colors.passportInputBorder.opacity(0.5))
@@ -39,16 +40,16 @@ struct OptionPickerSheet<Option: Identifiable & Equatable>: View {
             LinearGradient(
                 colors: [
                     AppTheme.Colors.passportPageLight,
-                    AppTheme.Colors.passportPageDark
+                    AppTheme.Colors.passportPageDark,
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
         )
     }
-    
+
     // MARK: - Header
-    
+
     private var headerView: some View {
         HStack {
             Button("Cancel") {
@@ -56,17 +57,17 @@ struct OptionPickerSheet<Option: Identifiable & Equatable>: View {
             }
             .font(AppTheme.Typography.monoMedium())
             .foregroundColor(AppTheme.Colors.passportTextSecondary)
-            
+
             Spacer()
-            
+
             Text(title)
                 .font(AppTheme.Typography.monoMedium())
                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
-            
+
             Spacer()
-            
+
             // Invisible button to balance the header
-            Button("Cancel") { }
+            Button("Cancel") {}
                 .font(AppTheme.Typography.monoMedium())
                 .opacity(0)
         }
@@ -74,9 +75,9 @@ struct OptionPickerSheet<Option: Identifiable & Equatable>: View {
         .padding(.vertical, AppTheme.Spacing.md)
         .background(AppTheme.Colors.passportPageLight)
     }
-    
+
     // MARK: - Option Row
-    
+
     private func optionRow(_ option: Option) -> some View {
         Button {
             onSelect(option)
@@ -86,9 +87,9 @@ struct OptionPickerSheet<Option: Identifiable & Equatable>: View {
                 Text(optionLabel(option))
                     .font(AppTheme.Typography.monoMedium())
                     .foregroundColor(AppTheme.Colors.passportTextPrimary)
-                
+
                 Spacer()
-                
+
                 if option == selectedOption {
                     Image(systemName: "checkmark")
                         .font(.system(size: 14, weight: .semibold))

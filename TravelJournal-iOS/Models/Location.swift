@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Location Search Result
+
 /// Search result from Nominatim (external, not yet saved to DB)
 struct LocationSearchResult: Codable, Identifiable, Equatable {
     let displayName: String
@@ -12,21 +13,23 @@ struct LocationSearchResult: Codable, Identifiable, Equatable {
     let placeType: PlaceType
     let countryCode: String?
     let boundingBox: BoundingBox?
-    
-    // Use osmType + osmId as the unique identifier
-    var id: String { "\(osmType)/\(osmId)" }
-    
-    // Display name with flag emoji based on country code
+
+    /// Use osmType + osmId as the unique identifier
+    var id: String {
+        "\(osmType)/\(osmId)"
+    }
+
+    /// Display name with flag emoji based on country code
     var displayNameWithFlag: String {
         if let code = countryCode {
             return "\(flag(for: code)) \(name)"
         }
         return name
     }
-    
-    // Convert country code to flag emoji
+
+    /// Convert country code to flag emoji
     private func flag(for countryCode: String) -> String {
-        let base: UInt32 = 127397
+        let base: UInt32 = 127_397
         var flag = ""
         for scalar in countryCode.uppercased().unicodeScalars {
             if let unicode = UnicodeScalar(base + scalar.value) {
@@ -38,6 +41,7 @@ struct LocationSearchResult: Codable, Identifiable, Equatable {
 }
 
 // MARK: - Bounding Box
+
 struct BoundingBox: Codable, Equatable {
     let minLatitude: Double
     let maxLatitude: Double
@@ -46,6 +50,7 @@ struct BoundingBox: Codable, Equatable {
 }
 
 // MARK: - Place Types
+
 enum PlaceType: String, Codable {
     case country = "Country"
     case region = "Region"
@@ -55,11 +60,12 @@ enum PlaceType: String, Codable {
 }
 
 // MARK: - Get or Create Request
+
 struct GetOrCreatePlaceRequest: Codable {
     let osmType: String
     let osmId: Int64
     let language: String?
-    
+
     init(osmType: String, osmId: Int64, language: String = "en") {
         self.osmType = osmType
         self.osmId = osmId
@@ -68,6 +74,7 @@ struct GetOrCreatePlaceRequest: Codable {
 }
 
 // MARK: - Place DTO (saved in DB)
+
 struct PlaceDTO: Codable, Identifiable, Equatable {
     let id: String
     let name: String
@@ -80,17 +87,17 @@ struct PlaceDTO: Codable, Identifiable, Equatable {
     let osmId: Int64
     let parentId: String?
     let createdAt: Date?
-    
-    // Display name with flag emoji
+
+    /// Display name with flag emoji
     var displayNameWithFlag: String {
         if let code = countryCode {
             return "\(flag(for: code)) \(name)"
         }
         return name
     }
-    
+
     private func flag(for countryCode: String) -> String {
-        let base: UInt32 = 127397
+        let base: UInt32 = 127_397
         var flag = ""
         for scalar in countryCode.uppercased().unicodeScalars {
             if let unicode = UnicodeScalar(base + scalar.value) {
@@ -102,9 +109,9 @@ struct PlaceDTO: Codable, Identifiable, Equatable {
 }
 
 // MARK: - Place Summary DTO
+
 struct PlaceSummaryDTO: Codable, Identifiable, Equatable {
     let id: String
     let name: String
     let countryCode: String?
 }
-

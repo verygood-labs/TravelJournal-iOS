@@ -12,7 +12,7 @@ struct TripContextMenu: ViewModifier {
     let onView: () -> Void
     let onEdit: () -> Void
     let onDelete: () -> Void
-    
+
     func body(content: Content) -> some View {
         content
             .contextMenu {
@@ -21,15 +21,15 @@ struct TripContextMenu: ViewModifier {
                 } label: {
                     Label("View", systemImage: "eye")
                 }
-                
+
                 Button {
                     onEdit()
                 } label: {
                     Label("Edit", systemImage: "pencil")
                 }
-                
+
                 Divider()
-                
+
                 Button(role: .destructive) {
                     onDelete()
                 } label: {

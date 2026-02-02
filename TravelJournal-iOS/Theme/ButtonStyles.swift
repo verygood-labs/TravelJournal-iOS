@@ -1,12 +1,13 @@
 import SwiftUI
 
 // MARK: - Primary Button Style
+
 /// Full-width filled button with press effects
 /// Usage: Button("CREATE PASSPORT") { }.buttonStyle(PrimaryButtonStyle())
 struct PrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
     var isLoading: Bool = false
-    
+
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: AppTheme.Spacing.xxs) {
             if isLoading {
@@ -14,7 +15,7 @@ struct PrimaryButtonStyle: ButtonStyle {
                     .progressViewStyle(CircularProgressViewStyle(tint: AppTheme.Colors.backgroundDark))
                     .scaleEffect(0.8)
             }
-            
+
             configuration.label
                 .font(AppTheme.Typography.button())
                 .tracking(1)
@@ -32,6 +33,7 @@ struct PrimaryButtonStyle: ButtonStyle {
 }
 
 // MARK: - Secondary Button Style
+
 /// Transparent button with border
 /// Usage: Button("I HAVE A PASSPORT") { }.buttonStyle(SecondaryButtonStyle())
 struct SecondaryButtonStyle: ButtonStyle {
@@ -63,6 +65,7 @@ struct SecondaryButtonStyle: ButtonStyle {
 }
 
 // MARK: - Social Button Style
+
 /// Square button for social login (Google, Apple)
 /// Usage: Button { } label: { Image(...) }.buttonStyle(SocialButtonStyle())
 struct SocialButtonStyle: ButtonStyle {
@@ -92,6 +95,7 @@ struct SocialButtonStyle: ButtonStyle {
 }
 
 // MARK: - Back Button Style
+
 /// Small back button
 /// Usage: Button("← Back") { }.buttonStyle(BackButtonStyle())
 struct BackButtonStyle: ButtonStyle {
@@ -116,11 +120,12 @@ struct BackButtonStyle: ButtonStyle {
 }
 
 // MARK: - Text Link Button Style
+
 /// Minimal text button for links
 /// Usage: Button("Forgot password?") { }.buttonStyle(TextLinkButtonStyle())
 struct TextLinkButtonStyle: ButtonStyle {
     var color: Color = AppTheme.Colors.primary.opacity(0.7)
-    
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(AppTheme.Typography.monoSmall())

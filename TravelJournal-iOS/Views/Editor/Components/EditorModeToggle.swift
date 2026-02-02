@@ -5,12 +5,11 @@
 //  Created by John Apale on 1/22/26.
 //
 
-
 import SwiftUI
 
 struct EditorModeToggle: View {
     @Binding var selectedMode: EditorMode
-    
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(EditorMode.allCases, id: \.self) { mode in
@@ -51,11 +50,12 @@ struct EditorModeToggle: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
             EditorModeToggle(selectedMode: .constant(.edit))
             EditorModeToggle(selectedMode: .constant(.preview))

@@ -6,7 +6,7 @@ struct User: Codable, Identifiable {
     let name: String
     let userName: String
     let profilePictureUrl: String?
-    
+
     enum CodingKeys: String, CodingKey {
         case id
         case email
@@ -43,7 +43,9 @@ struct UserStats: Codable {
     let totalPhotos: Int
     let totalDistance: Double?
 }
+
 // MARK: - UserProfile Extension
+
 extension UserProfile {
     var memberSince: String {
         let formatter = DateFormatter()

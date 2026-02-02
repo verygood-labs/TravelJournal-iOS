@@ -8,9 +8,9 @@
 import SwiftUI
 
 // MARK: - Support Section
+
 /// Support settings section with links for Help & FAQ, Privacy Policy, and Terms of Service
 struct SupportSection: View {
-    
     var body: some View {
         SettingsSection(title: "SUPPORT") {
             NavigationLink {
@@ -22,9 +22,9 @@ struct SupportSection: View {
                 )
             }
             .buttonStyle(.plain)
-            
+
             SettingsDivider()
-            
+
             NavigationLink {
                 PrivacyPolicyView()
             } label: {
@@ -34,9 +34,9 @@ struct SupportSection: View {
                 )
             }
             .buttonStyle(.plain)
-            
+
             SettingsDivider()
-            
+
             NavigationLink {
                 TermsOfServiceView()
             } label: {
@@ -53,5 +53,5 @@ struct SupportSection: View {
 // MARK: - Preview
 
 #Preview {
-    SupportSection();
+    SupportSection()
 }

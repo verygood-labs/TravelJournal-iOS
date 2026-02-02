@@ -9,7 +9,7 @@ import SwiftUI
 /// This component is just the visual - drag behavior is attached by the parent.
 struct DragHandle: View {
     var isActive: Bool = false
-    
+
     var body: some View {
         Image(systemName: "line.3.horizontal")
             .font(.system(size: 16, weight: .medium))
@@ -34,7 +34,7 @@ struct DragHandle: View {
                     .font(AppTheme.Typography.monoSmall())
                     .foregroundColor(AppTheme.Colors.passportTextPrimary)
             }
-            
+
             HStack {
                 DragHandle(isActive: true)
                 Text("Active/dragging state")

@@ -5,9 +5,9 @@ struct ThemedDatePicker: View {
     @Binding var date: Date
     var minDate: Date? = nil
     var maxDate: Date? = nil
-    
+
     @State private var showingPicker = false
-    
+
     var body: some View {
         Button {
             showingPicker = true
@@ -19,10 +19,10 @@ struct ThemedDatePicker: View {
                         .tracking(1)
                         .foregroundColor(AppTheme.Colors.textSecondary)
                         .frame(width: 50, alignment: .leading)
-                    
+
                     Spacer()
                 }
-                
+
                 dateButton
             }
         }
@@ -33,14 +33,15 @@ struct ThemedDatePicker: View {
                 .presentationDragIndicator(.visible)
         }
     }
-    
+
     // MARK: - Date Button
+
     private var dateButton: some View {
         HStack(spacing: AppTheme.Spacing.xs) {
             Text(formatDate(date))
                 .font(AppTheme.Typography.monoMedium())
                 .foregroundColor(AppTheme.Colors.textPrimary)
-            
+
             Image(systemName: "chevron.down")
                 .font(.system(size: 10, weight: .medium))
                 .foregroundColor(AppTheme.Colors.primary.opacity(0.7))
@@ -54,8 +55,9 @@ struct ThemedDatePicker: View {
         )
         .cornerRadius(AppTheme.CornerRadius.small)
     }
-    
+
     // MARK: - Date Picker Sheet
+
     private var datePickerSheet: some View {
         VStack(spacing: 0) {
             // Header
@@ -65,15 +67,15 @@ struct ThemedDatePicker: View {
                 }
                 .font(AppTheme.Typography.monoMedium())
                 .foregroundColor(AppTheme.Colors.passportTextSecondary)
-                
+
                 Spacer()
-                
+
                 Text(label ?? "Select Date")
                     .font(AppTheme.Typography.monoMedium())
                     .foregroundColor(AppTheme.Colors.passportTextPrimary)
-                
+
                 Spacer()
-                
+
                 Button("Done") {
                     showingPicker = false
                 }
@@ -83,17 +85,17 @@ struct ThemedDatePicker: View {
             .padding(.horizontal, AppTheme.Spacing.lg)
             .padding(.vertical, AppTheme.Spacing.md)
             .background(AppTheme.Colors.passportPageLight)
-            
+
             Divider()
                 .background(AppTheme.Colors.passportInputBorder)
-            
+
             // Date Picker
             Group {
                 if let minDate = minDate, let maxDate = maxDate {
                     DatePicker(
                         "",
                         selection: $date,
-                        in: minDate...maxDate,
+                        in: minDate ... maxDate,
                         displayedComponents: .date
                     )
                 } else if let minDate = minDate {
@@ -123,22 +125,23 @@ struct ThemedDatePicker: View {
             .tint(AppTheme.Colors.passportInputBorderFocused)
             .colorScheme(.light)
             .padding(.horizontal, AppTheme.Spacing.md)
-            
+
             Spacer()
         }
         .background(
             LinearGradient(
                 colors: [
                     AppTheme.Colors.passportPageLight,
-                    AppTheme.Colors.passportPageDark
+                    AppTheme.Colors.passportPageDark,
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
         )
     }
-    
+
     // MARK: - Helpers
+
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM dd, yyyy"
@@ -147,17 +150,18 @@ struct ThemedDatePicker: View {
 }
 
 // MARK: - Preview
+
 #Preview("With Label") {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: AppTheme.Spacing.md) {
             ThemedDatePicker(
                 label: "FROM",
                 date: .constant(Date())
             )
-            
+
             ThemedDatePicker(
                 label: "TO",
                 date: .constant(Date().addingTimeInterval(86400 * 3)),
@@ -172,7 +176,7 @@ struct ThemedDatePicker: View {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         ThemedDatePicker(
             label: nil,
             date: .constant(Date())

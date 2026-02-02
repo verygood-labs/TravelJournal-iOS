@@ -3,20 +3,19 @@ import SwiftUI
 struct PassportHomeView: View {
     @StateObject private var viewModel: PassportHomeViewModel
     @Binding var selectedTab: Int
-    
-    // Default initializer for normal use
+
+    /// Default initializer for normal use
     init(selectedTab: Binding<Int>) {
-        self._selectedTab = selectedTab
-        self._viewModel = StateObject(wrappedValue: PassportHomeViewModel())
-    }
-    
-    // Preview initializer with injected view model
-    init(selectedTab: Binding<Int>, previewViewModel: PassportHomeViewModel) {
-        self._selectedTab = selectedTab
-        previewViewModel.isPreview = true
-        self._viewModel = StateObject(wrappedValue: previewViewModel)
+        _selectedTab = selectedTab
+        _viewModel = StateObject(wrappedValue: PassportHomeViewModel())
     }
 
+    /// Preview initializer with injected view model
+    init(selectedTab: Binding<Int>, previewViewModel: PassportHomeViewModel) {
+        _selectedTab = selectedTab
+        previewViewModel.isPreview = true
+        _viewModel = StateObject(wrappedValue: previewViewModel)
+    }
 
     var body: some View {
         ZStack {
@@ -29,20 +28,20 @@ struct PassportHomeView: View {
                     // Header section (dark background)
                     headerSection
                         .frame(height: 140)
-                    
+
                     // Gold decorative border
                     GoldBorder()
-                    
+
                     // Body section (passport page background)
                     ScrollView {
                         VStack(spacing: AppTheme.Spacing.lg) {
                             // Identification section
                             IdentificationSection(viewModel: viewModel)
                                 .padding(.top, AppTheme.Spacing.lg)
-                            
+
                             // Divider between sections
                             SectionDivider()
-                            
+
                             // Visas & Entries section
                             VisasSection(viewModel: viewModel) {
                                 selectedTab = 2 // Journal tab index
@@ -71,6 +70,7 @@ struct PassportHomeView: View {
     }
 
     // MARK: - Error View
+
     private func errorView(message: String) -> some View {
         AppBackgroundView {
             VStack(spacing: AppTheme.Spacing.lg) {
@@ -78,20 +78,20 @@ struct PassportHomeView: View {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 60))
                     .foregroundColor(AppTheme.Colors.primary.opacity(0.6))
-                
+
                 // Error message
                 VStack(spacing: AppTheme.Spacing.xs) {
                     Text("Unable to Load Passport")
                         .font(AppTheme.Typography.serifSmall())
                         .foregroundColor(AppTheme.Colors.primary)
-                    
+
                     Text(message)
                         .font(AppTheme.Typography.monoSmall())
                         .foregroundColor(AppTheme.Colors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, AppTheme.Spacing.xl)
                 }
-                
+
                 // Retry button
                 Button {
                     Task {
@@ -114,29 +114,31 @@ struct PassportHomeView: View {
     }
 
     // MARK: - Loading View
+
     private var loadingView: some View {
         AppBackgroundView {
             VStack(spacing: AppTheme.Spacing.md) {
                 AnimatedGlobeView(size: 80)
-                
+
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: AppTheme.Colors.primary))
                     .scaleEffect(1.2)
-                
+
                 Text("Loading your passport...")
                     .font(AppTheme.Typography.monoSmall())
                     .foregroundColor(AppTheme.Colors.textSecondary)
             }
         }
     }
-    
+
     // MARK: - Header Section
+
     private var headerSection: some View {
         AppBackgroundView {
             VStack(spacing: AppTheme.Spacing.xs) {
                 // Animated globe
                 AnimatedGlobeView(size: 60)
-                
+
                 // "PASSPORT" text
                 Text("YOUR PASSPORT")
                     .font(AppTheme.Typography.monoMedium())
@@ -145,8 +147,9 @@ struct PassportHomeView: View {
             }
         }
     }
-    
+
     // MARK: - Actions
+
     private func handleAddTrip() {
         print("➕ Add Trip button tapped - will open journal drafting space")
         // TODO: Navigate to journal tab or show trip creation modal
@@ -159,7 +162,7 @@ struct PassportHomeView: View {
 
 #Preview("With Data") {
     let vm = PassportHomeViewModel()
-    
+
     vm.userProfile = UserProfile(
         userId: UUID(),
         email: "traveler@example.com",
@@ -173,7 +176,7 @@ struct PassportHomeView: View {
         createdAt: Date().addingTimeInterval(-86400 * 365),
         updatedAt: Date()
     )
-    
+
     vm.userStats = UserStats(
         totalTrips: 12,
         totalEntries: 47,
@@ -181,7 +184,7 @@ struct PassportHomeView: View {
         totalPhotos: 234,
         totalDistance: 45000
     )
-    
+
     vm.countryStamps = [
         CountryStamp(countryCode: "JP", countryName: "Japan", visitCount: 2, stampImageUrl: nil),
         CountryStamp(countryCode: "IT", countryName: "Italy", visitCount: 1, stampImageUrl: nil),
@@ -190,8 +193,8 @@ struct PassportHomeView: View {
         CountryStamp(countryCode: "MX", countryName: "Mexico", visitCount: 1, stampImageUrl: nil),
         CountryStamp(countryCode: "FR", countryName: "France", visitCount: 2, stampImageUrl: nil),
         CountryStamp(countryCode: "ES", countryName: "Spain", visitCount: 1, stampImageUrl: nil),
-        CountryStamp(countryCode: "DE", countryName: "Germany", visitCount: 1, stampImageUrl: nil)
+        CountryStamp(countryCode: "DE", countryName: "Germany", visitCount: 1, stampImageUrl: nil),
     ]
-    
+
     return PassportHomeView(selectedTab: .constant(0), previewViewModel: vm)
 }

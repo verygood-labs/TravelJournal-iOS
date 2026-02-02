@@ -27,9 +27,9 @@ struct MediaUploadResult: Codable {
 final class MediaService {
     static let shared = MediaService()
     private let api = APIService.shared
-    
+
     private init() {}
-    
+
     /// Upload an image to the media service
     /// - Parameters:
     ///   - image: The UIImage to upload
@@ -44,15 +44,15 @@ final class MediaService {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             throw APIError.unknown
         }
-        
+
         var fields: [String: String] = [
-            "type": type.rawValue
+            "type": type.rawValue,
         ]
-        
+
         if let tripId = tripId {
             fields["tripId"] = tripId.uuidString
         }
-        
+
         return try await api.uploadMultipart(
             endpoint: "/media/upload",
             fields: fields,

@@ -10,26 +10,26 @@ struct PhotoBlockSheet: View {
     let tripId: UUID
     let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
-    
+
     @Environment(\.dismiss) private var dismiss
-    
+
     // MARK: - State
-    
+
     @State private var caption: String = ""
     @State private var imageUrl: String = ""
     @State private var rotation: Int = 0
-    
+
     // Image picker state
     @State private var selectedImage: UIImage?
     @State private var showingImagePicker = false
     @State private var showingCamera = false
-    
+
     // Upload state
     @State private var isUploading = false
     @State private var uploadError: String?
-    
+
     // MARK: - Init
-    
+
     init(
         existingBlock: EditorBlock? = nil,
         tripId: UUID,
@@ -40,30 +40,30 @@ struct PhotoBlockSheet: View {
         self.tripId = tripId
         self.onSave = onSave
         self.onDelete = onDelete
-        
+
         if let block = existingBlock {
             _caption = State(initialValue: block.data.caption ?? "")
             _imageUrl = State(initialValue: block.data.imageUrl ?? "")
             _rotation = State(initialValue: block.data.rotation ?? 0)
         }
     }
-    
+
     // MARK: - Computed
-    
+
     private var hasImage: Bool {
         !imageUrl.isEmpty || selectedImage != nil
     }
-    
+
     private var isValid: Bool {
         hasImage && !isUploading
     }
-    
+
     private var sheetTitle: String {
         existingBlock != nil ? "Edit Photo" : "Add Photo"
     }
-    
+
     // MARK: - Body
-    
+
     var body: some View {
         VStack(spacing: 0) {
             BlockSheetNavigationBar(
@@ -72,19 +72,19 @@ struct PhotoBlockSheet: View {
                 onCancel: { dismiss() },
                 onDone: { saveAndDismiss() }
             )
-            
+
             ScrollView {
                 VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
                     // Photo section
                     BlockFormSection(label: "PHOTO") {
                         photoContent
                     }
-                    
+
                     // Rotation slider
                     BlockFormSection(label: "ROTATION") {
                         rotationSlider
                     }
-                    
+
                     // Caption
                     BlockFormSection(label: "CAPTION (OPTIONAL)") {
                         BlockTextEditor(
@@ -93,7 +93,7 @@ struct PhotoBlockSheet: View {
                             minHeight: 80
                         )
                     }
-                    
+
                     // Error message
                     if let error = uploadError {
                         Text(error)
@@ -104,9 +104,9 @@ struct PhotoBlockSheet: View {
                 }
                 .padding(AppTheme.Spacing.md)
             }
-            
+
             Spacer()
-            
+
             if existingBlock != nil, let onDelete = onDelete {
                 BlockDeleteButton(onDelete: onDelete)
                     .padding(.bottom, AppTheme.Spacing.lg)
@@ -127,9 +127,9 @@ struct PhotoBlockSheet: View {
             }
         }
     }
-    
+
     // MARK: - Photo Content
-    
+
     @ViewBuilder
     private var photoContent: some View {
         if isUploading {
@@ -143,14 +143,14 @@ struct PhotoBlockSheet: View {
             imagePlaceholder
         }
     }
-    
+
     // MARK: - Uploading View
-    
+
     private var uploadingView: some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             ProgressView()
                 .scaleEffect(1.2)
-            
+
             Text("Uploading...")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
@@ -160,17 +160,17 @@ struct PhotoBlockSheet: View {
         .background(AppTheme.Colors.passportInputBackground)
         .cornerRadius(AppTheme.CornerRadius.medium)
     }
-    
+
     // MARK: - Image Preview
-    
-    private func imagePreview(url: URL) -> some View {
+
+    private func imagePreview(url _: URL) -> some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             AsyncImage(url: APIService.shared.fullMediaURL(for: imageUrl)) { phase in
                 switch phase {
                 case .empty:
                     ProgressView()
                         .frame(height: 200)
-                case .success(let image):
+                case let .success(image):
                     image
                         .resizable()
                         .scaledToFit()
@@ -184,7 +184,7 @@ struct PhotoBlockSheet: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            
+
             // Replace button
             Button {
                 showImageSourceOptions()
@@ -201,15 +201,15 @@ struct PhotoBlockSheet: View {
             }
         }
     }
-    
+
     // MARK: - Failed Image View
-    
+
     private var failedImageView: some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 32))
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             Text("Failed to load image")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
@@ -219,9 +219,9 @@ struct PhotoBlockSheet: View {
         .background(AppTheme.Colors.passportInputBackground)
         .cornerRadius(AppTheme.CornerRadius.medium)
     }
-    
+
     // MARK: - Image Placeholder
-    
+
     private var imagePlaceholder: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             // Placeholder icon
@@ -229,7 +229,7 @@ struct PhotoBlockSheet: View {
                 Image(systemName: "photo.badge.plus")
                     .font(.system(size: 40))
                     .foregroundColor(AppTheme.Colors.passportTextMuted.opacity(0.6))
-                
+
                 Text("Add a photo")
                     .font(AppTheme.Typography.monoSmall())
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
@@ -242,7 +242,7 @@ struct PhotoBlockSheet: View {
                 RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
                     .stroke(AppTheme.Colors.passportInputBorder, style: StrokeStyle(lineWidth: 1, dash: [5]))
             )
-            
+
             // Action buttons
             HStack(spacing: AppTheme.Spacing.sm) {
                 Button {
@@ -261,7 +261,7 @@ struct PhotoBlockSheet: View {
                     .foregroundColor(AppTheme.Colors.passportPageLight)
                     .cornerRadius(AppTheme.CornerRadius.medium)
                 }
-                
+
                 Button {
                     showingImagePicker = true
                 } label: {
@@ -285,27 +285,27 @@ struct PhotoBlockSheet: View {
             }
         }
     }
-    
+
     // MARK: - Rotation Slider
-    
+
     private var rotationSlider: some View {
         VStack(spacing: AppTheme.Spacing.xs) {
             HStack {
                 Text("-180°")
                     .font(AppTheme.Typography.monoCaption())
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
+
                 Slider(value: Binding(
                     get: { Double(rotation) },
                     set: { rotation = Int($0) }
-                ), in: -180...180, step: 1)
-                .tint(AppTheme.Colors.primary)
-                
+                ), in: -180 ... 180, step: 1)
+                    .tint(AppTheme.Colors.primary)
+
                 Text("+180°")
                     .font(AppTheme.Typography.monoCaption())
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
             }
-            
+
             Text("\(rotation)°")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.passportTextSecondary)
@@ -314,19 +314,19 @@ struct PhotoBlockSheet: View {
         .background(AppTheme.Colors.passportInputBackground)
         .cornerRadius(AppTheme.CornerRadius.medium)
     }
-    
+
     // MARK: - Actions
-    
+
     private func showImageSourceOptions() {
         // For simplicity, just show library.
         // Could use ActionSheet for camera/library choice
         showingImagePicker = true
     }
-    
+
     private func uploadImage(_ image: UIImage) {
         isUploading = true
         uploadError = nil
-        
+
         Task {
             do {
                 let result = try await MediaService.shared.upload(
@@ -334,7 +334,7 @@ struct PhotoBlockSheet: View {
                     type: .block,
                     tripId: tripId
                 )
-                
+
                 await MainActor.run {
                     imageUrl = result.url
                     selectedImage = nil // Clear local image
@@ -350,7 +350,7 @@ struct PhotoBlockSheet: View {
             }
         }
     }
-    
+
     private func saveAndDismiss() {
         let block = EditorBlock.newPhoto(
             order: existingBlock?.order ?? 0,
@@ -358,7 +358,7 @@ struct PhotoBlockSheet: View {
             caption: caption.isEmpty ? nil : caption,
             rotation: rotation == 0 ? nil : rotation
         )
-        
+
         // Preserve the ID if editing
         let finalBlock = EditorBlock(
             id: existingBlock?.id ?? block.id,
@@ -367,7 +367,7 @@ struct PhotoBlockSheet: View {
             location: block.location,
             data: block.data
         )
-        
+
         onSave(finalBlock)
         dismiss()
     }

@@ -3,10 +3,10 @@ import SwiftUI
 struct ForgotPasswordView: View {
     @EnvironmentObject var authManager: AuthManager
     @Environment(\.dismiss) var dismiss
-    
+
     @State private var email = ""
     @State private var emailSent = false
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
@@ -16,16 +16,16 @@ struct ForgotPasswordView: View {
                         Image(systemName: "envelope.badge.fill")
                             .font(.system(size: 60))
                             .foregroundStyle(.green)
-                        
+
                         Text("Check Your Email")
                             .font(.title2)
                             .fontWeight(.bold)
-                        
+
                         Text("We've sent password reset instructions to \(email)")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
-                        
+
                         Button("Done") {
                             dismiss()
                         }
@@ -39,28 +39,28 @@ struct ForgotPasswordView: View {
                         Image(systemName: "lock.rotation")
                             .font(.system(size: 60))
                             .foregroundStyle(.blue)
-                        
+
                         Text("Reset Password")
                             .font(.title2)
                             .fontWeight(.bold)
-                        
+
                         Text("Enter your email address and we'll send you instructions to reset your password.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
-                        
+
                         TextField("Email", text: $email)
                             .textFieldStyle(.roundedBorder)
                             .textContentType(.emailAddress)
                             .autocapitalization(.none)
                             .keyboardType(.emailAddress)
-                        
+
                         if let error = authManager.error {
                             Text(error)
                                 .font(.caption)
                                 .foregroundStyle(.red)
                         }
-                        
+
                         Button {
                             Task {
                                 let success = await authManager.forgotPassword(email: email)
@@ -82,7 +82,7 @@ struct ForgotPasswordView: View {
                     }
                     .padding()
                 }
-                
+
                 Spacer()
             }
             .navigationBarTitleDisplayMode(.inline)

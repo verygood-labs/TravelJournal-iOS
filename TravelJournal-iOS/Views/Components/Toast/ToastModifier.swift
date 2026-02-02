@@ -1,10 +1,9 @@
 //
-//  ToastPosition.swift
+//  ToastModifier.swift
 //  TravelJournal-iOS
 //
 //  Created by John Apale on 1/29/26.
 //
-
 
 //
 //  ToastModifier.swift
@@ -19,21 +18,21 @@ import SwiftUI
 enum ToastPosition {
     case top
     case bottom
-    
+
     var alignment: Alignment {
         switch self {
         case .top: return .top
         case .bottom: return .bottom
         }
     }
-    
+
     var edge: Edge.Set {
         switch self {
         case .top: return .top
         case .bottom: return .bottom
         }
     }
-    
+
     var transitionEdge: Edge {
         switch self {
         case .top: return .top
@@ -48,7 +47,7 @@ enum ToastPosition {
 struct ToastModifier: ViewModifier {
     @ObservedObject var manager: ToastManager
     let position: ToastPosition
-    
+
     func body(content: Content) -> some View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -61,15 +60,15 @@ struct ToastModifier: ViewModifier {
                     .padding(position.edge, safeAreaPadding)
                     .transition(
                         .move(edge: position.transitionEdge)
-                        .combined(with: .opacity)
+                            .combined(with: .opacity)
                     )
                 }
             }
             .animation(.spring(response: 0.3, dampingFraction: 0.8), value: manager.currentToast?.id)
     }
-    
+
     // MARK: - Private
-    
+
     private var safeAreaPadding: CGFloat {
         switch position {
         case .top: return AppTheme.Spacing.xl

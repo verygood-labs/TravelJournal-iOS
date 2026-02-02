@@ -8,10 +8,11 @@
 import SwiftUI
 
 // MARK: - Profile Card Section
+
 /// Tappable profile card that navigates to Edit Profile
 struct ProfileCardSection: View {
     @ObservedObject var viewModel: ProfileViewModel
-    
+
     var body: some View {
         NavigationLink {
             EditProfileView(viewModel: viewModel)

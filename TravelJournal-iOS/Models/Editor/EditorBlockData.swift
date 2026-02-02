@@ -19,34 +19,37 @@ import Foundation
 /// - **Tip**: title, content
 /// - **Divider**: (none)
 struct EditorBlockData: Codable, Equatable {
-    
     // MARK: - Moment Fields
+
     var date: String?
     var title: String?
     var content: String?
     var stampText: String?
     var stampColor: String?
-    
+
     // MARK: - Recommendation Fields
+
     var name: String?
     var category: RecommendationCategory?
     var rating: Rating?
     var priceLevel: Int?
     var note: String?
-    
+
     // MARK: - Photo Fields
+
     var caption: String?
     var rotation: Int?
-    
+
     // MARK: - Shared Fields
+
     var imageUrl: String?
-    
+
     // MARK: - Initializers
-    
+
     init() {}
-    
+
     // MARK: - Factory Methods
-    
+
     static func moment(
         date: String? = nil,
         title: String? = nil,
@@ -64,7 +67,7 @@ struct EditorBlockData: Codable, Equatable {
         data.stampColor = stampColor
         return data
     }
-    
+
     static func recommendation(
         name: String,
         category: RecommendationCategory,
@@ -82,7 +85,7 @@ struct EditorBlockData: Codable, Equatable {
         data.imageUrl = imageUrl
         return data
     }
-    
+
     static func photo(
         imageUrl: String? = nil,
         caption: String? = nil,
@@ -94,7 +97,7 @@ struct EditorBlockData: Codable, Equatable {
         data.rotation = rotation
         return data
     }
-    
+
     static func tip(
         title: String? = nil,
         content: String? = nil
@@ -104,7 +107,7 @@ struct EditorBlockData: Codable, Equatable {
         data.content = content
         return data
     }
-    
+
     static func divider() -> EditorBlockData {
         EditorBlockData()
     }

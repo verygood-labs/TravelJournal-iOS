@@ -1,21 +1,21 @@
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 class JournalViewModel: ObservableObject {
     @Published var trips: [Trip] = []
     @Published var isLoading = false
     @Published var error: String?
-    
+
     private let tripService = TripService.shared
     private var currentPage = 1
     private var hasMorePages = true
-    
+
     func loadTrips() async {
         isLoading = true
         error = nil
         currentPage = 1
-        
+
         do {
             let response = try await tripService.getTrips(page: currentPage, pageSize: 20)
             trips = response.items
@@ -29,18 +29,19 @@ class JournalViewModel: ObservableObject {
             isLoading = false
         }
     }
-    
+
     func loadMoreTripsIfNeeded(currentTrip: Trip) async {
         // Check if we're near the end of the list
         guard let index = trips.firstIndex(where: { $0.id == currentTrip.id }),
               index >= trips.count - 3,
               hasMorePages,
-              !isLoading else {
+              !isLoading
+        else {
             return
         }
-        
+
         currentPage += 1
-        
+
         do {
             let response = try await tripService.getTrips(page: currentPage, pageSize: 20)
             trips.append(contentsOf: response.items)
@@ -50,12 +51,12 @@ class JournalViewModel: ObservableObject {
             currentPage -= 1
         }
     }
-    
+
     func addTrip(_ trip: Trip) async {
         // Note: This is for local additions. For API, use createTrip
         trips.insert(trip, at: 0)
     }
-    
+
     func createTrip(title: String, description: String?, startDate: Date?, endDate: Date?) async -> Bool {
         do {
             let newTrip = try await tripService.createTrip(
@@ -71,7 +72,7 @@ class JournalViewModel: ObservableObject {
             return false
         }
     }
-    
+
     func deleteTrip(_ trip: Trip) async -> Bool {
         do {
             try await tripService.deleteTrip(id: trip.id)

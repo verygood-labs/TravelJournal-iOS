@@ -1,27 +1,28 @@
 import SwiftUI
 
 // MARK: - Login View
+
 /// Passport-themed login screen with email/password and social login options
 struct LoginView: View {
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var toastManager: ToastManager
     @Environment(\.dismiss) var dismiss
-    
+
     // Form state
     @State private var email = ""
     @State private var password = ""
-    
-    // Focus state
+
+    /// Focus state
     @FocusState private var focusedField: Field?
-    
+
     // Navigation state
     @State private var showingRegister = false
     @State private var showingForgotPassword = false
-    
+
     enum Field {
         case email, password
     }
-    
+
     var body: some View {
         AppBackgroundView {
             ScrollView {
@@ -29,15 +30,15 @@ struct LoginView: View {
                     // Back button
                     backButton
                         .padding(.top, AppTheme.Spacing.lg)
-                    
+
                     // Header
                     headerSection
                         .padding(.top, AppTheme.Spacing.xl)
                         .padding(.bottom, AppTheme.Spacing.xxl)
-                    
+
                     // Login Form
                     formSection
-                    
+
                     // Social Login
                     SocialAuthSection(
                         showLabels: false,
@@ -49,9 +50,9 @@ struct LoginView: View {
                         }
                     )
                     .padding(.vertical, AppTheme.Spacing.xl)
-                    
+
                     Spacer(minLength: AppTheme.Spacing.xl)
-                    
+
                     // Sign up link
                     signUpSection
                         .padding(.bottom, AppTheme.Spacing.xl)
@@ -70,37 +71,40 @@ struct LoginView: View {
             focusedField = nil
         }
     }
-    
+
     // MARK: - Back Button
+
     private var backButton: some View {
         HStack {
             Button("← Back") {
                 dismiss()
             }
             .buttonStyle(BackButtonStyle())
-            
+
             Spacer()
         }
     }
-    
+
     // MARK: - Header Section
+
     private var headerSection: some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             AnimatedGlobeView(size: 60)
                 .padding(.bottom, AppTheme.Spacing.xxs)
-            
+
             Text("Welcome Back")
                 .font(AppTheme.Typography.serifMedium())
                 .foregroundColor(AppTheme.Colors.primary)
-            
+
             Text("Enter your credentials to continue your journey")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
         }
     }
-    
+
     // MARK: - Form Section
+
     private var formSection: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             // Email field
@@ -109,7 +113,7 @@ struct LoginView: View {
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.textAccentMuted)
-                
+
                 TextField("traveler@example.com", text: $email)
                     .textFieldStyle(PassportTextFieldStyle(isFocused: focusedField == .email))
                     .focused($focusedField, equals: .email)
@@ -118,14 +122,14 @@ struct LoginView: View {
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
             }
-            
+
             // Password field
             VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
                 Text("PASSWORD")
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.textAccentMuted)
-                
+
                 SecureInputField(
                     placeholder: "••••••••",
                     text: $password,
@@ -134,7 +138,7 @@ struct LoginView: View {
                 .focused($focusedField, equals: .password)
                 .textContentType(.password)
             }
-            
+
             // Forgot password
             HStack {
                 Spacer()
@@ -143,7 +147,7 @@ struct LoginView: View {
                 }
                 .buttonStyle(TextLinkButtonStyle())
             }
-            
+
             // Error message
             if let error = authManager.error {
                 Text(error)
@@ -152,7 +156,7 @@ struct LoginView: View {
                     .multilineTextAlignment(.center)
                     .padding(.top, AppTheme.Spacing.xxs)
             }
-            
+
             // Login button
             Button {
                 focusedField = nil
@@ -173,14 +177,15 @@ struct LoginView: View {
             .padding(.top, AppTheme.Spacing.xxs)
         }
     }
-    
+
     // MARK: - Sign Up Section
+
     private var signUpSection: some View {
         HStack(spacing: AppTheme.Spacing.xxxs) {
             Text("New traveler?")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
-            
+
             Button("Create Passport") {
                 showingRegister = true
             }
@@ -192,8 +197,9 @@ struct LoginView: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     LoginView()
         .environmentObject(AuthManager())
-        .environmentObject(ToastManager()) 
+        .environmentObject(ToastManager())
 }

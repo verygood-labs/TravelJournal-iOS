@@ -13,7 +13,7 @@ struct JournalTripRow: View {
     var onView: () -> Void = {}
     var onEdit: () -> Void = {}
     var onDelete: () -> Void = {}
-    
+
     var body: some View {
         Button {
             onView()
@@ -27,8 +27,9 @@ struct JournalTripRow: View {
             onDelete: onDelete
         )
     }
-    
+
     // MARK: - Row Content
+
     private var rowContent: some View {
         HStack(alignment: .center, spacing: AppTheme.Spacing.xxs) {
             // Left: Title, date, and stats
@@ -38,7 +39,7 @@ struct JournalTripRow: View {
                     .font(AppTheme.Typography.monoMedium())
                     .foregroundColor(AppTheme.Colors.passportTextPrimary)
                     .lineLimit(1)
-                
+
                 // Date range
                 HStack(spacing: AppTheme.Spacing.xxxs) {
                     Image(systemName: "calendar")
@@ -47,24 +48,24 @@ struct JournalTripRow: View {
                         .font(AppTheme.Typography.monoCaption())
                 }
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
+
                 // Stats row: locations, notes, last updated
                 HStack(spacing: AppTheme.Spacing.sm) {
                     // Locations
                     statItem(icon: "mappin", value: "\(trip.stops?.count ?? 0)")
-                    
+
                     // Notes/Entries
                     statItem(icon: "doc.text", value: "0")
-                    
+
                     // Last updated
                     Text("Updated \(formatRelativeDate(trip.updatedAt ?? trip.createdAt))")
                         .font(AppTheme.Typography.monoCaption())
                         .foregroundColor(AppTheme.Colors.passportTextMuted)
                 }
             }
-            
+
             Spacer()
-            
+
             // Right: Status badge
             statusBadge
         }
@@ -81,12 +82,13 @@ struct JournalTripRow: View {
     }
 
     // MARK: - Stat Item
+
     private func statItem(icon: String, value: String) -> some View {
         HStack(spacing: 3) {
             Image(systemName: icon)
                 .font(.system(size: 10))
                 .foregroundColor(AppTheme.Colors.primary)
-            
+
             Text(value)
                 .font(AppTheme.Typography.monoCaption())
                 .foregroundColor(AppTheme.Colors.passportTextSecondary)
@@ -94,19 +96,21 @@ struct JournalTripRow: View {
     }
 
     // MARK: - Format Relative Date
+
     private func formatRelativeDate(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: date, relativeTo: Date())
     }
-    
+
     // MARK: - Status Badge
+
     private var statusBadge: some View {
         HStack(spacing: 3) {
             Circle()
                 .fill(trip.status.color)
                 .frame(width: 5, height: 5)
-            
+
             Text(trip.status.rawValue.uppercased())
                 .font(AppTheme.Typography.monoCaption())
                 .tracking(0.5)
@@ -122,6 +126,7 @@ struct JournalTripRow: View {
 }
 
 // MARK: - Preview
+
 #Preview("Single Row") {
     let sampleTrip = Trip(
         id: UUID(),
@@ -136,11 +141,11 @@ struct JournalTripRow: View {
         updatedAt: Date().addingTimeInterval(-86400 * 2),
         stops: nil
     )
-    
+
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         JournalTripRow(
             trip: sampleTrip,
             onView: { print("View tapped") },
@@ -190,13 +195,13 @@ struct JournalTripRow: View {
             createdAt: Date(),
             updatedAt: Date(),
             stops: nil
-        )
+        ),
     ]
-    
+
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: AppTheme.Spacing.xs) {
             ForEach(trips) { trip in
                 JournalTripRow(

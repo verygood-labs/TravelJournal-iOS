@@ -1,11 +1,12 @@
 import SwiftUI
 
 // MARK: - Page Turn Transition
+
 /// Custom transition that mimics a passport page turning
 struct PageTurnTransition: ViewModifier {
     let isPresented: Bool
     let isForward: Bool // true = turning to next page, false = going back
-    
+
     func body(content: Content) -> some View {
         content
             .rotation3DEffect(
@@ -19,18 +20,19 @@ struct PageTurnTransition: ViewModifier {
 }
 
 // MARK: - Page Turn Container
+
 /// Container view that manages page-turn transitions between registration steps
 struct PageTurnContainer<Content: View>: View {
     let isPresented: Bool
     let isForward: Bool
     let content: Content
-    
+
     init(isPresented: Bool, isForward: Bool = true, @ViewBuilder content: () -> Content) {
         self.isPresented = isPresented
         self.isForward = isForward
         self.content = content()
     }
-    
+
     var body: some View {
         if isPresented {
             content
@@ -41,14 +43,15 @@ struct PageTurnContainer<Content: View>: View {
 }
 
 // MARK: - Page Turn Navigation Modifier
+
 /// A view modifier that presents a destination view with a page-turn animation
 struct PageTurnNavigationModifier<Destination: View>: ViewModifier {
     @Binding var isPresented: Bool
     let destination: () -> Destination
-    
+
     @State private var showDestination = false
     @State private var isAnimating = false
-    
+
     func body(content: Content) -> some View {
         ZStack {
             // Current page
@@ -61,7 +64,7 @@ struct PageTurnNavigationModifier<Destination: View>: ViewModifier {
                     perspective: 0.3
                 )
                 .opacity(showDestination ? 0 : 1)
-            
+
             // Next page
             if showDestination || isAnimating {
                 destination()
@@ -93,27 +96,30 @@ struct PageTurnNavigationModifier<Destination: View>: ViewModifier {
 }
 
 // MARK: - View Extension
+
 extension View {
     /// Presents a destination view with a page-turn animation
     func pageTurnNavigation<Destination: View>(
         isPresented: Binding<Bool>,
         @ViewBuilder destination: @escaping () -> Destination
     ) -> some View {
-        self.modifier(PageTurnNavigationModifier(isPresented: isPresented, destination: destination))
+        modifier(PageTurnNavigationModifier(isPresented: isPresented, destination: destination))
     }
 }
 
 // MARK: - Page Turn Dismiss Action
+
 /// Custom dismiss action for page turn transitions
 struct PageTurnDismissAction {
     let dismiss: () -> Void
-    
+
     func callAsFunction() {
         dismiss()
     }
 }
 
 // MARK: - Environment Key for Page Turn Dismiss
+
 private struct PageTurnDismissKey: EnvironmentKey {
     static let defaultValue: PageTurnDismissAction? = nil
 }
@@ -126,29 +132,30 @@ extension EnvironmentValues {
 }
 
 // MARK: - Full Screen Page Turn Cover
+
 /// A replacement for fullScreenCover that uses page-turn animation
 /// Animates like a book page peeling from bottom-right corner
 struct PageTurnCover<Content: View, Destination: View>: View {
     @Binding var isPresented: Bool
     let content: Content
     let destination: () -> Destination
-    
+
     @State private var showDestination = false
     @State private var isAnimating = false
     @State private var progress: CGFloat = 0 // 0 = showing source, 1 = showing destination
-    
+
     private let animationDuration: Double = 0.8
-    
+
     init(
         isPresented: Binding<Bool>,
         @ViewBuilder content: () -> Content,
         @ViewBuilder destination: @escaping () -> Destination
     ) {
-        self._isPresented = isPresented
+        _isPresented = isPresented
         self.content = content()
         self.destination = destination
     }
-    
+
     var body: some View {
         ZStack {
             // Destination page (underneath, revealed as source peels away)
@@ -159,7 +166,7 @@ struct PageTurnCover<Content: View, Destination: View>: View {
                     })
                     .allowsHitTesting(showDestination)
             }
-            
+
             // Source page (on top, peels away from bottom-right corner)
             content
                 .allowsHitTesting(!showDestination)
@@ -187,15 +194,16 @@ struct PageTurnCover<Content: View, Destination: View>: View {
 }
 
 // MARK: - Page Peel Effect Modifier
+
 /// Creates a realistic page peel effect from the bottom-right corner
 struct PagePeelEffect: ViewModifier, Animatable {
     var progress: CGFloat
-    
+
     var animatableData: CGFloat {
         get { progress }
         set { progress = newValue }
     }
-    
+
     func body(content: Content) -> some View {
         content
             // Main rotation - page turns from right edge toward left
@@ -227,10 +235,11 @@ struct PagePeelEffect: ViewModifier, Animatable {
 }
 
 // MARK: - Preview
+
 #Preview {
     struct PreviewContainer: View {
         @State private var showNext = false
-        
+
         var body: some View {
             PageTurnCover(isPresented: $showNext) {
                 ZStack {
@@ -263,6 +272,6 @@ struct PagePeelEffect: ViewModifier, Animatable {
             }
         }
     }
-    
+
     return PreviewContainer()
 }

@@ -1,19 +1,20 @@
 import SwiftUI
 
 // MARK: - Registration Progress Bar
+
 /// Displays step progress for multi-step registration flow
 struct RegistrationProgressBar: View {
     let currentStep: Int
     let totalSteps: Int
-    
+
     private var progress: Double {
         Double(currentStep) / Double(totalSteps)
     }
-    
+
     private var percentComplete: Int {
         Int(progress * 100)
     }
-    
+
     var body: some View {
         VStack(spacing: AppTheme.Spacing.xxs) {
             // Step indicator and percentage
@@ -22,18 +23,18 @@ struct RegistrationProgressBar: View {
                     .font(AppTheme.Typography.monoSmall())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.primary)
-                
+
                 Spacer()
-                
+
                 Text("\(percentComplete)% COMPLETE")
                     .font(AppTheme.Typography.monoSmall())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.textSecondary)
             }
-            
+
             // Progress segments
             HStack(spacing: AppTheme.Spacing.xxxs) {
-                ForEach(1...totalSteps, id: \.self) { step in
+                ForEach(1 ... totalSteps, id: \.self) { step in
                     ProgressSegment(isCompleted: step <= currentStep)
                 }
             }
@@ -45,9 +46,10 @@ struct RegistrationProgressBar: View {
 }
 
 // MARK: - Progress Segment
+
 private struct ProgressSegment: View {
     let isCompleted: Bool
-    
+
     var body: some View {
         RoundedRectangle(cornerRadius: 2)
             .fill(isCompleted ? AppTheme.Colors.primary : AppTheme.Colors.primary.opacity(0.2))
@@ -57,6 +59,7 @@ private struct ProgressSegment: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     VStack(spacing: 40) {
         RegistrationProgressBar(currentStep: 1, totalSteps: 4)

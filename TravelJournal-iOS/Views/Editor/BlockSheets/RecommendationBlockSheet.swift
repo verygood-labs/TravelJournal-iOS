@@ -9,15 +9,15 @@ struct RecommendationBlockSheet: View {
     let existingBlock: EditorBlock?
     let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
-    
+
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var name: String = ""
     @State private var category: RecommendationCategory = .eat
     @State private var rating: Rating? = nil
     @State private var priceLevel: Int? = nil
     @State private var note: String = ""
-    
+
     init(
         existingBlock: EditorBlock? = nil,
         onSave: @escaping (EditorBlock) -> Void,
@@ -26,7 +26,7 @@ struct RecommendationBlockSheet: View {
         self.existingBlock = existingBlock
         self.onSave = onSave
         self.onDelete = onDelete
-        
+
         if let block = existingBlock {
             _name = State(initialValue: block.data.name ?? "")
             _category = State(initialValue: block.data.category ?? .eat)
@@ -35,15 +35,15 @@ struct RecommendationBlockSheet: View {
             _note = State(initialValue: block.data.note ?? "")
         }
     }
-    
+
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
-    
+
     private var sheetTitle: String {
         existingBlock != nil ? "Edit Recommendation" : "Add Recommendation"
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             BlockSheetNavigationBar(
@@ -52,22 +52,22 @@ struct RecommendationBlockSheet: View {
                 onCancel: { dismiss() },
                 onDone: { saveAndDismiss() }
             )
-            
+
             ScrollView {
                 VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
                     BlockFormSection(label: "PLACE NAME") {
                         TextField("e.g., Cafe de Flore", text: $name)
                             .textFieldStyle(BlockTextFieldStyle())
                     }
-                    
+
                     BlockFormSection(label: "CATEGORY") {
                         CategoryPicker(selection: $category)
                     }
-                    
+
                     BlockFormSection(label: "RATING (OPTIONAL)") {
                         RatingPicker(selection: $rating)
                     }
-                    
+
                     BlockFormSection(label: "WHY YOU RECOMMEND IT") {
                         BlockTextEditor(
                             text: $note,
@@ -78,9 +78,9 @@ struct RecommendationBlockSheet: View {
                 }
                 .padding(AppTheme.Spacing.md)
             }
-            
+
             Spacer()
-            
+
             if existingBlock != nil, let onDelete = onDelete {
                 BlockDeleteButton(onDelete: onDelete)
                     .padding(.bottom, AppTheme.Spacing.lg)
@@ -90,7 +90,7 @@ struct RecommendationBlockSheet: View {
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
-    
+
     private func saveAndDismiss() {
         let block = EditorBlock.newRecommendation(
             order: existingBlock?.order ?? 0,
@@ -100,7 +100,7 @@ struct RecommendationBlockSheet: View {
             priceLevel: priceLevel,
             note: note.isEmpty ? nil : note
         )
-        
+
         // Preserve the ID if editing
         let finalBlock = EditorBlock(
             id: existingBlock?.id ?? block.id,
@@ -109,7 +109,7 @@ struct RecommendationBlockSheet: View {
             location: existingBlock?.location,
             data: block.data
         )
-        
+
         onSave(finalBlock)
         dismiss()
     }
@@ -119,7 +119,7 @@ struct RecommendationBlockSheet: View {
 
 private struct CategoryPicker: View {
     @Binding var selection: RecommendationCategory
-    
+
     var body: some View {
         HStack(spacing: AppTheme.Spacing.xs) {
             ForEach(RecommendationCategory.allCases, id: \.self) { category in
@@ -138,7 +138,7 @@ private struct CategoryButton: View {
     let category: RecommendationCategory
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             VStack(spacing: 4) {
@@ -165,7 +165,7 @@ private struct CategoryButton: View {
 
 private struct RatingPicker: View {
     @Binding var selection: Rating?
-    
+
     var body: some View {
         HStack(spacing: AppTheme.Spacing.xs) {
             ForEach(Rating.allCases, id: \.self) { rating in
@@ -188,7 +188,7 @@ private struct RatingButton: View {
     let rating: Rating
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(rating.displayName)
@@ -209,6 +209,7 @@ private struct RatingButton: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     RecommendationBlockSheet(onSave: { _ in })
 }

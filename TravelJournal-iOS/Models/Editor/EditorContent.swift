@@ -13,46 +13,46 @@ import Foundation
 /// Maps to `DraftContentDto` on the backend.
 struct EditorContent: Codable, Equatable {
     var blocks: [EditorBlock]
-    
+
     // MARK: - Initializers
-    
+
     init(blocks: [EditorBlock] = []) {
         self.blocks = blocks
     }
-    
+
     // MARK: - Query Helpers
-    
+
     func block(withId id: UUID) -> EditorBlock? {
         blocks.first { $0.id == id }
     }
-    
+
     var nextOrder: Int {
         (blocks.map(\.order).max() ?? -1) + 1
     }
-    
+
     // MARK: - Mutation Helpers
-    
+
     mutating func append(_ block: EditorBlock) {
         var newBlock = block
         newBlock.order = nextOrder
         blocks.append(newBlock)
     }
-    
+
     mutating func insert(_ block: EditorBlock, at index: Int) {
         blocks.insert(block, at: index)
         reindex()
     }
-    
+
     mutating func remove(id: UUID) {
         blocks.removeAll { $0.id == id }
         reindex()
     }
-    
+
     mutating func update(_ block: EditorBlock) {
         guard let index = blocks.firstIndex(where: { $0.id == block.id }) else { return }
         blocks[index] = block
     }
-    
+
     mutating func reorder(ids: [UUID]) {
         var reordered: [EditorBlock] = []
         for (index, id) in ids.enumerated() {
@@ -62,9 +62,9 @@ struct EditorContent: Codable, Equatable {
         }
         blocks = reordered
     }
-    
+
     // MARK: - Private Helpers
-    
+
     private mutating func reindex() {
         for index in blocks.indices {
             blocks[index].order = index

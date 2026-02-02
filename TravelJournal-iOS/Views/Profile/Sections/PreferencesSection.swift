@@ -8,6 +8,7 @@
 import SwiftUI
 
 // MARK: - Preferences Section
+
 /// Preferences settings section with currency and distance units
 struct PreferencesSection: View {
     @ObservedObject var viewModel: ProfileViewModel
@@ -24,9 +25,9 @@ struct PreferencesSection: View {
                 )
             }
             .buttonStyle(.plain)
-            
+
             SettingsDivider()
-            
+
             Button {
                 viewModel.showingDistanceUnitPicker = true
             } label: {
@@ -46,4 +47,3 @@ struct PreferencesSection: View {
 #Preview {
     PreferencesSection(viewModel: ProfileViewModel())
 }
-

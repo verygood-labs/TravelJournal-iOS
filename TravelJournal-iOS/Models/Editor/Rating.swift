@@ -5,7 +5,6 @@
 //  Created by John Apale on 1/26/26.
 //
 
-
 //
 //  Rating.swift
 //  TravelJournal-iOS
@@ -24,9 +23,9 @@ enum Rating: Int, Codable, CaseIterable {
     case c = 3
     case d = 4
     case f = 5
-    
+
     // MARK: - Display Properties
-    
+
     var displayName: String {
         switch self {
         case .s: return "S"
@@ -37,7 +36,7 @@ enum Rating: Int, Codable, CaseIterable {
         case .f: return "F"
         }
     }
-    
+
     var description: String {
         switch self {
         case .s: return "Exceptional"
@@ -48,7 +47,7 @@ enum Rating: Int, Codable, CaseIterable {
         case .f: return "Poor"
         }
     }
-    
+
     var color: Color {
         switch self {
         case .s: return Color(hex: "FFD700") // Gold

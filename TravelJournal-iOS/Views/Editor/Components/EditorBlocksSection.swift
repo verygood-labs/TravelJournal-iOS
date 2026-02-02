@@ -7,23 +7,23 @@ import SwiftUI
 
 struct EditorBlocksSection: View {
     @ObservedObject var viewModel: JournalEditorViewModel
-    
+
     // Drag state
     @State private var draggingBlockId: UUID?
     @State private var dragOffset: CGFloat = 0
     @State private var initialIndex: Int?
-    
-    // Track drag handle frames for hit testing
+
+    /// Track drag handle frames for hit testing
     @State private var dragHandleFrames: [UUID: CGRect] = [:]
-    
+
     // Fixed block height for calculations
     private let blockHeight: CGFloat = 88
     private let dividerHeight: CGFloat = 44
     private let blockSpacing: CGFloat = AppTheme.Spacing.md
-    
-    // Coordinate space for the entire section
+
+    /// Coordinate space for the entire section
     private let sectionCoordinateSpace = "editorBlocksSection"
-    
+
     var body: some View {
         VStack(spacing: blockSpacing) {
             if viewModel.blocks.isEmpty {
@@ -31,7 +31,7 @@ struct EditorBlocksSection: View {
             } else {
                 ForEach(Array(viewModel.blocks.enumerated()), id: \.element.id) { index, block in
                     let isDragging = draggingBlockId == block.id
-                    
+
                     blockRow(block: block, index: index, isDragging: isDragging)
                         .zIndex(isDragging ? 1 : 0)
                         .scaleEffect(isDragging ? 1.03 : 1.0)
@@ -45,9 +45,9 @@ struct EditorBlocksSection: View {
         }
         .coordinateSpace(name: sectionCoordinateSpace)
     }
-    
+
     // MARK: - Block Row with Drag Handle Detection
-    
+
     @ViewBuilder
     private func blockRow(block: EditorBlock, index: Int, isDragging: Bool) -> some View {
         let content = Group {
@@ -73,7 +73,7 @@ struct EditorBlocksSection: View {
                 )
             }
         }
-        
+
         // Overlay to capture drag handle gestures (on top so it receives touches)
         content
             .overlay(alignment: .leading) {
@@ -100,49 +100,50 @@ struct EditorBlocksSection: View {
                     )
             }
     }
-    
+
     // MARK: - Drag Calculations
-    
+
     private var currentTargetIndex: Int? {
         guard let initial = initialIndex, draggingBlockId != nil else { return nil }
-        
+
         let totalBlockHeight = blockHeight + blockSpacing
         let indexOffset = Int(round(dragOffset / totalBlockHeight))
         let newIndex = initial + indexOffset
-        
+
         return max(0, min(viewModel.blocks.count - 1, newIndex))
     }
-    
+
     private func offsetFor(index: Int, blockId: UUID) -> CGFloat {
         // The dragging block follows the finger
         if draggingBlockId == blockId {
             return dragOffset
         }
-        
+
         // Other blocks shift to make room
         guard let initial = initialIndex,
               let target = currentTargetIndex,
-              initial != target else {
+              initial != target
+        else {
             return 0
         }
-        
+
         // Get the height of the dragging block
         let draggingBlockHeight = heightForBlock(at: initial) + blockSpacing
-        
+
         // Dragging down: blocks between initial and target shift up
         if initial < target {
             if index > initial && index <= target {
                 return -draggingBlockHeight
             }
         }
-        
+
         // Dragging up: blocks between target and initial shift down
         if initial > target {
             if index >= target && index < initial {
                 return draggingBlockHeight
             }
         }
-        
+
         return 0
     }
 
@@ -152,33 +153,34 @@ struct EditorBlocksSection: View {
         }
         return viewModel.blocks[index].type == .divider ? dividerHeight : blockHeight
     }
-    
+
     // MARK: - Drag Actions
-    
+
     private func startDrag(block: EditorBlock, at index: Int) {
         print("🚀 Drag started: \(block.id) at index \(index)")
         draggingBlockId = block.id
         initialIndex = index
         dragOffset = 0
     }
-    
+
     private func endDrag() {
         guard let initial = initialIndex,
-              let target = currentTargetIndex else {
+              let target = currentTargetIndex
+        else {
             resetDragState()
             return
         }
-        
+
         print("📦 Drag ended - initial: \(initial), target: \(target)")
-        
+
         if initial != target {
             print("✅ Moving from \(initial) to \(target)")
             viewModel.moveBlock(fromIndex: initial, toIndex: target)
         }
-        
+
         resetDragState()
     }
-    
+
     private func resetDragState() {
         withAnimation(.easeOut(duration: 0.15)) {
             draggingBlockId = nil
@@ -186,19 +188,19 @@ struct EditorBlocksSection: View {
             initialIndex = nil
         }
     }
-    
+
     // MARK: - Empty State
-    
+
     private var emptyBlocksPlaceholder: some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             Image(systemName: "square.stack.3d.up")
                 .font(.system(size: 36))
                 .foregroundColor(AppTheme.Colors.passportTextMuted.opacity(0.5))
-            
+
             Text("Start adding content")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             Text("Use the toolbar below to add\nmoments, photos, and more")
                 .font(AppTheme.Typography.monoCaption())
                 .foregroundColor(AppTheme.Colors.passportTextMuted.opacity(0.7))
@@ -224,11 +226,11 @@ struct EditorBlocksSection: View {
         updatedAt: Date(),
         stops: nil
     )
-    
+
     return ZStack {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
-        
+
         EditorBlocksSection(viewModel: JournalEditorViewModel(trip: trip))
     }
 }
@@ -247,7 +249,7 @@ struct EditorBlocksSection: View {
         updatedAt: Date(),
         stops: nil
     )
-    
+
     let viewModel = JournalEditorViewModel(trip: trip)
     viewModel.blocks = [
         EditorBlock.newMoment(
@@ -259,13 +261,13 @@ struct EditorBlocksSection: View {
             order: 1,
             title: "Getting Around",
             content: "Use Grab for easy transportation."
-        )
+        ),
     ]
-    
+
     return ZStack {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
-        
+
         EditorBlocksSection(viewModel: viewModel)
             .padding()
     }
@@ -285,7 +287,7 @@ struct EditorBlocksSection: View {
         updatedAt: Date(),
         stops: nil
     )
-    
+
     let viewModel = JournalEditorViewModel(trip: trip)
     viewModel.blocks = [
         EditorBlock.newMoment(
@@ -307,13 +309,13 @@ struct EditorBlocksSection: View {
             name: "Aristocrat Restaurant",
             category: .eat
         ),
-        EditorBlock.newDivider(order: 4)
+        EditorBlock.newDivider(order: 4),
     ]
-    
+
     return ZStack {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
-        
+
         ScrollView {
             EditorBlocksSection(viewModel: viewModel)
                 .padding()

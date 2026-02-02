@@ -17,9 +17,9 @@ struct EditorBlock: Codable, Identifiable, Equatable {
     let type: BlockType
     var location: EditorLocation?
     var data: EditorBlockData
-    
+
     // MARK: - Initializers
-    
+
     init(
         id: UUID = UUID(),
         order: Int,
@@ -33,9 +33,9 @@ struct EditorBlock: Codable, Identifiable, Equatable {
         self.location = location
         self.data = data
     }
-    
+
     // MARK: - Factory Methods
-    
+
     static func newMoment(
         order: Int,
         date: String? = nil,
@@ -60,7 +60,7 @@ struct EditorBlock: Codable, Identifiable, Equatable {
             )
         )
     }
-    
+
     static func newRecommendation(
         order: Int,
         name: String,
@@ -85,7 +85,7 @@ struct EditorBlock: Codable, Identifiable, Equatable {
             )
         )
     }
-    
+
     static func newPhoto(
         order: Int,
         imageUrl: String? = nil,
@@ -102,7 +102,7 @@ struct EditorBlock: Codable, Identifiable, Equatable {
             )
         )
     }
-    
+
     static func newTip(
         order: Int,
         title: String? = nil,
@@ -117,7 +117,7 @@ struct EditorBlock: Codable, Identifiable, Equatable {
             )
         )
     }
-    
+
     static func newDivider(order: Int) -> EditorBlock {
         EditorBlock(
             order: order,

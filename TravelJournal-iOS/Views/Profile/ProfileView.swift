@@ -1,11 +1,12 @@
 import SwiftUI
 
 // MARK: - Profile View
+
 /// Main profile/settings screen with profile card and settings sections
 struct ProfileView: View {
     @EnvironmentObject var authManager: AuthManager
     @StateObject private var viewModel = ProfileViewModel()
-    
+
     var body: some View {
         NavigationStack {
             AppBackgroundView {
@@ -13,22 +14,22 @@ struct ProfileView: View {
                     VStack(spacing: AppTheme.Spacing.lg) {
                         // Profile Card Section
                         ProfileCardSection(viewModel: viewModel)
-                        
+
                         // Account Section
                         AccountSection(viewModel: viewModel)
-                        
+
                         // Preferences Section
                         PreferencesSection(viewModel: viewModel)
-                        
+
                         // Support Section
-                        SupportSection();
-                        
+                        SupportSection()
+
                         // App Version
                         appVersionSection
-                        
+
                         // Danger Zone
                         dangerZoneSection
-                        
+
                         // Bottom padding for tab bar
                         Spacer()
                             .frame(height: AppTheme.Spacing.xxxl)
@@ -78,7 +79,7 @@ struct ProfileView: View {
             }
             // Logout Alert
             .alert("Log Out", isPresented: $viewModel.showingLogoutAlert) {
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {}
                 Button("Log Out", role: .destructive) {
                     Task {
                         await authManager.logout()
@@ -89,7 +90,7 @@ struct ProfileView: View {
             }
             // Delete Account Alert
             .alert("Delete Account", isPresented: $viewModel.showingDeleteAccountAlert) {
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {}
                 Button("Continue", role: .destructive) {
                     viewModel.showingDeleteConfirmation = true
                 }
@@ -104,15 +105,15 @@ struct ProfileView: View {
             }
         }
     }
-    
+
     // MARK: - App Version Section
-    
+
     private var appVersionSection: some View {
         VStack(spacing: 0) {
             Text("TravelJournal")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
-            
+
             Text(viewModel.appVersion)
                 .font(AppTheme.Typography.monoCaption())
                 .foregroundColor(AppTheme.Colors.textMuted)
@@ -120,9 +121,9 @@ struct ProfileView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, AppTheme.Spacing.md)
     }
-    
+
     // MARK: - Danger Zone Section
-    
+
     private var dangerZoneSection: some View {
         SettingsSection {
             Button {
@@ -136,9 +137,9 @@ struct ProfileView: View {
                 )
             }
             .buttonStyle(.plain)
-            
+
             SettingsDivider()
-            
+
             Button {
                 viewModel.showingDeleteAccountAlert = true
             } label: {

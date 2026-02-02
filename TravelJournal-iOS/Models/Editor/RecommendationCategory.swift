@@ -16,9 +16,9 @@ enum RecommendationCategory: Int, Codable, CaseIterable {
     case eat = 1
     case `do` = 2
     case shop = 3
-    
+
     // MARK: - Display Properties
-    
+
     var displayName: String {
         switch self {
         case .stay: return "Stay"
@@ -27,7 +27,7 @@ enum RecommendationCategory: Int, Codable, CaseIterable {
         case .shop: return "Shop"
         }
     }
-    
+
     var icon: String {
         switch self {
         case .stay: return "bed.double.fill"

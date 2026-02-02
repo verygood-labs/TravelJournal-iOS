@@ -1,16 +1,17 @@
 import SwiftUI
 
 // MARK: - Passport Text Field Style
+
 /// Custom text field style with passport theme styling and validation states
 /// Used on dark backgrounds
 struct PassportTextFieldStyle: TextFieldStyle {
     var isFocused: Bool = false
     var validationState: ValidationState = .none
-    
+
     enum ValidationState {
         case none, valid, invalid
     }
-    
+
     private var borderColor: Color {
         switch validationState {
         case .valid:
@@ -21,7 +22,7 @@ struct PassportTextFieldStyle: TextFieldStyle {
             return isFocused ? AppTheme.Colors.inputBorderFocused : AppTheme.Colors.inputBorder
         }
     }
-    
+
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .font(AppTheme.Typography.monoMedium())
@@ -45,16 +46,17 @@ struct PassportTextFieldStyle: TextFieldStyle {
 }
 
 // MARK: - Passport Page Text Field Style
+
 /// Custom text field style for passport page (cream/paper background)
 /// Used on light passport page backgrounds
 struct PassportPageTextFieldStyle: TextFieldStyle {
     var isFocused: Bool = false
     var validationState: ValidationState = .none
-    
+
     enum ValidationState {
         case none, valid, invalid
     }
-    
+
     private var borderColor: Color {
         switch validationState {
         case .valid:
@@ -65,7 +67,7 @@ struct PassportPageTextFieldStyle: TextFieldStyle {
             return isFocused ? AppTheme.Colors.passportInputBorderFocused : AppTheme.Colors.passportInputBorder
         }
     }
-    
+
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .font(AppTheme.Typography.monoMedium())
@@ -89,21 +91,22 @@ struct PassportPageTextFieldStyle: TextFieldStyle {
 }
 
 // MARK: - Preview
+
 #Preview("Dark Background") {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
             TextField("Default", text: .constant(""))
                 .textFieldStyle(PassportTextFieldStyle())
-            
+
             TextField("Focused", text: .constant(""))
                 .textFieldStyle(PassportTextFieldStyle(isFocused: true))
-            
+
             TextField("Valid", text: .constant("test@email.com"))
                 .textFieldStyle(PassportTextFieldStyle(validationState: .valid))
-            
+
             TextField("Invalid", text: .constant("bad input"))
                 .textFieldStyle(PassportTextFieldStyle(validationState: .invalid))
         }
@@ -116,23 +119,23 @@ struct PassportPageTextFieldStyle: TextFieldStyle {
         LinearGradient(
             colors: [
                 AppTheme.Colors.passportPageLight,
-                AppTheme.Colors.passportPageDark
+                AppTheme.Colors.passportPageDark,
             ],
             startPoint: .top,
             endPoint: .bottom
         )
         .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
             TextField("Default", text: .constant(""))
                 .textFieldStyle(PassportPageTextFieldStyle())
-            
+
             TextField("Focused", text: .constant(""))
                 .textFieldStyle(PassportPageTextFieldStyle(isFocused: true))
-            
+
             TextField("Valid", text: .constant("test@email.com"))
                 .textFieldStyle(PassportPageTextFieldStyle(validationState: .valid))
-            
+
             TextField("Invalid", text: .constant("bad input"))
                 .textFieldStyle(PassportPageTextFieldStyle(validationState: .invalid))
         }

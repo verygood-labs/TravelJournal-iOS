@@ -17,9 +17,9 @@ enum BlockType: String, Codable, CaseIterable {
     case photo
     case tip
     case divider
-    
+
     // MARK: - Display Properties
-    
+
     var icon: String {
         switch self {
         case .moment: return "sparkles"
@@ -29,7 +29,7 @@ enum BlockType: String, Codable, CaseIterable {
         case .divider: return "minus"
         }
     }
-    
+
     var label: String {
         switch self {
         case .moment: return "Moment"
@@ -39,7 +39,7 @@ enum BlockType: String, Codable, CaseIterable {
         case .divider: return "Divider"
         }
     }
-    
+
     /// Block types available in the editor toolbar
     static var toolbarItems: [BlockType] {
         [.moment, .photo, .recommendation, .tip, .divider]

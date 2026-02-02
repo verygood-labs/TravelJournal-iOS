@@ -9,13 +9,14 @@ import Foundation
 import SwiftUI
 
 // MARK: - Block Sheet Navigation Bar
+
 /// Reusable navigation bar for all block editor sheets
 struct BlockSheetNavigationBar: View {
     let title: String
     let isValid: Bool
     let onCancel: () -> Void
     let onDone: () -> Void
-    
+
     var body: some View {
         HStack {
             Button {
@@ -25,16 +26,16 @@ struct BlockSheetNavigationBar: View {
                     .font(AppTheme.Typography.monoMedium())
                     .foregroundColor(AppTheme.Colors.textSecondary)
             }
-            
+
             Spacer()
-            
+
             Text(title)
                 .font(AppTheme.Typography.monoMedium())
                 .fontWeight(.semibold)
                 .foregroundColor(AppTheme.Colors.textPrimary)
-            
+
             Spacer()
-            
+
             Button {
                 onDone()
             } label: {
@@ -53,35 +54,32 @@ struct BlockSheetNavigationBar: View {
 }
 
 // MARK: - Block Form Section
+
 /// Reusable form section with label
 struct BlockFormSection<Content: View>: View {
     let label: String
-    let content: Content
-    
-    init(label: String, @ViewBuilder content: () -> Content) {
-        self.label = label
-        self.content = content()
-    }
-    
+    @ViewBuilder let content: Content
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
             Text(label)
                 .font(AppTheme.Typography.inputLabel())
                 .tracking(1)
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             content
         }
     }
 }
 
 // MARK: - Block Text Editor
+
 /// Styled text editor for block forms
 struct BlockTextEditor: View {
     @Binding var text: String
     let placeholder: String
     var minHeight: CGFloat = 120
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             TextEditor(text: $text)
@@ -96,7 +94,7 @@ struct BlockTextEditor: View {
                         .stroke(AppTheme.Colors.passportInputBorder, lineWidth: 1)
                 )
                 .cornerRadius(AppTheme.CornerRadius.medium)
-            
+
             if text.isEmpty {
                 Text(placeholder)
                     .font(AppTheme.Typography.monoMedium())
@@ -109,6 +107,7 @@ struct BlockTextEditor: View {
 }
 
 // MARK: - Block TextField Style
+
 struct BlockTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
@@ -125,9 +124,10 @@ struct BlockTextFieldStyle: TextFieldStyle {
 }
 
 // MARK: - Block Delete Button
+
 struct BlockDeleteButton: View {
     let onDelete: () -> Void
-    
+
     var body: some View {
         Button {
             onDelete()
@@ -142,6 +142,7 @@ struct BlockDeleteButton: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     VStack(spacing: AppTheme.Spacing.lg) {
         BlockSheetNavigationBar(
@@ -150,21 +151,21 @@ struct BlockDeleteButton: View {
             onCancel: {},
             onDone: {}
         )
-        
+
         VStack(spacing: AppTheme.Spacing.md) {
             BlockFormSection(label: "TITLE") {
                 TextField("Enter title", text: .constant(""))
                     .textFieldStyle(BlockTextFieldStyle())
             }
-            
+
             BlockFormSection(label: "CONTENT") {
                 BlockTextEditor(text: .constant(""), placeholder: "Write something...")
             }
         }
         .padding()
-        
+
         Spacer()
-        
+
         BlockDeleteButton(onDelete: {})
     }
     .background(AppTheme.Colors.passportPageDark)

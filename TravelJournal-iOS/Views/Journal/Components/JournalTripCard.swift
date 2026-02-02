@@ -5,8 +5,6 @@
 //  Created by John Apale on 1/21/26.
 //
 
-
-
 import SwiftUI
 
 struct JournalTripCard: View {
@@ -28,22 +26,23 @@ struct JournalTripCard: View {
             onDelete: onDelete
         )
     }
-    
+
     // MARK: - Card Content
+
     private var cardContent: some View {
         VStack(spacing: 0) {
             // Cover Image Section with edit button
             coverImageSection
-            
+
             // Details Section
             PassportPageBackgroundView {
                 VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
                     // Title and Status Row
                     titleRow
-                    
+
                     // Date Range
                     dateRangeRow
-                    
+
                     // Description (if available)
                     if let description = trip.description, !description.isEmpty {
                         Text(description)
@@ -51,13 +50,13 @@ struct JournalTripCard: View {
                             .foregroundColor(AppTheme.Colors.passportTextSecondary)
                             .lineLimit(2)
                     }
-                    
+
                     // Divider
                     Rectangle()
                         .fill(AppTheme.Colors.passportInputBorder)
                         .frame(height: 1)
                         .padding(.vertical, AppTheme.Spacing.xxs)
-                    
+
                     // Stats and Metadata Row
                     bottomRow
                 }
@@ -71,19 +70,21 @@ struct JournalTripCard: View {
         )
         .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
     }
-    
+
     // MARK: - Cover Image Section
+
     private var coverImageSection: some View {
         // Cover image or placeholder
         Group {
             if let coverUrl = trip.coverImageUrl,
-               let url = APIService.shared.fullMediaURL(for: coverUrl) {
+               let url = APIService.shared.fullMediaURL(for: coverUrl)
+            {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
                         coverPlaceholder
                             .overlay(ProgressView())
-                    case .success(let image):
+                    case let .success(image):
                         image
                             .resizable()
                             .scaledToFill()
@@ -101,26 +102,27 @@ struct JournalTripCard: View {
         }
         .frame(height: 160)
     }
-    
+
     private var coverPlaceholder: some View {
         ZStack {
             LinearGradient(
                 colors: [
                     AppTheme.Colors.backgroundMedium,
-                    AppTheme.Colors.backgroundDark
+                    AppTheme.Colors.backgroundDark,
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            
+
             Image(systemName: "photo.on.rectangle.angled")
                 .font(.system(size: 32, weight: .light))
                 .foregroundColor(AppTheme.Colors.primary.opacity(0.3))
         }
-        .frame(height: 160)  // ← Changed from 120
+        .frame(height: 160) // ← Changed from 120
     }
-    
+
     // MARK: - Action Buttons
+
     private var actionButtons: some View {
         HStack(spacing: AppTheme.Spacing.xxs) {
             // Edit Button
@@ -136,28 +138,29 @@ struct JournalTripCard: View {
             }
         }
     }
-    
+
     // MARK: - Title Row
+
     private var titleRow: some View {
         HStack(alignment: .center) {
             Text(trip.title)
                 .font(AppTheme.Typography.serifSmall())
                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
                 .lineLimit(1)
-            
+
             Spacer()
-            
+
             // Status Badge
             statusBadge
         }
     }
-    
+
     private var statusBadge: some View {
         HStack(spacing: 3) {
             Circle()
                 .fill(trip.status.color)
                 .frame(width: 5, height: 5)
-            
+
             Text(trip.status.rawValue.uppercased())
                 .font(AppTheme.Typography.monoCaption())
                 .tracking(0.5)
@@ -170,50 +173,52 @@ struct JournalTripCard: View {
                 .fill(trip.status.color.opacity(0.1))
         )
     }
-    
+
     // MARK: - Date Range Row
+
     private var dateRangeRow: some View {
         HStack(spacing: AppTheme.Spacing.xxxs) {
             Image(systemName: "calendar")
                 .font(.system(size: 10))
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             Text(trip.dateRange)
                 .font(AppTheme.Typography.monoCaption())
                 .foregroundColor(AppTheme.Colors.passportTextSecondary)
         }
     }
-    
+
     // MARK: - Bottom Row (Stats + Metadata combined)
+
     private var bottomRow: some View {
         HStack(spacing: AppTheme.Spacing.sm) {
             // Locations
             statItem(icon: "mappin", value: "\(trip.stops?.count ?? 0)")
-            
+
             // Entries
             statItem(icon: "doc.text", value: "0")
-            
+
             Spacer()
-            
+
             // Updated date
             Text("Updated \(formatRelativeDate(trip.updatedAt ?? trip.createdAt))")
                 .font(AppTheme.Typography.monoCaption())
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
         }
     }
-    
+
     private func statItem(icon: String, value: String) -> some View {
         HStack(spacing: 3) {
             Image(systemName: icon)
                 .font(.system(size: 10))
                 .foregroundColor(AppTheme.Colors.primary)
-            
+
             Text(value)
                 .font(AppTheme.Typography.monoCaption())
                 .foregroundColor(AppTheme.Colors.passportTextSecondary)
         }
     }
-    
+
     private func formatRelativeDate(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
@@ -222,6 +227,7 @@ struct JournalTripCard: View {
 }
 
 // MARK: - Preview
+
 #Preview("Public Trip") {
     let sampleTrip = Trip(
         id: UUID(),
@@ -236,11 +242,11 @@ struct JournalTripCard: View {
         updatedAt: Date().addingTimeInterval(-86400 * 2),
         stops: nil
     )
-    
+
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         JournalTripCard(
             trip: sampleTrip,
             onView: { print("View tapped") },
@@ -264,11 +270,11 @@ struct JournalTripCard: View {
         updatedAt: Date(),
         stops: nil
     )
-    
+
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         JournalTripCard(
             trip: draftTrip,
             onView: { print("View tapped") },
@@ -292,11 +298,11 @@ struct JournalTripCard: View {
         updatedAt: Date().addingTimeInterval(-86400 * 30),
         stops: nil
     )
-    
+
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         JournalTripCard(
             trip: privateTrip,
             onView: { print("View tapped") },
@@ -346,9 +352,9 @@ struct JournalTripCard: View {
             createdAt: Date().addingTimeInterval(-86400 * 60),
             updatedAt: Date().addingTimeInterval(-86400 * 10),
             stops: nil
-        )
+        ),
     ]
-    
+
     ScrollView {
         LazyVStack(spacing: AppTheme.Spacing.lg) {
             ForEach(trips) { trip in

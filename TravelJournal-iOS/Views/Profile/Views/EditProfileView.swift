@@ -1,14 +1,14 @@
 //
-//  EditProfileField.swift
+//  EditProfileView.swift
 //  TravelJournal-iOS
 //
 //  Created by John Apale on 1/24/26.
 //
 
-
 import SwiftUI
 
 // MARK: - Edit Profile Field
+
 /// Specifies which field to focus when opening the edit screen
 enum EditProfileField {
     case none
@@ -18,17 +18,18 @@ enum EditProfileField {
 }
 
 // MARK: - Edit Profile View
+
 /// Screen for editing user profile information (name, username, photo, nationality)
 /// Uses passport page styling consistent with the app theme
 struct EditProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     var field: EditProfileField = .none
-    
+
     @Environment(\.dismiss) private var dismiss
     @StateObject private var editViewModel = EditProfileViewModel()
-    
+
     @FocusState private var focusedField: EditProfileField?
-    
+
     var body: some View {
         PassportPageBackgroundView {
             ScrollView {
@@ -36,11 +37,11 @@ struct EditProfileView: View {
                     // Profile Photo Section
                     profilePhotoSection
                         .padding(.top, AppTheme.Spacing.xl)
-                    
+
                     // Form Fields
                     formSection
                         .padding(.horizontal, AppTheme.Spacing.lg)
-                    
+
                     Spacer(minLength: AppTheme.Spacing.xxxl)
                 }
             }
@@ -56,7 +57,7 @@ struct EditProfileView: View {
                 .font(AppTheme.Typography.monoMedium())
                 .foregroundColor(AppTheme.Colors.passportTextSecondary)
             }
-            
+
             ToolbarItem(placement: .navigationBarTrailing) {
                 if editViewModel.isSaving {
                     ProgressView()
@@ -79,7 +80,7 @@ struct EditProfileView: View {
             if let profile = viewModel.userProfile {
                 editViewModel.initialize(with: profile)
             }
-            
+
             // Set initial focus if specified
             if field != .none {
                 focusedField = field
@@ -95,14 +96,14 @@ struct EditProfileView: View {
             get: { editViewModel.error != nil },
             set: { if !$0 { editViewModel.error = nil } }
         )) {
-            Button("OK", role: .cancel) { }
+            Button("OK", role: .cancel) {}
         } message: {
             Text(editViewModel.error ?? "")
         }
     }
-    
+
     // MARK: - Profile Photo Section
-    
+
     private var profilePhotoSection: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             // Photo
@@ -119,7 +120,7 @@ struct EditProfileView: View {
                         case .empty:
                             photoPlaceholder
                                 .overlay(ProgressView())
-                        case .success(let image):
+                        case let .success(image):
                             image
                                 .resizable()
                                 .scaledToFill()
@@ -140,7 +141,7 @@ struct EditProfileView: View {
                 RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
                     .stroke(AppTheme.Colors.primary, lineWidth: 2)
             )
-            
+
             // Photo action buttons
             HStack(spacing: AppTheme.Spacing.md) {
                 Button {
@@ -158,7 +159,7 @@ struct EditProfileView: View {
                     .background(AppTheme.Colors.primary.opacity(0.1))
                     .cornerRadius(AppTheme.CornerRadius.pill)
                 }
-                
+
                 Button {
                     editViewModel.showingImagePicker = true
                 } label: {
@@ -177,43 +178,43 @@ struct EditProfileView: View {
             }
         }
     }
-    
+
     private var photoPlaceholder: some View {
         ZStack {
             RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
                 .fill(AppTheme.Colors.passportInputBackground)
                 .frame(width: 120, height: 120)
-            
+
             Image(systemName: "person.fill")
                 .font(.system(size: 40))
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
         }
     }
-    
+
     // MARK: - Form Section
-    
+
     private var formSection: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             // Full Name
             nameField
-            
+
             // Username
             usernameField
-            
+
             // Nationality
             nationalityField
         }
     }
-    
+
     // MARK: - Name Field
-    
+
     private var nameField: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
             Text("FULL NAME")
                 .font(AppTheme.Typography.inputLabel())
                 .tracking(1)
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             TextField(
                 "",
                 text: $editViewModel.name,
@@ -226,22 +227,22 @@ struct EditProfileView: View {
             .autocorrectionDisabled()
         }
     }
-    
+
     // MARK: - Username Field
-    
+
     private var usernameField: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
             Text("HANDLE / USERNAME")
                 .font(AppTheme.Typography.inputLabel())
                 .tracking(1)
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             HStack(spacing: 0) {
                 Text("@")
                     .font(AppTheme.Typography.monoMedium())
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
                     .padding(.leading, AppTheme.Spacing.sm)
-                
+
                 TextField(
                     "",
                     text: $editViewModel.username,
@@ -255,7 +256,7 @@ struct EditProfileView: View {
                 .autocapitalization(.none)
                 .autocorrectionDisabled()
                 .padding(.vertical, 14)
-                
+
                 // Status indicator
                 usernameStatusIndicator
             }
@@ -269,7 +270,7 @@ struct EditProfileView: View {
                     .stroke(usernameBorderColor, lineWidth: 2)
             )
             .cornerRadius(AppTheme.CornerRadius.medium)
-            
+
             if let error = editViewModel.usernameError {
                 Text(error)
                     .font(AppTheme.Typography.monoCaption())
@@ -277,7 +278,7 @@ struct EditProfileView: View {
             }
         }
     }
-    
+
     private var usernameBorderColor: Color {
         if editViewModel.usernameError != nil {
             return .red
@@ -286,7 +287,7 @@ struct EditProfileView: View {
             ? AppTheme.Colors.passportInputBorderFocused
             : AppTheme.Colors.passportInputBorder
     }
-    
+
     @ViewBuilder
     private var usernameStatusIndicator: some View {
         if editViewModel.isCheckingUsername {
@@ -306,23 +307,23 @@ struct EditProfileView: View {
                 .frame(width: AppTheme.Spacing.sm)
         }
     }
-    
+
     // MARK: - Nationality Field
-    
+
     private var nationalityField: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
             Text("NATIONALITY")
                 .font(AppTheme.Typography.inputLabel())
                 .tracking(1)
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             nationalityPicker
         }
         .task {
             await editViewModel.loadCountries()
         }
     }
-    
+
     private var nationalityPicker: some View {
         VStack(spacing: 0) {
             // Input field
@@ -331,9 +332,9 @@ struct EditProfileView: View {
                     Text(country.name)
                         .font(AppTheme.Typography.monoMedium())
                         .foregroundColor(AppTheme.Colors.passportTextPrimary)
-                    
+
                     Spacer()
-                    
+
                     Button {
                         editViewModel.clearSelectedCountry()
                     } label: {
@@ -345,7 +346,7 @@ struct EditProfileView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 14))
                         .foregroundColor(AppTheme.Colors.passportTextMuted)
-                    
+
                     TextField(
                         "",
                         text: $editViewModel.countrySearchText,
@@ -361,7 +362,7 @@ struct EditProfileView: View {
                     .onChange(of: editViewModel.countrySearchText) { _, newValue in
                         editViewModel.showCountryDropdown = !newValue.isEmpty
                     }
-                    
+
                     if editViewModel.isLoadingCountries {
                         ProgressView()
                             .scaleEffect(0.8)
@@ -381,7 +382,7 @@ struct EditProfileView: View {
                     )
             )
             .clipShape(RoundedRectangle(cornerRadius: editViewModel.showCountryDropdown ? 0 : AppTheme.CornerRadius.medium))
-            
+
             // Dropdown list
             if editViewModel.showCountryDropdown && !editViewModel.filteredCountries.isEmpty {
                 ScrollView {
@@ -401,7 +402,7 @@ struct EditProfileView: View {
                                 .padding(.vertical, 12)
                                 .background(AppTheme.Colors.passportInputBackground)
                             }
-                            
+
                             if country.id != editViewModel.filteredCountries.last?.id {
                                 Divider()
                                     .background(AppTheme.Colors.passportInputBorder)
@@ -419,9 +420,9 @@ struct EditProfileView: View {
             }
         }
     }
-    
+
     // MARK: - Save Profile
-    
+
     private func saveProfile() async {
         let success = await editViewModel.saveProfile()
         if success {

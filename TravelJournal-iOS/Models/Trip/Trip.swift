@@ -5,7 +5,6 @@
 //  Created by John Apale on 1/25/26.
 //
 
-
 import Foundation
 
 struct Trip: Codable, Identifiable {
@@ -23,18 +22,18 @@ struct Trip: Codable, Identifiable {
     let primaryDestination: String?
     let saveCount: Int
     let stopCount: Int
-    
+
     enum CodingKeys: String, CodingKey {
         case id, title, description, coverImageUrl, status, tripMode
         case startDate, endDate, createdAt, updatedAt, stops
         case primaryDestination, saveCount, stopCount
     }
-    
+
     // MARK: - Decoder (handles DateOnly format for startDate/endDate)
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         id = try container.decode(UUID.self, forKey: .id)
         title = try container.decode(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
@@ -47,27 +46,27 @@ struct Trip: Codable, Identifiable {
         primaryDestination = try container.decodeIfPresent(String.self, forKey: .primaryDestination)
         saveCount = try container.decodeIfPresent(Int.self, forKey: .saveCount) ?? 0
         stopCount = try container.decodeIfPresent(Int.self, forKey: .stopCount) ?? 0
-        
+
         // Handle DateOnly format (yyyy-MM-dd)
         let dateOnlyFormatter = DateFormatter()
         dateOnlyFormatter.dateFormat = "yyyy-MM-dd"
         dateOnlyFormatter.timeZone = TimeZone(identifier: "UTC")
-        
+
         if let startDateString = try container.decodeIfPresent(String.self, forKey: .startDate) {
             startDate = dateOnlyFormatter.date(from: startDateString)
         } else {
             startDate = nil
         }
-        
+
         if let endDateString = try container.decodeIfPresent(String.self, forKey: .endDate) {
             endDate = dateOnlyFormatter.date(from: endDateString)
         } else {
             endDate = nil
         }
     }
-    
+
     // MARK: - Memberwise Initializer (for previews)
-    
+
     init(
         id: UUID,
         title: String,
@@ -108,17 +107,17 @@ extension Trip {
         guard let start = startDate, let end = endDate else {
             return "No dates set"
         }
-        
+
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
-        
+
         let startString = formatter.string(from: start)
         let endString = formatter.string(from: end)
-        
+
         let yearFormatter = DateFormatter()
         yearFormatter.dateFormat = "yyyy"
         let year = yearFormatter.string(from: end)
-        
+
         return "\(startString) - \(endString), \(year)"
     }
 }

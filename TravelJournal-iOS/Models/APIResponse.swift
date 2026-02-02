@@ -23,7 +23,7 @@ struct ProblemDetails: Codable {
 struct ValidationErrorResponse: Codable {
     let message: String?
     let errors: [FieldError]?
-    
+
     struct FieldError: Codable {
         let field: String
         let message: String
@@ -43,7 +43,7 @@ enum APIError: Error, LocalizedError {
     case networkError(Error)
     case decodingError(Error)
     case unknown
-    
+
     var errorDescription: String? {
         switch self {
         case .unauthorized:
@@ -52,11 +52,11 @@ enum APIError: Error, LocalizedError {
             return "You don't have permission to access this"
         case .notFound:
             return "The requested resource was not found"
-        case .validationError(let errors):
+        case let .validationError(errors):
             return errors.values.flatMap { $0 }.joined(separator: "\n")
-        case .serverError(let message):
+        case let .serverError(message):
             return message
-        case .networkError(let error):
+        case let .networkError(error):
             return "Network error: \(error.localizedDescription)"
         case .decodingError:
             return "Failed to process server response"

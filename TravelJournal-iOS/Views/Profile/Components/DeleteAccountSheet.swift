@@ -5,16 +5,16 @@
 //  Created by John Apale on 1/24/26.
 //
 
-
 import SwiftUI
 
 // MARK: - Delete Account Confirmation Sheet
+
 /// Sheet that requires user to type "DELETE" to confirm account deletion
 struct DeleteAccountSheet: View {
     @ObservedObject var viewModel: ProfileViewModel
     @ObservedObject var authManager: AuthManager
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         VStack(spacing: AppTheme.Spacing.lg) {
             // Header
@@ -22,18 +22,18 @@ struct DeleteAccountSheet: View {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 40))
                     .foregroundColor(AppTheme.Colors.error)
-                
+
                 Text("Confirm Deletion")
                     .font(AppTheme.Typography.serifSmall())
                     .foregroundColor(AppTheme.Colors.textPrimary)
             }
             .padding(.top, AppTheme.Spacing.md)
-            
+
             // Instructions
             Text("Type DELETE to confirm")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
-            
+
             // Text Field
             TextField("", text: $viewModel.deleteConfirmationText)
                 .font(AppTheme.Typography.monoMedium())
@@ -46,7 +46,7 @@ struct DeleteAccountSheet: View {
                         .stroke(AppTheme.Colors.inputBorder, lineWidth: 1)
                 )
                 .padding(.horizontal, AppTheme.Spacing.xl)
-            
+
             // Delete Button
             Button {
                 Task {
@@ -73,7 +73,7 @@ struct DeleteAccountSheet: View {
             }
             .disabled(!viewModel.canDeleteAccount || viewModel.isDeletingAccount)
             .padding(.horizontal, AppTheme.Spacing.lg)
-            
+
             Spacer()
         }
         .background(AppTheme.Colors.backgroundMedium)

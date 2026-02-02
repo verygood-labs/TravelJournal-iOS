@@ -1,10 +1,10 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 struct MapView: View {
     @StateObject private var viewModel = MapViewModel()
     @State private var position: MapCameraPosition = .automatic
-    
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -20,8 +20,9 @@ struct MapView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
     }
-    
+
     // MARK: - Map Content
+
     private var mapContent: some View {
         Map(position: $position) {
             // Plot visited countries/locations
@@ -38,8 +39,9 @@ struct MapView: View {
             await viewModel.loadVisitedLocations()
         }
     }
-    
+
     // MARK: - Stats Overlay
+
     private var statsOverlay: some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             HStack(spacing: AppTheme.Spacing.lg) {
@@ -48,21 +50,21 @@ struct MapView: View {
                     value: "\(viewModel.countriesCount)",
                     label: "Countries"
                 )
-                
+
                 Divider()
                     .frame(height: 30)
                     .background(AppTheme.Colors.primary.opacity(0.3))
-                
+
                 statItem(
                     icon: "airplane",
                     value: "\(viewModel.tripsCount)",
                     label: "Trips"
                 )
-                
+
                 Divider()
                     .frame(height: 30)
                     .background(AppTheme.Colors.primary.opacity(0.3))
-                
+
                 statItem(
                     icon: "mappin.and.ellipse",
                     value: "\(viewModel.locationsCount)",
@@ -80,55 +82,57 @@ struct MapView: View {
         .padding(.horizontal, AppTheme.Spacing.lg)
         .padding(.bottom, AppTheme.Spacing.lg)
     }
-    
+
     private func statItem(icon: String, value: String, label: String) -> some View {
         VStack(spacing: AppTheme.Spacing.xxs) {
             Image(systemName: icon)
                 .font(.system(size: 20))
                 .foregroundColor(AppTheme.Colors.primary)
-            
+
             Text(value)
                 .font(AppTheme.Typography.serifMedium())
                 .foregroundColor(AppTheme.Colors.textPrimary)
-            
+
             Text(label)
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
         }
         .frame(maxWidth: .infinity)
     }
-    
+
     // MARK: - Loading View
+
     private var loadingView: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             AnimatedGlobeView(size: 60)
-            
+
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: AppTheme.Colors.primary))
-            
+
             Text("Loading map...")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
         }
     }
-    
+
     // MARK: - Error View
+
     private func errorView(message: String) -> some View {
         VStack(spacing: AppTheme.Spacing.md) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 50))
                 .foregroundColor(AppTheme.Colors.primary.opacity(0.6))
-            
+
             Text("Unable to Load Map")
                 .font(AppTheme.Typography.serifSmall())
                 .foregroundColor(AppTheme.Colors.textPrimary)
-            
+
             Text(message)
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppTheme.Spacing.xl)
-            
+
             Button {
                 Task {
                     await viewModel.loadVisitedLocations()
@@ -148,6 +152,7 @@ struct MapView: View {
 }
 
 // MARK: - Supporting Types
+
 struct VisitedLocation: Identifiable {
     let id = UUID()
     let name: String

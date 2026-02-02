@@ -1,31 +1,28 @@
 import SwiftUI
 
 // MARK: - Passport Page Background View
+
 /// Cream/paper-style background with subtle grid pattern
 /// Used for form sections that mimic passport page aesthetics
 /// Usage: PassportPageBackgroundView { YourContent() }
 struct PassportPageBackgroundView<Content: View>: View {
-    let content: Content
-    
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-    
+    @ViewBuilder let content: Content
+
     var body: some View {
         ZStack {
             // Base gradient - cream/paper colors
             LinearGradient(
                 colors: [
                     AppTheme.Colors.passportPageLight,
-                    AppTheme.Colors.passportPageDark
+                    AppTheme.Colors.passportPageDark,
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
-            
+
             // Grid pattern overlay
             PassportGridPatternView()
-            
+
             // Content
             content
         }
@@ -33,13 +30,14 @@ struct PassportPageBackgroundView<Content: View>: View {
 }
 
 // MARK: - Passport Grid Pattern View
+
 /// Subtle cross-hatch grid pattern overlay for passport page texture
 struct PassportGridPatternView: View {
     var body: some View {
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
             let gridSpacing: CGFloat = 60
             let lineWidth: CGFloat = 0.5
-            
+
             // Draw vertical lines
             for x in stride(from: 0, to: size.width, by: gridSpacing) {
                 var path = Path()
@@ -51,7 +49,7 @@ struct PassportGridPatternView: View {
                     lineWidth: lineWidth
                 )
             }
-            
+
             // Draw horizontal lines
             for y in stride(from: 0, to: size.height, by: gridSpacing) {
                 var path = Path()
@@ -69,6 +67,7 @@ struct PassportGridPatternView: View {
 }
 
 // MARK: - Page Curl Decoration
+
 /// Decorative page curl effect for bottom-right corner
 struct PageCurlDecoration: View {
     var body: some View {
@@ -81,7 +80,7 @@ struct PageCurlDecoration: View {
                         LinearGradient(
                             colors: [
                                 Color.clear,
-                                Color.black.opacity(0.05)
+                                Color.black.opacity(0.05),
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -94,6 +93,7 @@ struct PageCurlDecoration: View {
 }
 
 // MARK: - Triangle Shape
+
 struct Triangle: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -106,13 +106,14 @@ struct Triangle: Shape {
 }
 
 // MARK: - Preview
+
 #Preview {
     PassportPageBackgroundView {
         VStack {
             Text("Passport Page Content")
                 .font(AppTheme.Typography.serifMedium())
                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
-            
+
             Text("Subtitle text")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.passportTextSecondary)

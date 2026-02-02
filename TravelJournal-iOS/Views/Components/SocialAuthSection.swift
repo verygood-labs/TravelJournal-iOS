@@ -1,18 +1,19 @@
 import SwiftUI
 
 // MARK: - Social Auth Section
+
 /// Reusable social authentication section with divider and Google/Apple buttons
 /// Usage: SocialAuthSection(onGoogleTap: { }, onAppleTap: { })
 struct SocialAuthSection: View {
     var showLabels: Bool = true
     var onGoogleTap: () -> Void
     var onAppleTap: () -> Void
-    
+
     var body: some View {
         VStack(spacing: AppTheme.Spacing.lg) {
             // Divider
             divider
-            
+
             // Social buttons
             HStack(spacing: AppTheme.Spacing.xs) {
                 // Google
@@ -28,7 +29,7 @@ struct SocialAuthSection: View {
                     }
                 }
                 .buttonStyle(SocialButtonStyle())
-                
+
                 // Apple
                 Button(action: onAppleTap) {
                     if showLabels {
@@ -45,26 +46,28 @@ struct SocialAuthSection: View {
             }
         }
     }
-    
+
     // MARK: - Divider
+
     private var divider: some View {
         HStack(spacing: AppTheme.Spacing.sm) {
             Rectangle()
                 .fill(AppTheme.Colors.divider)
                 .frame(height: 1)
-            
+
             Text("OR")
                 .font(AppTheme.Typography.monoCaption())
                 .tracking(1)
                 .foregroundColor(AppTheme.Colors.textPrimary.opacity(0.3))
-            
+
             Rectangle()
                 .fill(AppTheme.Colors.divider)
                 .frame(height: 1)
         }
     }
-    
+
     // MARK: - Google Icon
+
     private var googleIcon: some View {
         // Using SF Symbol as fallback - replace with actual Google logo asset
         Image(systemName: "g.circle.fill")
@@ -75,8 +78,9 @@ struct SocialAuthSection: View {
                 endPoint: .bottomTrailing
             ))
     }
-    
+
     // MARK: - Apple Icon
+
     private var appleIcon: some View {
         Image(systemName: "apple.logo")
             .font(.system(size: showLabels ? 16 : 20))
@@ -84,24 +88,25 @@ struct SocialAuthSection: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: 40) {
             // With labels (for RegisterView)
             SocialAuthSection(
                 showLabels: true,
-                onGoogleTap: { },
-                onAppleTap: { }
+                onGoogleTap: {},
+                onAppleTap: {}
             )
-            
+
             // Without labels (for LoginView)
             SocialAuthSection(
                 showLabels: false,
-                onGoogleTap: { },
-                onAppleTap: { }
+                onGoogleTap: {},
+                onAppleTap: {}
             )
         }
         .padding()

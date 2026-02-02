@@ -1,20 +1,20 @@
 import SwiftUI
 
 struct JournalEditorView: View {
-    // ViewModel
+    /// ViewModel
     @StateObject private var viewModel: JournalEditorViewModel
-    
-    // Environment
+
+    /// Environment
     @Environment(\.dismiss) private var dismiss
-    
+
     // MARK: - Initialization
-    
+
     init(trip: Trip) {
         _viewModel = StateObject(wrappedValue: JournalEditorViewModel(trip: trip))
     }
-    
+
     // MARK: - Body
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Top navigation bar
@@ -23,14 +23,14 @@ struct JournalEditorView: View {
                 onCancel: { dismiss() },
                 onDone: { handleDone() }
             )
-            
+
             // Main content based on mode
             if viewModel.editorMode == .edit {
                 editModeContent
             } else {
                 previewModeContent
             }
-            
+
             // Bottom toolbar (only in edit mode)
             if viewModel.editorMode == .edit {
                 EditorBlockToolbar(viewModel: viewModel)
@@ -59,15 +59,15 @@ struct JournalEditorView: View {
             }
         }
     }
-    
+
     // MARK: - Edit Mode Content
-    
+
     private var editModeContent: some View {
         ScrollView {
             VStack(spacing: 0) {
                 // Cover image section
                 EditorCoverSection(viewModel: viewModel)
-                
+
                 // Trip header card
                 EditorTripHeaderCard(
                     viewModel: viewModel,
@@ -76,35 +76,35 @@ struct JournalEditorView: View {
                 )
                 .padding(.horizontal, AppTheme.Spacing.md)
                 .offset(y: -40)
-                
+
                 // Journal blocks
                 EditorBlocksSection(viewModel: viewModel)
                     .padding(.horizontal, AppTheme.Spacing.md)
-                
+
                 // Bottom spacing for toolbar
                 Spacer()
                     .frame(height: 100)
             }
         }
     }
-    
+
     // MARK: - Preview Mode Content
-    
+
     private var previewModeContent: some View {
         ScrollView {
             VStack(spacing: AppTheme.Spacing.md) {
                 Text("Preview Mode")
                     .font(AppTheme.Typography.monoMedium())
                     .foregroundColor(AppTheme.Colors.passportTextSecondary)
-                
+
                 // TODO: Implement preview rendering
             }
             .padding()
         }
     }
-    
+
     // MARK: - Actions
-    
+
     private func handleDone() {
         Task {
             let success = await viewModel.saveAndClose()
@@ -113,12 +113,12 @@ struct JournalEditorView: View {
             }
         }
     }
-    
+
     private func handleDatesTapped() {
         // TODO: Show date picker
         print("Dates tapped")
     }
-    
+
     private func handleLocationTapped() {
         // TODO: Show location picker
         print("Location tapped")
@@ -143,10 +143,10 @@ struct JournalEditorView: View {
             TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH")),
             TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH")),
             TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH"))
+            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH")),
         ]
     )
-    
+
     JournalEditorView(trip: sampleTrip)
 }
 
@@ -166,10 +166,10 @@ struct JournalEditorView: View {
             TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH")),
             TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH")),
             TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH"))
+            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH")),
         ]
     )
-    
+
     JournalEditorViewPreview(trip: sampleTrip)
 }
 
@@ -178,7 +178,7 @@ struct JournalEditorView: View {
 /// Preview wrapper that allows injecting sample data into the view model
 private struct JournalEditorViewPreview: View {
     let trip: Trip
-    
+
     var body: some View {
         JournalEditorViewWithBlocks(trip: trip)
     }
@@ -187,7 +187,7 @@ private struct JournalEditorViewPreview: View {
 private struct JournalEditorViewWithBlocks: View {
     @StateObject private var viewModel: JournalEditorViewModel
     @Environment(\.dismiss) private var dismiss
-    
+
     init(trip: Trip) {
         let vm = JournalEditorViewModel(trip: trip)
         vm.blocks = [
@@ -214,35 +214,35 @@ private struct JournalEditorViewWithBlocks: View {
             EditorBlock.newMoment(
                 order: 4,
                 content: "The street food scene here is incredible. Every corner has something new to try - from fish balls to balut (if you're brave enough!)."
-            )
+            ),
         ]
         _viewModel = StateObject(wrappedValue: vm)
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             EditorNavigationBar(
                 viewModel: viewModel,
                 onCancel: { dismiss() },
-                onDone: { }
+                onDone: {}
             )
-            
+
             if viewModel.editorMode == .edit {
                 ScrollView {
                     VStack(spacing: 0) {
                         EditorCoverSection(viewModel: viewModel)
-                        
+
                         EditorTripHeaderCard(
                             viewModel: viewModel,
-                            onDatesTapped: { },
-                            onLocationTapped: { }
+                            onDatesTapped: {},
+                            onLocationTapped: {}
                         )
                         .padding(.horizontal, AppTheme.Spacing.md)
                         .offset(y: -40)
-                        
+
                         EditorBlocksSection(viewModel: viewModel)
                             .padding(.horizontal, AppTheme.Spacing.md)
-                        
+
                         Spacer()
                             .frame(height: 100)
                     }
@@ -255,7 +255,7 @@ private struct JournalEditorViewWithBlocks: View {
                         .padding()
                 }
             }
-            
+
             if viewModel.editorMode == .edit {
                 EditorBlockToolbar(viewModel: viewModel)
             }

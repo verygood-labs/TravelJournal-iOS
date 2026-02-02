@@ -9,10 +9,10 @@ struct EditorBlockCard: View {
     let block: EditorBlock
     var isDragging: Bool = false
     let onTap: () -> Void
-    
-    // Coordinate space name for hit testing
+
+    /// Coordinate space name for hit testing
     static let dragHandleCoordinateSpace = "dragHandle"
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Polaroid-style image for photo blocks
@@ -21,20 +21,20 @@ struct EditorBlockCard: View {
                     .padding(.horizontal, AppTheme.Spacing.md)
                     .padding(.top, AppTheme.Spacing.md)
             }
-            
+
             // Standard card content
             HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
                 // Drag handle with named coordinate space
                 DragHandle(isActive: isDragging)
                     .coordinateSpace(name: EditorBlockCard.dragHandleCoordinateSpace)
-                
+
                 // Content area
                 VStack(alignment: .leading, spacing: AppTheme.Spacing.xxxs) {
                     Text(block.type.rawValue.uppercased())
                         .font(AppTheme.Typography.monoCaption())
                         .tracking(1)
                         .foregroundColor(AppTheme.Colors.passportTextMuted)
-                    
+
                     if let preview = blockPreviewText, !preview.isEmpty {
                         Text(preview)
                             .font(AppTheme.Typography.monoMedium())
@@ -52,9 +52,9 @@ struct EditorBlockCard: View {
                 .onTapGesture {
                     onTap()
                 }
-                
+
                 Spacer()
-                
+
                 blockTypeIcon
                     .onTapGesture {
                         onTap()
@@ -66,7 +66,7 @@ struct EditorBlockCard: View {
             LinearGradient(
                 colors: [
                     AppTheme.Colors.passportPageLight,
-                    AppTheme.Colors.passportPageDark
+                    AppTheme.Colors.passportPageDark,
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -78,7 +78,7 @@ struct EditorBlockCard: View {
         )
         .cornerRadius(AppTheme.CornerRadius.medium)
     }
-    
+
     // MARK: - Photo Image Section
 
     private func photoImageSection(imageUrl: String) -> some View {
@@ -88,7 +88,7 @@ struct EditorBlockCard: View {
                 case .empty:
                     imagePlaceholder
                         .overlay(ProgressView())
-                case .success(let image):
+                case let .success(image):
                     image
                         .resizable()
                         .scaledToFill()
@@ -123,7 +123,7 @@ struct EditorBlockCard: View {
         Rectangle()
             .fill(AppTheme.Colors.passportInputBackground)
     }
-    
+
     // MARK: - Block Preview Text
 
     private var blockPreviewText: String? {
@@ -167,7 +167,7 @@ struct EditorBlockCard: View {
                 isDragging: false,
                 onTap: {}
             )
-            
+
             EditorBlockCard(
                 block: EditorBlock.newMoment(
                     order: 1,
@@ -177,7 +177,7 @@ struct EditorBlockCard: View {
                 isDragging: true,
                 onTap: {}
             )
-            
+
             EditorBlockCard(
                 block: EditorBlock.newPhoto(
                     order: 2,
@@ -186,7 +186,7 @@ struct EditorBlockCard: View {
                 ),
                 onTap: {}
             )
-            
+
             EditorBlockCard(
                 block: EditorBlock.newRecommendation(
                     order: 3,

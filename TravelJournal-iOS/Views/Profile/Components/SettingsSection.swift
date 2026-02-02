@@ -5,20 +5,20 @@
 //  Created by John Apale on 1/24/26.
 //
 
-
 import SwiftUI
 
 // MARK: - Settings Section
+
 /// A container for grouping settings rows with an optional title
 struct SettingsSection<Content: View>: View {
     let title: String?
     let content: Content
-    
+
     init(title: String? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
         self.content = content()
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
             // Section title
@@ -29,7 +29,7 @@ struct SettingsSection<Content: View>: View {
                     .foregroundColor(AppTheme.Colors.textMuted)
                     .padding(.leading, AppTheme.Spacing.xxxs)
             }
-            
+
             // Section content
             VStack(spacing: 0) {
                 content
@@ -46,7 +46,7 @@ struct SettingsSection<Content: View>: View {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: AppTheme.Spacing.lg) {
             // Section with title
             SettingsSection(title: "ACCOUNT") {
@@ -56,15 +56,15 @@ struct SettingsSection<Content: View>: View {
                     value: "john@example.com",
                     showChevron: false
                 )
-                
+
                 SettingsDivider()
-                
+
                 SettingsRow(
                     icon: "lock.fill",
                     label: "Change Password"
                 )
             }
-            
+
             // Section without title
             SettingsSection {
                 SettingsRow(

@@ -4,11 +4,11 @@ extension Date {
     var isToday: Bool {
         Calendar.current.isDateInToday(self)
     }
-    
+
     var isYesterday: Bool {
         Calendar.current.isDateInYesterday(self)
     }
-    
+
     var relativeFormatted: String {
         if isToday {
             return "Today"
@@ -20,7 +20,7 @@ extension Date {
             return formatter.string(from: self)
         }
     }
-    
+
     func formatted(as format: String) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = format

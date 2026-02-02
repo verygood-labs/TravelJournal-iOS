@@ -34,7 +34,7 @@ struct CheckUsernameRequest: Codable {
     let userName: String
 }
 
-// Response is same structure as CheckEmailResponse
+/// Response is same structure as CheckEmailResponse
 typealias CheckUsernameResponse = CheckEmailResponse
 
 struct RefreshTokenRequest: Codable {

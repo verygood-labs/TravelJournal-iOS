@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Styled Text Field
+
 /// A custom TextField with styled placeholder text
 /// Used on dark backgrounds
 struct StyledTextField: View {
@@ -11,11 +12,11 @@ struct StyledTextField: View {
     var keyboardType: UIKeyboardType = .default
     var textContentType: UITextContentType? = nil
     var autocapitalization: TextInputAutocapitalization = .sentences
-    
+
     enum ValidationState {
         case none, valid, invalid
     }
-    
+
     private var borderColor: Color {
         switch validationState {
         case .valid:
@@ -26,7 +27,7 @@ struct StyledTextField: View {
             return isFocused ? AppTheme.Colors.inputBorderFocused : AppTheme.Colors.inputBorder
         }
     }
-    
+
     var body: some View {
         TextField(
             "",
@@ -59,6 +60,7 @@ struct StyledTextField: View {
 }
 
 // MARK: - Styled Text Field (Passport Page)
+
 /// A custom TextField with styled placeholder text for passport page background
 /// Used on light/cream backgrounds
 struct StyledPassportPageTextField: View {
@@ -69,11 +71,11 @@ struct StyledPassportPageTextField: View {
     var keyboardType: UIKeyboardType = .default
     var textContentType: UITextContentType? = nil
     var autocapitalization: TextInputAutocapitalization = .sentences
-    
+
     enum ValidationState {
         case none, valid, invalid
     }
-    
+
     private var borderColor: Color {
         switch validationState {
         case .valid:
@@ -84,7 +86,7 @@ struct StyledPassportPageTextField: View {
             return isFocused ? AppTheme.Colors.passportInputBorderFocused : AppTheme.Colors.passportInputBorder
         }
     }
-    
+
     var body: some View {
         TextField(
             "",
@@ -117,23 +119,24 @@ struct StyledPassportPageTextField: View {
 }
 
 // MARK: - Preview
+
 #Preview("Dark Background") {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
             StyledTextField(
                 placeholder: "traveler@example.com",
                 text: .constant("")
             )
-            
+
             StyledTextField(
                 placeholder: "traveler@example.com",
                 text: .constant(""),
                 isFocused: true
             )
-            
+
             StyledTextField(
                 placeholder: "traveler@example.com",
                 text: .constant("test@email.com"),
@@ -149,25 +152,25 @@ struct StyledPassportPageTextField: View {
         LinearGradient(
             colors: [
                 AppTheme.Colors.passportPageLight,
-                AppTheme.Colors.passportPageDark
+                AppTheme.Colors.passportPageDark,
             ],
             startPoint: .top,
             endPoint: .bottom
         )
         .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
             StyledPassportPageTextField(
                 placeholder: "Your name as it appears",
                 text: .constant("")
             )
-            
+
             StyledPassportPageTextField(
                 placeholder: "Your name as it appears",
                 text: .constant(""),
                 isFocused: true
             )
-            
+
             StyledPassportPageTextField(
                 placeholder: "Your name as it appears",
                 text: .constant("John Doe"),

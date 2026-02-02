@@ -2,39 +2,41 @@ import SwiftUI
 
 struct IdentificationSection: View {
     @ObservedObject var viewModel: PassportHomeViewModel
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Section header
             sectionHeader
                 .padding(.horizontal, AppTheme.Spacing.lg)
                 .padding(.bottom, AppTheme.Spacing.md)
-            
+
             // Main card content
             HStack(alignment: .top, spacing: AppTheme.Spacing.md) {
                 // Profile photo with corner brackets
                 profilePhotoSection
-                
+
                 // Details section
                 detailsSection
-                
+
                 Spacer()
             }
             .padding(.horizontal, AppTheme.Spacing.lg)
             .padding(.bottom, AppTheme.Spacing.md) // Changed from .lg to .md
-            
+
             // Stats row
             statsRow
                 .padding(.horizontal, AppTheme.Spacing.lg)
         }
     }
-    
+
     // MARK: - Section Header
+
     private var sectionHeader: some View {
         SectionHeader(title: "IDENTIFICATION")
     }
-    
+
     // MARK: - Profile Photo Section
+
     private var profilePhotoSection: some View {
         ZStack {
             // Photo frame
@@ -45,7 +47,7 @@ struct IdentificationSection: View {
                         case .empty:
                             ProgressView()
                                 .frame(width: 100, height: 120)
-                        case .success(let image):
+                        case let .success(image):
                             image
                                 .resizable()
                                 .scaledToFill()
@@ -65,7 +67,7 @@ struct IdentificationSection: View {
                 Rectangle()
                     .stroke(AppTheme.Colors.passportInputBorderFocused, lineWidth: 2)
             )
-            
+
             // Corner brackets
             PhotoCornerBrackets()
         }
@@ -84,6 +86,7 @@ struct IdentificationSection: View {
     }
 
     // MARK: - Details Section
+
     private var detailsSection: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
             // Row 1: Traveler Name (full width)
@@ -93,7 +96,7 @@ struct IdentificationSection: View {
                 useSerifFont: false,
                 valueFont: AppTheme.Typography.monoMedium() // or monoLarge() for even bigger
             )
-            
+
             // Row 2: Passport Number and Date Issued (side by side)
             HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
                 DetailField(
@@ -110,7 +113,7 @@ struct IdentificationSection: View {
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            
+
             // Row 3: Nationality
             HStack(alignment: .top, spacing: AppTheme.Spacing.sm) {
                 DetailField(
@@ -122,20 +125,21 @@ struct IdentificationSection: View {
             }
         }
     }
-    
+
     // MARK: - Stats Row
+
     private var statsRow: some View {
         HStack(spacing: AppTheme.Spacing.md) {
             StatItem(
                 value: viewModel.countriesCount,
                 label: "COUNTRIES"
             )
-            
+
             StatItem(
                 value: viewModel.entriesCount,
                 label: "ENTRIES"
             )
-            
+
             StatItem(
                 value: viewModel.tripsCount,
                 label: "TRIPS"
@@ -151,16 +155,17 @@ struct IdentificationSection: View {
 }
 
 // MARK: - Stat Item Component
+
 private struct StatItem: View {
     let value: Int
     let label: String
-    
+
     var body: some View {
         VStack(spacing: AppTheme.Spacing.xxxs) {
             Text("\(value)")
                 .font(AppTheme.Typography.monoLarge())
                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
-            
+
             Text(label)
                 .font(AppTheme.Typography.monoCaption())
                 .tracking(1)
@@ -171,13 +176,14 @@ private struct StatItem: View {
 }
 
 // MARK: - Photo Corner Brackets
+
 private struct PhotoCornerBrackets: View {
     var body: some View {
         GeometryReader { geometry in
             let size: CGFloat = 12
             let offset: CGFloat = -3
             let lineWidth: CGFloat = 2
-            
+
             ZStack {
                 // Top-left
                 Path { path in
@@ -186,7 +192,7 @@ private struct PhotoCornerBrackets: View {
                     path.addLine(to: CGPoint(x: offset, y: offset + size))
                 }
                 .stroke(AppTheme.Colors.primary, lineWidth: lineWidth)
-                
+
                 // Top-right
                 Path { path in
                     path.move(to: CGPoint(x: geometry.size.width - offset - size, y: offset))
@@ -194,7 +200,7 @@ private struct PhotoCornerBrackets: View {
                     path.addLine(to: CGPoint(x: geometry.size.width - offset, y: offset + size))
                 }
                 .stroke(AppTheme.Colors.primary, lineWidth: lineWidth)
-                
+
                 // Bottom-left
                 Path { path in
                     path.move(to: CGPoint(x: offset, y: geometry.size.height - offset - size))
@@ -202,7 +208,7 @@ private struct PhotoCornerBrackets: View {
                     path.addLine(to: CGPoint(x: offset + size, y: geometry.size.height - offset))
                 }
                 .stroke(AppTheme.Colors.primary, lineWidth: lineWidth)
-                
+
                 // Bottom-right
                 Path { path in
                     path.move(to: CGPoint(x: geometry.size.width - offset, y: geometry.size.height - offset - size))
@@ -216,19 +222,20 @@ private struct PhotoCornerBrackets: View {
 }
 
 // MARK: - Detail Field Component
+
 private struct DetailField: View {
     let label: String
     let value: String
     var useSerifFont: Bool = true
     var valueFont: Font? = nil // New parameter for custom font
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
                 .font(AppTheme.Typography.monoCaption())
                 .tracking(1)
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             Text(value)
                 .font(valueFont ?? (useSerifFont ? AppTheme.Typography.serifSmall() : AppTheme.Typography.monoSmall()))
                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
@@ -237,6 +244,7 @@ private struct DetailField: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     PassportPageBackgroundView {
         IdentificationSection(viewModel: PassportHomeViewModel())

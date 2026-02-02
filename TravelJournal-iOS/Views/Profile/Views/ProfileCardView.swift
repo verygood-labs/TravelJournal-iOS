@@ -5,10 +5,10 @@
 //  Created by John Apale on 1/24/26.
 //
 
-
 import SwiftUI
 
 // MARK: - Profile Card View
+
 /// Passport-style profile card showing user photo, name, and username
 /// Tappable to navigate to edit profile screen
 struct ProfileCardView: View {
@@ -16,17 +16,17 @@ struct ProfileCardView: View {
     let username: String
     let profileImageUrl: URL?
     var isLoading: Bool = false
-    
+
     var body: some View {
         HStack(spacing: AppTheme.Spacing.md) {
             // Profile Photo
             profilePhotoView
-            
+
             // Profile Info
             profileInfoView
-            
+
             Spacer()
-            
+
             // Chevron
             Image(systemName: "chevron.right")
                 .font(.system(size: 14, weight: .medium))
@@ -39,12 +39,12 @@ struct ProfileCardView: View {
                 LinearGradient(
                     colors: [
                         AppTheme.Colors.passportPageLight,
-                        AppTheme.Colors.passportPageDark
+                        AppTheme.Colors.passportPageDark,
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                
+
                 // Subtle grid pattern
                 PassportCardGridPattern()
             }
@@ -55,9 +55,9 @@ struct ProfileCardView: View {
                 .stroke(AppTheme.Colors.primary.opacity(0.3), lineWidth: 1)
         )
     }
-    
+
     // MARK: - Profile Photo
-    
+
     private var profilePhotoView: some View {
         ZStack {
             if isLoading {
@@ -75,7 +75,7 @@ struct ProfileCardView: View {
                     case .empty:
                         placeholderImage
                             .overlay(ProgressView())
-                    case .success(let image):
+                    case let .success(image):
                         image
                             .resizable()
                             .scaledToFill()
@@ -91,19 +91,19 @@ struct ProfileCardView: View {
                 // Default placeholder
                 placeholderImage
             }
-            
+
             // Edit badge
             editBadge
         }
         .frame(width: 72, height: 72)
     }
-    
+
     private var placeholderImage: some View {
         ZStack {
             RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
                 .fill(AppTheme.Colors.cardBackground)
                 .frame(width: 72, height: 72)
-            
+
             Image(systemName: "person.fill")
                 .font(.system(size: 28))
                 .foregroundColor(AppTheme.Colors.textMuted)
@@ -113,7 +113,7 @@ struct ProfileCardView: View {
                 .stroke(AppTheme.Colors.primary, lineWidth: 2)
         )
     }
-    
+
     private var editBadge: some View {
         VStack {
             Spacer()
@@ -123,7 +123,7 @@ struct ProfileCardView: View {
                     Circle()
                         .fill(AppTheme.Colors.primary)
                         .frame(width: 22, height: 22)
-                    
+
                     Image(systemName: "pencil")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(AppTheme.Colors.passportPageLight)
@@ -132,9 +132,9 @@ struct ProfileCardView: View {
             }
         }
     }
-    
+
     // MARK: - Profile Info
-    
+
     private var profileInfoView: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
             // Full Name
@@ -143,7 +143,7 @@ struct ProfileCardView: View {
                     .font(AppTheme.Typography.monoTiny())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
+
                 if isLoading {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(AppTheme.Colors.passportInputBackground)
@@ -155,14 +155,14 @@ struct ProfileCardView: View {
                         .lineLimit(1)
                 }
             }
-            
+
             // Username
             VStack(alignment: .leading, spacing: 2) {
                 Text("HANDLE")
                     .font(AppTheme.Typography.monoTiny())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
+
                 if isLoading {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(AppTheme.Colors.passportInputBackground)
@@ -185,7 +185,7 @@ struct PassportCardGridPattern: View {
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
             let gridSpacing: CGFloat = 40
             let lineWidth: CGFloat = 0.5
-            
+
             // Draw vertical lines
             for x in stride(from: 0, to: size.width, by: gridSpacing) {
                 var path = Path()
@@ -197,7 +197,7 @@ struct PassportCardGridPattern: View {
                     lineWidth: lineWidth
                 )
             }
-            
+
             // Draw horizontal lines
             for y in stride(from: 0, to: size.height, by: gridSpacing) {
                 var path = Path()
@@ -220,7 +220,7 @@ struct PassportCardGridPattern: View {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
             // With data
             ProfileCardView(
@@ -229,7 +229,7 @@ struct PassportCardGridPattern: View {
                 profileImageUrl: nil,
                 isLoading: false
             )
-            
+
             // Loading state
             ProfileCardView(
                 name: "",

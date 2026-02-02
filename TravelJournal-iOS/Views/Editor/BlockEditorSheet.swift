@@ -7,7 +7,7 @@ struct BlockEditorSheet: View {
     let tripId: UUID?
     let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
-    
+
     init(
         blockType: BlockType,
         existingBlock: EditorBlock? = nil,
@@ -21,7 +21,7 @@ struct BlockEditorSheet: View {
         self.onSave = onSave
         self.onDelete = onDelete
     }
-    
+
     var body: some View {
         switch blockType {
         case .moment:
@@ -60,6 +60,7 @@ struct BlockEditorSheet: View {
 }
 
 // MARK: - Preview
+
 #Preview("Tip") {
     BlockEditorSheet(blockType: .tip, onSave: { _ in })
 }

@@ -9,10 +9,11 @@ import Foundation
 import SwiftUI
 
 // MARK: - Account Section
+
 /// Account settings section with email, password, and nationality
 struct AccountSection: View {
     @ObservedObject var viewModel: ProfileViewModel
-    
+
     var body: some View {
         SettingsSection(title: "ACCOUNT") {
             SettingsRow(
@@ -21,9 +22,9 @@ struct AccountSection: View {
                 value: viewModel.email,
                 showChevron: false
             )
-            
+
             SettingsDivider()
-            
+
             NavigationLink {
                 ChangePasswordView()
             } label: {
@@ -33,9 +34,9 @@ struct AccountSection: View {
                 )
             }
             .buttonStyle(.plain)
-            
+
             SettingsDivider()
-            
+
             NavigationLink {
                 EditProfileView(viewModel: viewModel, field: .nationality)
             } label: {

@@ -3,12 +3,12 @@ import SwiftUI
 struct VisasSection: View {
     @ObservedObject var viewModel: PassportHomeViewModel
     var onViewAllTapped: (() -> Void)? = nil
-    
+
     @State private var currentPage = 0
-    
+
     private let stampsPerPage = 6
     private let maxPages = 6
-    
+
     private var totalPages: Int {
         let stampCount = viewModel.countryStamps.count
         guard stampCount > 0 else { return 0 }
@@ -20,7 +20,7 @@ struct VisasSection: View {
         let startIndex = page * stampsPerPage
         let endIndex = min(startIndex + stampsPerPage, viewModel.countryStamps.count)
         guard startIndex < viewModel.countryStamps.count else { return [] }
-        return Array(viewModel.countryStamps[startIndex..<endIndex])
+        return Array(viewModel.countryStamps[startIndex ..< endIndex])
     }
 
     var body: some View {
@@ -28,13 +28,14 @@ struct VisasSection: View {
             // Section header
             sectionHeader
                 .padding(.horizontal, AppTheme.Spacing.lg)
-            
+
             // Paginated stamps grid
             stampGrid
         }
     }
 
     // MARK: - Section Header
+
     private var sectionHeader: some View {
         SectionHeader(
             title: "VISAS & ENTRIES",
@@ -43,8 +44,9 @@ struct VisasSection: View {
             onTrailingActionTapped: onViewAllTapped
         )
     }
-    
+
     // MARK: - Stamp Grid
+
     private var stampGrid: some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             if viewModel.countryStamps.isEmpty {
@@ -52,7 +54,7 @@ struct VisasSection: View {
             } else {
                 // Paginated stamps
                 TabView(selection: $currentPage) {
-                    ForEach(0..<totalPages, id: \.self) { page in
+                    ForEach(0 ..< totalPages, id: \.self) { page in
                         stampPage(for: page)
                             .tag(page)
                     }
@@ -60,20 +62,21 @@ struct VisasSection: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .frame(minHeight: 280) // minimum height, but can grow
                 .fixedSize(horizontal: false, vertical: true)
-                
+
                 // Custom page indicator
                 pageIndicator
             }
         }
     }
-    
+
     // MARK: - Stamp Page
+
     private func stampPage(for page: Int) -> some View {
         LazyVGrid(
             columns: [
                 GridItem(.flexible(), spacing: AppTheme.Spacing.xs),
                 GridItem(.flexible(), spacing: AppTheme.Spacing.xs),
-                GridItem(.flexible(), spacing: AppTheme.Spacing.xs)
+                GridItem(.flexible(), spacing: AppTheme.Spacing.xs),
             ],
             spacing: AppTheme.Spacing.xs
         ) {
@@ -85,9 +88,10 @@ struct VisasSection: View {
     }
 
     // MARK: - Page Indicator
+
     private var pageIndicator: some View {
         HStack(spacing: AppTheme.Spacing.xxs) {
-            ForEach(0..<totalPages, id: \.self) { index in
+            ForEach(0 ..< totalPages, id: \.self) { index in
                 Capsule()
                     .fill(index == currentPage
                         ? AppTheme.Colors.passportInputBorderFocused
@@ -99,9 +103,9 @@ struct VisasSection: View {
     }
 
     // MARK: - Empty State
+
     private var emptyState: some View {
         VStack(spacing: AppTheme.Spacing.md) {
-            
             Button {
                 viewModel.showingAddTrip = true
             } label: {
@@ -117,6 +121,7 @@ struct VisasSection: View {
 }
 
 // MARK: - Preview
+
 #Preview("Empty State") {
     PassportPageBackgroundView {
         VisasSection(viewModel: PassportHomeViewModel())
@@ -136,10 +141,10 @@ struct VisasSection: View {
                 CountryStamp(countryCode: "MX", countryName: "Mexico", visitCount: 1, stampImageUrl: nil),
                 CountryStamp(countryCode: "FR", countryName: "France", visitCount: 2, stampImageUrl: nil),
                 CountryStamp(countryCode: "ES", countryName: "Spain", visitCount: 1, stampImageUrl: nil),
-                CountryStamp(countryCode: "DE", countryName: "Germany", visitCount: 1, stampImageUrl: nil)
+                CountryStamp(countryCode: "DE", countryName: "Germany", visitCount: 1, stampImageUrl: nil),
             ]
             return vm
         }())
-        .padding(.vertical, AppTheme.Spacing.lg)
+            .padding(.vertical, AppTheme.Spacing.lg)
     }
 }

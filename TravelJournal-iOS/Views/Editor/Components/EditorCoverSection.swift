@@ -5,12 +5,11 @@
 //  Created by John Apale on 1/22/26.
 //
 
-
 import SwiftUI
 
 struct EditorCoverSection: View {
     @ObservedObject var viewModel: JournalEditorViewModel
-    
+
     var body: some View {
         ZStack {
             // Background
@@ -27,21 +26,22 @@ struct EditorCoverSection: View {
                             colors: [
                                 Color.black.opacity(0.3),
                                 Color.clear,
-                                Color.black.opacity(0.3)
+                                Color.black.opacity(0.3),
                             ],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
             } else if let urlString = viewModel.coverImageUrl,
-                      let url = APIService.shared.fullMediaURL(for: urlString) {
+                      let url = APIService.shared.fullMediaURL(for: urlString)
+            {
                 // Show existing cover from URL
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
                         placeholderBackground
                             .overlay(ProgressView())
-                    case .success(let image):
+                    case let .success(image):
                         image
                             .resizable()
                             .scaledToFill()
@@ -52,7 +52,7 @@ struct EditorCoverSection: View {
                                     colors: [
                                         Color.black.opacity(0.3),
                                         Color.clear,
-                                        Color.black.opacity(0.3)
+                                        Color.black.opacity(0.3),
                                     ],
                                     startPoint: .top,
                                     endPoint: .bottom
@@ -68,7 +68,7 @@ struct EditorCoverSection: View {
                 // Show placeholder
                 placeholderBackground
             }
-            
+
             // Cover actions
             coverActions
         }
@@ -80,43 +80,45 @@ struct EditorCoverSection: View {
             ImagePicker(image: $viewModel.selectedCoverImage, sourceType: .camera)
         }
     }
-    
+
     // MARK: - Placeholder Background
+
     private var placeholderBackground: some View {
         LinearGradient(
             colors: [
                 AppTheme.Colors.backgroundMedium,
-                AppTheme.Colors.backgroundDark
+                AppTheme.Colors.backgroundDark,
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         .frame(height: 200)
     }
-    
+
     // MARK: - Cover Actions
+
     private var coverActions: some View {
         VStack {
             if viewModel.selectedCoverImage != nil || viewModel.coverImageUrl != nil {
                 // Show edit/remove buttons
                 HStack {
                     Spacer()
-                    
+
                     Menu {
                         Button {
                             viewModel.selectCoverFromCamera()
                         } label: {
                             Label("Take Photo", systemImage: "camera")
                         }
-                        
+
                         Button {
                             viewModel.selectCoverFromLibrary()
                         } label: {
                             Label("Choose from Library", systemImage: "photo")
                         }
-                        
+
                         Divider()
-                        
+
                         Button(role: .destructive) {
                             viewModel.removeCoverImage()
                         } label: {
@@ -130,7 +132,7 @@ struct EditorCoverSection: View {
                     }
                     .padding(AppTheme.Spacing.md)
                 }
-                
+
                 Spacer()
             } else {
                 // Show add cover button
@@ -138,12 +140,12 @@ struct EditorCoverSection: View {
                     Image(systemName: "camera.fill")
                         .font(.system(size: 32))
                         .foregroundColor(AppTheme.Colors.primary.opacity(0.5))
-                    
+
                     Text("ADD COVER")
                         .font(AppTheme.Typography.monoSmall())
                         .tracking(1)
                         .foregroundColor(AppTheme.Colors.primary.opacity(0.6))
-                    
+
                     HStack(spacing: AppTheme.Spacing.md) {
                         Button {
                             viewModel.selectCoverFromCamera()
@@ -160,7 +162,7 @@ struct EditorCoverSection: View {
                             .background(AppTheme.Colors.primary.opacity(0.15))
                             .cornerRadius(AppTheme.CornerRadius.pill)
                         }
-                        
+
                         Button {
                             viewModel.selectCoverFromLibrary()
                         } label: {
@@ -185,6 +187,7 @@ struct EditorCoverSection: View {
 }
 
 // MARK: - Preview
+
 #Preview("No Cover") {
     let trip = Trip(
         id: UUID(),
@@ -199,6 +202,6 @@ struct EditorCoverSection: View {
         updatedAt: Date(),
         stops: nil
     )
-    
+
     return EditorCoverSection(viewModel: JournalEditorViewModel(trip: trip))
 }

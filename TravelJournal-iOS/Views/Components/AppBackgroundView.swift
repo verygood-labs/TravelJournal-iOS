@@ -1,32 +1,29 @@
 import SwiftUI
 
 // MARK: - App Background View
+
 /// Full-screen background with gradient and subtle dot pattern texture
 /// Usage: AppBackgroundView { YourContent() }
 struct AppBackgroundView<Content: View>: View {
-    let content: Content
-    
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-    
+    @ViewBuilder let content: Content
+
     var body: some View {
         ZStack {
             // Base gradient
             LinearGradient(
                 colors: [
                     AppTheme.Colors.backgroundMedium,
-                    AppTheme.Colors.backgroundDark
+                    AppTheme.Colors.backgroundDark,
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
-            
+
             // Dot pattern overlay
             DotPatternView()
                 .ignoresSafeArea()
-            
+
             // Content
             content
         }
@@ -34,13 +31,14 @@ struct AppBackgroundView<Content: View>: View {
 }
 
 // MARK: - Dot Pattern View
+
 /// Subtle repeating dot pattern overlay
 struct DotPatternView: View {
     var body: some View {
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
             let dotSpacing: CGFloat = 40
             let dotRadius: CGFloat = 1
-            
+
             for x in stride(from: dotSpacing / 2, to: size.width, by: dotSpacing) {
                 for y in stride(from: dotSpacing / 2, to: size.height, by: dotSpacing) {
                     let rect = CGRect(
@@ -61,6 +59,7 @@ struct DotPatternView: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     AppBackgroundView {
         Text("Content goes here")

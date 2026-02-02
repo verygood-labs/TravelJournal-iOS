@@ -12,8 +12,10 @@ struct CountryStamp: Codable, Identifiable {
     let countryName: String
     let visitCount: Int
     let stampImageUrl: String?
-    
-    var id: String { countryCode }
+
+    var id: String {
+        countryCode
+    }
 }
 
 struct CountryStampsResponse: Codable {

@@ -11,7 +11,7 @@ import SwiftUI
 enum JournalViewMode: String, CaseIterable {
     case card = "Cards"
     case list = "List"
-    
+
     var icon: String {
         switch self {
         case .card: return "square.grid.2x2"
@@ -22,7 +22,7 @@ enum JournalViewMode: String, CaseIterable {
 
 struct JournalViewToggle: View {
     @Binding var selectedMode: JournalViewMode
-    
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(JournalViewMode.allCases, id: \.self) { mode in
@@ -34,7 +34,7 @@ struct JournalViewToggle: View {
                     HStack(spacing: AppTheme.Spacing.xxs) {
                         Image(systemName: mode.icon)
                             .font(.system(size: 12, weight: .medium))
-                        
+
                         Text(mode.rawValue.uppercased())
                             .font(AppTheme.Typography.monoCaption())
                             .tracking(1)
@@ -69,7 +69,7 @@ struct JournalViewToggle: View {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
             JournalViewToggle(selectedMode: .constant(.card))
             JournalViewToggle(selectedMode: .constant(.list))

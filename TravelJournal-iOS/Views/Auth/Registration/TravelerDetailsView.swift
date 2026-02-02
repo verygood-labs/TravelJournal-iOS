@@ -1,27 +1,28 @@
 import SwiftUI
 
 // MARK: - Traveler Details View
+
 /// Step 2 of registration: Collect name, username, and home country
 struct TravelerDetailsView: View {
-    // ViewModel handles all business logic
+    /// ViewModel handles all business logic
     @StateObject private var viewModel: RegistrationViewModel
-    
-    // Focus state (UI-only, stays in view)
+
+    /// Focus state (UI-only, stays in view)
     @FocusState private var focusedField: Field?
-    
+
     // Image picker state (UI-only)
     @State private var showingImagePicker = false
     @State private var showingCamera = false
-    
-    // Navigation
+
+    /// Navigation
     @Environment(\.dismiss) var dismiss
-    
+
     enum Field {
         case fullName, username, country
     }
-    
+
     // MARK: - Initialization
-    
+
     init(email: String, password: String, authManager: AuthManager) {
         _viewModel = StateObject(wrappedValue: RegistrationViewModel(
             email: email,
@@ -29,9 +30,9 @@ struct TravelerDetailsView: View {
             authManager: authManager
         ))
     }
-    
+
     // MARK: - Computed Properties
-    
+
     private var usernameBorderColor: Color {
         if viewModel.usernameError != nil {
             return .red
@@ -40,9 +41,9 @@ struct TravelerDetailsView: View {
             ? AppTheme.Colors.passportInputBorderFocused
             : AppTheme.Colors.passportInputBorder
     }
-    
+
     // MARK: - Body
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Progress bar stays in place during transition
@@ -54,7 +55,7 @@ struct TravelerDetailsView: View {
             }
             .frame(height: 80)
             .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
-            
+
             // Page content with turn animation (only the form flips)
             // Step 2 -> Step 3 transition
             PageTurnCover(isPresented: $viewModel.showingPassportPhoto) {
@@ -76,7 +77,7 @@ struct TravelerDetailsView: View {
                     )
                 }
             }
-            
+
             // Bottom navigation stays in place during transition
             bottomNavigation
                 .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
@@ -120,13 +121,14 @@ struct TravelerDetailsView: View {
             get: { viewModel.registrationError != nil },
             set: { if !$0 { viewModel.registrationError = nil } }
         )) {
-            Button("OK", role: .cancel) { }
+            Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.registrationError ?? "")
         }
     }
-    
+
     // MARK: - Traveler Details Form Content
+
     private var travelerDetailsFormContent: some View {
         PassportPageBackgroundView {
             ScrollView {
@@ -135,29 +137,30 @@ struct TravelerDetailsView: View {
                     headerSection
                         .padding(.top, AppTheme.Spacing.xl)
                         .padding(.bottom, AppTheme.Spacing.lg)
-                    
+
                     // Form
                     formSection
                         .padding(.horizontal, AppTheme.Spacing.lg)
-                    
+
                     Spacer(minLength: AppTheme.Spacing.xxxl)
                 }
             }
         }
     }
-    
+
     // MARK: - Header Section
+
     private var headerSection: some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             Text("✦ IDENTIFICATION PAGE ✦")
                 .font(AppTheme.Typography.monoSmall())
                 .tracking(2)
                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-            
+
             Text("Traveler Details")
                 .font(AppTheme.Typography.serifMedium())
                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
-            
+
             Text("Let's set up your passport identification.")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.passportTextSecondary)
@@ -165,8 +168,9 @@ struct TravelerDetailsView: View {
         }
         .padding(.horizontal, AppTheme.Spacing.lg)
     }
-    
+
     // MARK: - Form Section
+
     private var formSection: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             // Full Name field
@@ -175,7 +179,7 @@ struct TravelerDetailsView: View {
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
+
                 TextField(
                     "",
                     text: $viewModel.fullName,
@@ -186,25 +190,25 @@ struct TravelerDetailsView: View {
                 .focused($focusedField, equals: .fullName)
                 .textContentType(.name)
                 .autocorrectionDisabled()
-                
+
                 Text("This will appear on your passport")
                     .font(AppTheme.Typography.monoCaption())
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
             }
-            
+
             // Username field
             VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
                 Text("HANDLE / USERNAME")
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
+
                 HStack(spacing: 0) {
                     Text("@")
                         .font(AppTheme.Typography.monoMedium())
                         .foregroundColor(AppTheme.Colors.passportTextMuted)
                         .padding(.leading, AppTheme.Spacing.sm)
-                    
+
                     TextField(
                         "",
                         text: $viewModel.username,
@@ -218,7 +222,7 @@ struct TravelerDetailsView: View {
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
                     .padding(.vertical, 14)
-                    
+
                     // Status indicator
                     if viewModel.isCheckingUsername {
                         ProgressView()
@@ -248,7 +252,7 @@ struct TravelerDetailsView: View {
                 )
                 .cornerRadius(AppTheme.CornerRadius.medium)
                 .animation(.easeInOut(duration: AppTheme.Animation.fast), value: focusedField)
-                
+
                 if let error = viewModel.usernameError {
                     Text(error)
                         .font(AppTheme.Typography.monoCaption())
@@ -259,14 +263,14 @@ struct TravelerDetailsView: View {
                         .foregroundColor(AppTheme.Colors.passportTextMuted)
                 }
             }
-            
+
             // Home Country field
             VStack(alignment: .leading, spacing: AppTheme.Spacing.xxs) {
                 Text("HOME COUNTRY")
                     .font(AppTheme.Typography.inputLabel())
                     .tracking(1)
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
-                
+
                 VStack(spacing: 0) {
                     // Input field
                     HStack {
@@ -275,9 +279,9 @@ struct TravelerDetailsView: View {
                             Text(country.name)
                                 .font(AppTheme.Typography.monoMedium())
                                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
-                            
+
                             Spacer()
-                            
+
                             Button {
                                 viewModel.clearSelectedCountry()
                             } label: {
@@ -290,7 +294,7 @@ struct TravelerDetailsView: View {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 14))
                                 .foregroundColor(AppTheme.Colors.passportTextMuted)
-                            
+
                             TextField(
                                 "",
                                 text: $viewModel.countrySearchText,
@@ -308,7 +312,7 @@ struct TravelerDetailsView: View {
                                     viewModel.showCountryDropdown = true
                                 }
                             }
-                            
+
                             if viewModel.isLoadingCountries {
                                 ProgressView()
                                     .scaleEffect(0.8)
@@ -330,7 +334,7 @@ struct TravelerDetailsView: View {
                     .clipShape(
                         RoundedRectangle(cornerRadius: viewModel.showCountryDropdown ? 0 : AppTheme.CornerRadius.medium)
                     )
-                    
+
                     // Dropdown list
                     if viewModel.showCountryDropdown && !viewModel.filteredCountries.isEmpty {
                         ScrollView {
@@ -350,7 +354,7 @@ struct TravelerDetailsView: View {
                                         .padding(.vertical, 12)
                                         .background(AppTheme.Colors.passportInputBackground)
                                     }
-                                    
+
                                     if country.id != viewModel.filteredCountries.last?.id {
                                         Divider()
                                             .background(AppTheme.Colors.passportInputBorder)
@@ -369,7 +373,7 @@ struct TravelerDetailsView: View {
                         )
                     }
                 }
-                
+
                 Text(viewModel.selectedCountry != nil ? "Your home country for your passport" : "Type to search for your country")
                     .font(AppTheme.Typography.monoCaption())
                     .foregroundColor(AppTheme.Colors.passportTextMuted)
@@ -391,8 +395,9 @@ struct TravelerDetailsView: View {
             }
         }
     }
-    
+
     // MARK: - Bottom Navigation
+
     private var bottomNavigation: some View {
         HStack(spacing: AppTheme.Spacing.sm) {
             // Back button
@@ -412,7 +417,7 @@ struct TravelerDetailsView: View {
             .buttonStyle(SecondaryButtonStyle())
             .frame(width: 120)
             .disabled(viewModel.isSubmitting)
-            
+
             // Continue/Submit button
             Button {
                 focusedField = nil
@@ -445,6 +450,7 @@ struct TravelerDetailsView: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     TravelerDetailsView(
         email: "test@example.com",

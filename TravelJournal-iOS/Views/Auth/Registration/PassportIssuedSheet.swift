@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Passport Issued Sheet
+
 /// Success sheet shown after registration submission
 /// Displays the issued passport with interactive passport book opening sequence
 struct PassportIssuedSheet: View {
@@ -9,7 +10,7 @@ struct PassportIssuedSheet: View {
     let nationalityName: String
     let passportPhoto: UIImage?
     let onContinue: () -> Void
-    
+
     // Animation states - sequential timeline
     @State private var bookAppeared = false
     @State private var showTapHint = false
@@ -20,23 +21,23 @@ struct PassportIssuedSheet: View {
     @State private var titleWritten = false
     @State private var subtextRevealed = false
     @State private var buttonRevealed = false
-    
+
     // Drag gesture state for interactive flip
     @State private var dragOffset: CGFloat = 0
     @State private var flipProgress: Double = 0
-    
+
     // Title text for typewriter effect
     private let titleText = "Passport Issued"
     @State private var displayedTitle = ""
-    
+
     var body: some View {
         AppBackgroundView {
-            GeometryReader { geometry in
+            GeometryReader { _ in
                 ZStack {
                     // Main content
                     VStack(spacing: 0) {
                         Spacer()
-                        
+
                         // Passport Book Container
                         ZStack {
                             // Passport card inside (always visible underneath cover)
@@ -57,7 +58,7 @@ struct PassportIssuedSheet: View {
                                     }
                                 }
                             )
-                            
+
                             // Front cover (interactive flip) - matches card size
                             if !bookOpened {
                                 passportCover
@@ -92,7 +93,7 @@ struct PassportIssuedSheet: View {
                                         openBook()
                                     }
                             }
-                            
+
                             // Tap hint
                             if showTapHint && !bookOpened {
                                 tapHintView
@@ -100,10 +101,10 @@ struct PassportIssuedSheet: View {
                             }
                         }
                         .frame(height: 350)
-                        
+
                         Spacer()
                             .frame(height: AppTheme.Spacing.lg)
-                        
+
                         // Header text section
                         VStack(spacing: AppTheme.Spacing.sm) {
                             // Official document badge
@@ -113,13 +114,13 @@ struct PassportIssuedSheet: View {
                                 .foregroundColor(AppTheme.Colors.primary.opacity(0.8))
                                 .opacity(titleWritten ? 1 : 0)
                                 .scaleEffect(titleWritten ? 1 : 0.8)
-                            
+
                             // Typewriter title with checkmark
                             HStack(spacing: AppTheme.Spacing.xs) {
                                 Text(displayedTitle)
                                     .font(AppTheme.Typography.serifLarge())
                                     .foregroundColor(AppTheme.Colors.primary)
-                                
+
                                 if displayedTitle == titleText {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 24, weight: .medium))
@@ -128,7 +129,7 @@ struct PassportIssuedSheet: View {
                                 }
                             }
                             .frame(height: 36)
-                            
+
                             // Subtext
                             Text("You're ready to start your journey.\nYour passport has been created\nsuccessfully.")
                                 .font(AppTheme.Typography.monoSmall())
@@ -138,10 +139,10 @@ struct PassportIssuedSheet: View {
                                 .opacity(subtextRevealed ? 1 : 0)
                                 .offset(y: subtextRevealed ? 0 : 15)
                         }
-                        
+
                         Spacer()
                             .frame(height: AppTheme.Spacing.xl)
-                        
+
                         // Continue button
                         Button {
                             onContinue()
@@ -158,7 +159,7 @@ struct PassportIssuedSheet: View {
                         .padding(.horizontal, AppTheme.Spacing.lg)
                         .opacity(buttonRevealed ? 1 : 0)
                         .offset(y: buttonRevealed ? 0 : 20)
-                        
+
                         Spacer()
                             .frame(height: AppTheme.Spacing.xxl)
                     }
@@ -169,29 +170,31 @@ struct PassportIssuedSheet: View {
             startInitialAnimation()
         }
     }
-    
+
     // MARK: - Open Book Action
+
     private func openBook() {
         hasUserInteracted = true
-        
+
         withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
             bookOpened = true
             flipProgress = 1.0
             dragOffset = 0
             showTapHint = false
         }
-        
+
         // Continue with post-open animations
         startPostOpenAnimations()
     }
-    
+
     // MARK: - Initial Animation (Book appears)
+
     private func startInitialAnimation() {
         // Step 1: Passport book drops in
         withAnimation(.spring(response: 0.7, dampingFraction: 0.6)) {
             bookAppeared = true
         }
-        
+
         // Step 2: Show tap hint after book lands
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             if !hasUserInteracted {
@@ -201,8 +204,9 @@ struct PassportIssuedSheet: View {
             }
         }
     }
-    
+
     // MARK: - Post-Open Animations
+
     private func startPostOpenAnimations() {
         // Step 1: Stamp lands (1.0s after open)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -216,7 +220,7 @@ struct PassportIssuedSheet: View {
                 }
             }
         }
-        
+
         // Step 2: Title badge appears (1.5s after open)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
@@ -225,14 +229,14 @@ struct PassportIssuedSheet: View {
             // Start typewriter effect
             typewriterEffect()
         }
-        
+
         // Step 3: Subtext eases in (1.9s after open)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.9) {
             withAnimation(.easeOut(duration: 0.5)) {
                 subtextRevealed = true
             }
         }
-        
+
         // Step 4: Button appears (2.3s after open)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.3) {
             withAnimation(.easeOut(duration: 0.4)) {
@@ -240,8 +244,9 @@ struct PassportIssuedSheet: View {
             }
         }
     }
-    
+
     // MARK: - Typewriter Effect
+
     private func typewriterEffect() {
         displayedTitle = ""
         for (index, character) in titleText.enumerated() {
@@ -252,14 +257,15 @@ struct PassportIssuedSheet: View {
             }
         }
     }
-    
+
     // MARK: - Tap Hint View
+
     private var tapHintView: some View {
         VStack(spacing: AppTheme.Spacing.xs) {
             Image(systemName: "hand.tap.fill")
                 .font(.system(size: 24))
                 .foregroundColor(AppTheme.Colors.primary.opacity(0.7))
-            
+
             Text("Tap or swipe up to open")
                 .font(AppTheme.Typography.monoSmall())
                 .foregroundColor(AppTheme.Colors.primary.opacity(0.7))
@@ -275,8 +281,9 @@ struct PassportIssuedSheet: View {
                 )
         )
     }
-    
+
     // MARK: - Passport Cover (Interactive)
+
     private var passportCover: some View {
         // Invisible PassportCard to get the exact size
         PassportCard(
@@ -293,7 +300,7 @@ struct PassportIssuedSheet: View {
                         LinearGradient(
                             colors: [
                                 Color(red: 0.18, green: 0.30, blue: 0.24),
-                                Color(red: 0.12, green: 0.22, blue: 0.17)
+                                Color(red: 0.12, green: 0.22, blue: 0.17),
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -306,20 +313,20 @@ struct PassportIssuedSheet: View {
                             Image(systemName: "globe.americas.fill")
                                 .font(.system(size: 40, weight: .light))
                                 .foregroundColor(AppTheme.Colors.primary.opacity(0.6))
-                            
+
                             Text("TRAVEL")
                                 .font(AppTheme.Typography.monoSmall())
                                 .tracking(6)
                                 .foregroundColor(AppTheme.Colors.primary.opacity(0.8))
-                            
+
                             Text("JOURNAL")
                                 .font(AppTheme.Typography.serifMedium())
                                 .foregroundColor(AppTheme.Colors.primary)
-                            
+
                             Rectangle()
                                 .fill(AppTheme.Colors.primary.opacity(0.3))
                                 .frame(width: 60, height: 1)
-                            
+
                             Text("PASSPORT")
                                 .font(AppTheme.Typography.monoSmall())
                                 .tracking(4)
@@ -350,8 +357,9 @@ struct PassportIssuedSheet: View {
             }
         )
     }
-    
+
     // MARK: - Corner Decoration
+
     private var cornerDecoration: some View {
         Path { path in
             path.move(to: CGPoint(x: 0, y: 15))
@@ -361,8 +369,9 @@ struct PassportIssuedSheet: View {
         .stroke(AppTheme.Colors.primary.opacity(0.4), lineWidth: 1)
         .frame(width: 15, height: 15)
     }
-    
+
     // MARK: - Stamp Seal
+
     private var stampSeal: some View {
         ZStack {
             // Outer ring with dashes
@@ -372,17 +381,17 @@ struct PassportIssuedSheet: View {
                     style: StrokeStyle(lineWidth: 2, dash: [3, 3])
                 )
                 .frame(width: 60, height: 60)
-            
+
             // Inner circle
             Circle()
                 .stroke(AppTheme.Colors.primary, lineWidth: 2)
                 .frame(width: 48, height: 48)
-            
+
             // Filled background
             Circle()
                 .fill(AppTheme.Colors.primary.opacity(0.15))
                 .frame(width: 44, height: 44)
-            
+
             // Checkmark
             Image(systemName: "checkmark")
                 .font(.system(size: 22, weight: .bold))
@@ -399,6 +408,7 @@ struct PassportIssuedSheet: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     PassportIssuedSheet(
         fullName: "Ralph Buan",

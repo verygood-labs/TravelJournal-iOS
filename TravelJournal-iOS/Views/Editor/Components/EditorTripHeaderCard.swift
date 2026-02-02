@@ -5,14 +5,13 @@
 //  Created by John Apale on 1/22/26.
 //
 
-
 import SwiftUI
 
 struct EditorTripHeaderCard: View {
     @ObservedObject var viewModel: JournalEditorViewModel
     var onDatesTapped: (() -> Void)?
     var onLocationTapped: (() -> Void)?
-    
+
     var body: some View {
         VStack(spacing: AppTheme.Spacing.sm) {
             // Title
@@ -20,7 +19,7 @@ struct EditorTripHeaderCard: View {
                 .font(AppTheme.Typography.serifMedium())
                 .foregroundColor(AppTheme.Colors.passportTextPrimary)
                 .multilineTextAlignment(.center)
-            
+
             // Route (from stops)
             if let routeText = viewModel.routeText {
                 Text(routeText)
@@ -28,13 +27,13 @@ struct EditorTripHeaderCard: View {
                     .foregroundColor(AppTheme.Colors.passportTextSecondary)
                     .multilineTextAlignment(.center)
             }
-            
+
             // Divider
             Rectangle()
                 .fill(AppTheme.Colors.passportInputBorder)
                 .frame(height: 1)
                 .padding(.vertical, AppTheme.Spacing.xxs)
-            
+
             // Quick actions
             HStack(spacing: AppTheme.Spacing.xl) {
                 quickActionButton(
@@ -42,7 +41,7 @@ struct EditorTripHeaderCard: View {
                     label: "Dates",
                     action: { onDatesTapped?() }
                 )
-                
+
                 quickActionButton(
                     icon: "mappin.and.ellipse",
                     label: "Location",
@@ -55,7 +54,7 @@ struct EditorTripHeaderCard: View {
             LinearGradient(
                 colors: [
                     AppTheme.Colors.passportPageLight,
-                    AppTheme.Colors.passportPageDark
+                    AppTheme.Colors.passportPageDark,
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -68,8 +67,9 @@ struct EditorTripHeaderCard: View {
         .cornerRadius(AppTheme.CornerRadius.large)
         .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
     }
-    
+
     // MARK: - Quick Action Button
+
     private func quickActionButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
         Button {
             action()
@@ -86,6 +86,7 @@ struct EditorTripHeaderCard: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     let trip = Trip(
         id: UUID(),
@@ -101,14 +102,14 @@ struct EditorTripHeaderCard: View {
         stops: [
             TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH")),
             TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH"))
+            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH")),
         ]
     )
-    
+
     ZStack {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
-        
+
         EditorTripHeaderCard(viewModel: JournalEditorViewModel(trip: trip))
             .padding()
     }

@@ -1,5 +1,5 @@
 //
-//  AddBlockRequest.swift
+//  EditorRequests.swift
 //  TravelJournal-iOS
 //
 //  Created by John Apale on 1/26/26.
@@ -15,11 +15,11 @@ struct AddBlockRequest: Codable {
     let location: EditorLocation?
     let data: EditorBlockData
     let insertAtOrder: Int?
-    
+
     init(block: EditorBlock, insertAtOrder: Int? = nil) {
-        self.type = block.type
-        self.location = block.location
-        self.data = block.data
+        type = block.type
+        location = block.location
+        data = block.data
         self.insertAtOrder = insertAtOrder
     }
 }
@@ -30,10 +30,10 @@ struct AddBlockRequest: Codable {
 struct UpdateBlockRequest: Codable {
     let location: EditorLocation?
     let data: EditorBlockData
-    
+
     init(block: EditorBlock) {
-        self.location = block.location
-        self.data = block.data
+        location = block.location
+        data = block.data
     }
 }
 
@@ -42,9 +42,9 @@ struct UpdateBlockRequest: Codable {
 /// Request body for PUT /trips/{tripId}/draft (full save)
 struct SaveDraftRequest: Codable {
     let blocks: [EditorBlock]
-    
+
     init(content: EditorContent) {
-        self.blocks = content.blocks
+        blocks = content.blocks
     }
 }
 

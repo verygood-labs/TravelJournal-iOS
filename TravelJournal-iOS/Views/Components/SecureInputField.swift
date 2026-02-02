@@ -1,11 +1,12 @@
 import SwiftUI
 
 // MARK: - Eye Icon
+
 /// Custom eye icon drawn with SwiftUI paths
 struct EyeIcon: View {
     var isOpen: Bool = true
     var size: CGFloat = 20
-    
+
     var body: some View {
         ZStack {
             // Eye outline (always visible)
@@ -13,7 +14,7 @@ struct EyeIcon: View {
                 let width = size
                 let height = size * 0.5
                 let centerY = size / 2
-                
+
                 // Top curve
                 path.move(to: CGPoint(x: 0, y: centerY))
                 path.addQuadCurve(
@@ -27,14 +28,14 @@ struct EyeIcon: View {
                 )
             }
             .stroke(AppTheme.Colors.textSecondary, lineWidth: 1.5)
-            
+
             // Pupil (only when open)
             if isOpen {
                 Circle()
                     .fill(AppTheme.Colors.textSecondary)
                     .frame(width: size * 0.3, height: size * 0.3)
             }
-            
+
             // Diagonal slash line when closed
             if !isOpen {
                 Path { path in
@@ -49,15 +50,16 @@ struct EyeIcon: View {
 }
 
 // MARK: - Secure Input Field
+
 /// A text field with integrated password visibility toggle
 struct SecureInputField: View {
     let placeholder: String
     @Binding var text: String
     var isFocused: Bool = false
     var validationState: PassportTextFieldStyle.ValidationState = .none
-    
+
     @State private var isSecure: Bool = true
-    
+
     private var borderColor: Color {
         switch validationState {
         case .valid:
@@ -68,7 +70,7 @@ struct SecureInputField: View {
             return isFocused ? AppTheme.Colors.inputBorderFocused : AppTheme.Colors.inputBorder
         }
     }
-    
+
     var body: some View {
         HStack(spacing: AppTheme.Spacing.xs) {
             Group {
@@ -91,7 +93,7 @@ struct SecureInputField: View {
             .font(AppTheme.Typography.monoMedium())
             .foregroundColor(AppTheme.Colors.textPrimary)
             .tint(AppTheme.Colors.primary)
-            
+
             Button {
                 isSecure.toggle()
             } label: {
@@ -117,24 +119,25 @@ struct SecureInputField: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
-        
+
         VStack(spacing: 20) {
             SecureInputField(
                 placeholder: "Password",
                 text: .constant(""),
                 isFocused: false
             )
-            
+
             SecureInputField(
                 placeholder: "Password",
                 text: .constant("mypassword"),
                 isFocused: true
             )
-            
+
             HStack(spacing: 20) {
                 EyeIcon(isOpen: true, size: 24)
                 EyeIcon(isOpen: false, size: 24)

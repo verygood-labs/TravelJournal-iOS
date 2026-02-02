@@ -5,7 +5,6 @@
 //  Created by John Apale on 1/29/26.
 //
 
-
 //
 //  Toast.swift
 //  TravelJournal-iOS
@@ -22,15 +21,15 @@ struct Toast: Equatable {
     let message: String
     let icon: String?
     let duration: TimeInterval
-    
+
     // MARK: - Toast Type
-    
+
     enum ToastType {
         case success
         case error
         case warning
         case info
-        
+
         var defaultIcon: String {
             switch self {
             case .success: return "checkmark.circle.fill"
@@ -39,7 +38,7 @@ struct Toast: Equatable {
             case .info: return "info.circle.fill"
             }
         }
-        
+
         var backgroundColor: Color {
             switch self {
             case .success: return Color(hex: "4CAF50")
@@ -48,14 +47,14 @@ struct Toast: Equatable {
             case .info: return Color(hex: "607D8B")
             }
         }
-        
+
         var iconColor: Color {
             .white
         }
     }
-    
+
     // MARK: - Initialization
-    
+
     init(
         id: UUID = UUID(),
         type: ToastType,
@@ -69,9 +68,9 @@ struct Toast: Equatable {
         self.icon = icon ?? type.defaultIcon
         self.duration = duration
     }
-    
+
     // MARK: - Convenience Initializers
-    
+
     static func success(
         _ message: String,
         icon: String? = nil,
@@ -84,7 +83,7 @@ struct Toast: Equatable {
             duration: duration
         )
     }
-    
+
     static func error(
         _ message: String,
         icon: String? = nil,
@@ -97,7 +96,7 @@ struct Toast: Equatable {
             duration: duration
         )
     }
-    
+
     static func warning(
         _ message: String,
         icon: String? = nil,
@@ -110,7 +109,7 @@ struct Toast: Equatable {
             duration: duration
         )
     }
-    
+
     static func info(
         _ message: String,
         icon: String? = nil,

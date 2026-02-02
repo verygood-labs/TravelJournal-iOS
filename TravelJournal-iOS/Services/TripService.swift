@@ -3,9 +3,9 @@ import Foundation
 class TripService {
     static let shared = TripService()
     private let api = APIService.shared
-    
+
     private init() {}
-    
+
     func getTrips(page: Int = 1, pageSize: Int = 20, status: TripStatus? = nil) async throws -> PaginatedResponse<Trip> {
         var endpoint = "/trips?page=\(page)&pageSize=\(pageSize)"
         if let status = status {
@@ -13,11 +13,11 @@ class TripService {
         }
         return try await api.request(endpoint: endpoint)
     }
-    
+
     func getTrip(id: UUID) async throws -> Trip {
         return try await api.request(endpoint: "/trips/\(id)")
     }
-    
+
     func createTrip(
         title: String,
         description: String? = nil,
@@ -32,36 +32,35 @@ class TripService {
             endDate: endDate,
             initialStops: initialStops
         )
-        
+
         return try await api.request(
             endpoint: "/trips",
             method: "POST",
             body: request
         )
     }
-    
-    
+
     func deleteTrip(id: UUID) async throws {
         try await api.requestVoid(
             endpoint: "/trips/\(id)",
             method: "DELETE"
         )
     }
-    
+
     func updateTripStatus(id: UUID, status: TripStatus) async throws -> Trip {
         struct StatusRequest: Codable {
             let status: String
         }
-        
+
         return try await api.request(
             endpoint: "/trips/\(id)/status",
             method: "PUT",
             body: StatusRequest(status: status.rawValue)
         )
     }
-    
+
     // MARK: - Trip Stops
-    
+
     func addStop(
         tripId: UUID,
         placeName: String,
@@ -75,40 +74,40 @@ class TripService {
             let longitude: Double
             let placeId: String?
         }
-        
+
         let request = AddStopRequest(
             placeName: placeName,
             latitude: latitude,
             longitude: longitude,
             placeId: placeId
         )
-        
+
         return try await api.request(
             endpoint: "/trips/\(tripId)/stops",
             method: "POST",
             body: request
         )
     }
-    
+
     func removeStop(tripId: UUID, stopId: UUID) async throws {
         try await api.requestVoid(
             endpoint: "/trips/\(tripId)/stops/\(stopId)",
             method: "DELETE"
         )
     }
-    
+
     func reorderStops(tripId: UUID, stopIds: [UUID]) async throws {
         struct ReorderRequest: Codable {
             let stopIds: [UUID]
         }
-        
+
         try await api.requestVoid(
             endpoint: "/trips/\(tripId)/stops/reorder",
             method: "PUT",
             body: ReorderRequest(stopIds: stopIds)
         )
     }
-    
+
     // MARK: - Trip Draft/Journal
 
     func getDraft(tripId: UUID) async throws -> EditorResponse {
