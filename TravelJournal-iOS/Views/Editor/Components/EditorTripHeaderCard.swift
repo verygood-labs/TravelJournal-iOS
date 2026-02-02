@@ -34,19 +34,51 @@ struct EditorTripHeaderCard: View {
                 .frame(height: 1)
                 .padding(.vertical, AppTheme.Spacing.xxs)
 
-            // Quick actions
+            // Dates and Location info
             HStack(spacing: AppTheme.Spacing.xl) {
-                quickActionButton(
-                    icon: "calendar",
-                    label: "Dates",
-                    action: { onDatesTapped?() }
-                )
+                // Dates
+                Button {
+                    onDatesTapped?()
+                } label: {
+                    HStack(spacing: AppTheme.Spacing.xxxs) {
+                        Image(systemName: "calendar")
+                            .font(.system(size: 14))
+                        if viewModel.startDateText != nil || viewModel.endDateText != nil {
+                            VStack(alignment: .leading, spacing: 2) {
+                                if let startText = viewModel.startDateText {
+                                    Text(startText)
+                                        .font(AppTheme.Typography.monoSmall())
+                                }
+                                if let endText = viewModel.endDateText {
+                                    Text(endText)
+                                        .font(AppTheme.Typography.monoSmall())
+                                }
+                            }
+                        } else {
+                            Text("Add Dates")
+                                .font(AppTheme.Typography.monoSmall())
+                        }
+                    }
+                    .foregroundColor(AppTheme.Colors.passportInputBorderFocused)
+                }
 
-                quickActionButton(
-                    icon: "mappin.and.ellipse",
-                    label: "Location",
-                    action: { onLocationTapped?() }
-                )
+                // Location
+                Button {
+                    onLocationTapped?()
+                } label: {
+                    HStack(spacing: AppTheme.Spacing.xxxs) {
+                        Image(systemName: "mappin.and.ellipse")
+                            .font(.system(size: 14))
+                        if !viewModel.tripStops.isEmpty {
+                            Text("\(viewModel.tripStops.count) stop\(viewModel.tripStops.count == 1 ? "" : "s")")
+                                .font(AppTheme.Typography.monoSmall())
+                        } else {
+                            Text("Add Location")
+                                .font(AppTheme.Typography.monoSmall())
+                        }
+                    }
+                    .foregroundColor(AppTheme.Colors.passportInputBorderFocused)
+                }
             }
         }
         .padding(AppTheme.Spacing.lg)
@@ -66,22 +98,6 @@ struct EditorTripHeaderCard: View {
         )
         .cornerRadius(AppTheme.CornerRadius.large)
         .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
-    }
-
-    // MARK: - Quick Action Button
-
-    private func quickActionButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
-        Button {
-            action()
-        } label: {
-            HStack(spacing: AppTheme.Spacing.xxxs) {
-                Image(systemName: icon)
-                    .font(.system(size: 14))
-                Text(label)
-                    .font(AppTheme.Typography.monoSmall())
-            }
-            .foregroundColor(AppTheme.Colors.passportInputBorderFocused)
-        }
     }
 }
 
@@ -110,7 +126,7 @@ struct EditorTripHeaderCard: View {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
 
-        EditorTripHeaderCard(viewModel: JournalEditorViewModel(trip: trip))
+        EditorTripHeaderCard(viewModel: JournalEditorViewModel(trip: trip, toastManager: ToastManager()))
             .padding()
     }
 }
