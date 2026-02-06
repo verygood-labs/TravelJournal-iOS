@@ -203,6 +203,24 @@ struct JournalPreviewView: View {
     )
 }
 
+#Preview("Retro Theme") {
+    JournalPreviewView(
+        title: "Two Weeks in the Philippines",
+        description: "Island hopping adventure through paradise",
+        coverImageUrl: nil,
+        startDate: Date(),
+        endDate: Date().addingTimeInterval(86400 * 14),
+        stops: [
+            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH")),
+        ],
+        blocks: sampleBlocks,
+        availableThemes: JournalTheme.systemThemes,
+        selectedTheme: .constant(.retro),
+        isLoadingThemes: false,
+        onThemeSelected: { _ in }
+    )
+}
+
 // MARK: - Sample Data
 
 private let sampleBlocks: [EditorBlock] = [
@@ -213,22 +231,27 @@ private let sampleBlocks: [EditorBlock] = [
         content: "Landed at NAIA around 6am, groggy but excited. The humidity hit immediately.",
         stampText: "PH"
     ),
-    EditorBlock.newTip(
+    EditorBlock.newPhoto(
         order: 1,
+        imageUrl: "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=800",
+        caption: "Sunset over Manila Bay"
+    ),
+    EditorBlock.newTip(
+        order: 2,
         title: "Getting Around",
         content: "Use Grab for affordable transportation. Much cheaper and safer than regular taxis."
     ),
     EditorBlock.newRecommendation(
-        order: 2,
+        order: 3,
         name: "Aristocrat Restaurant",
         category: .eat,
         rating: .a,
         priceLevel: 2,
         note: "Best chicken barbecue in Manila! A must-visit institution since 1936."
     ),
-    EditorBlock.newDivider(order: 3),
+    EditorBlock.newDivider(order: 4),
     EditorBlock.newMoment(
-        order: 4,
+        order: 5,
         date: "Jan 16, 2026",
         title: "Exploring Intramuros",
         content: "Spent the morning walking through the old walled city. The Spanish colonial architecture is stunning."
