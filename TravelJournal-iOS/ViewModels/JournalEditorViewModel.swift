@@ -43,6 +43,7 @@ final class JournalEditorViewModel: ObservableObject {
     @Published var availableThemes: [JournalTheme] = []
     @Published var selectedTheme: JournalTheme = .default
     @Published var isLoadingThemes = false
+    private var themeSaveTask: Task<Void, Never>?
 
     // MARK: - Alert State
 
@@ -387,13 +388,25 @@ final class JournalEditorViewModel: ObservableObject {
     }
 
     /// Selects a theme and persists the selection to the API.
+    /// Uses debouncing to avoid excessive API calls when browsing themes.
     func selectTheme(_ theme: JournalTheme) {
         selectedTheme = theme
 
-        // Persist selection to API (fire and forget)
-        Task {
+        // Cancel any pending save
+        themeSaveTask?.cancel()
+
+        // Capture values to avoid referencing self after potential deallocation
+        let tripId = self.tripId
+        let themeService = self.themeService
+
+        // Debounce: wait 500ms before persisting to API
+        themeSaveTask = Task { [weak self] in
             do {
+                try await Task.sleep(nanoseconds: 500_000_000) // 500ms
+                guard !Task.isCancelled, self != nil else { return }
                 try await themeService.setDraftTheme(tripId: tripId, themeId: theme.id)
+            } catch is CancellationError {
+                // Expected when user changes theme quickly - ignore
             } catch {
                 print("Failed to save theme selection: \(error)")
                 // Don't show error to user - theme selection still works locally
