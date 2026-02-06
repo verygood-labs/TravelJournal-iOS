@@ -94,7 +94,10 @@ struct ThemedRecommendationCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: theme.style.borderRadius)
-                .stroke(theme.colors.borderColor.opacity(0.5), lineWidth: 1)
+                .stroke(
+                    theme.style.borderRadius == 0 ? theme.colors.borderColor : theme.colors.borderColor.opacity(0.5),
+                    lineWidth: theme.style.borderRadius == 0 ? 2 : 1
+                )
         )
     }
 

@@ -168,6 +168,13 @@ struct ThemedJournalHeader: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(theme.colors.cardBackgroundColor)
         .cornerRadius(theme.style.borderRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: theme.style.borderRadius)
+                .stroke(
+                    theme.style.borderRadius == 0 ? theme.colors.borderColor : theme.colors.borderColor.opacity(0.5),
+                    lineWidth: theme.style.borderRadius == 0 ? 2 : 1
+                )
+        )
         .shadow(
             color: theme.style.cardShadow ? Color.black.opacity(0.1) : .clear,
             radius: theme.style.cardShadow ? 10 : 0,

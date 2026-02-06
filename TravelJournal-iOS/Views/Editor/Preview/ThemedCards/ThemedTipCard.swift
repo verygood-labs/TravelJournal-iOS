@@ -59,7 +59,7 @@ struct ThemedTipCard: View {
         .cornerRadius(theme.style.borderRadius)
         .overlay(
             RoundedRectangle(cornerRadius: theme.style.borderRadius)
-                .stroke(tipStyle.borderSwiftUIColor, lineWidth: 2)
+                .stroke(tipStyle.borderSwiftUIColor, lineWidth: theme.style.borderRadius == 0 ? 2 : 2)
         )
     }
 }
