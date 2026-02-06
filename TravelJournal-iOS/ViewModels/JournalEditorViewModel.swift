@@ -38,6 +38,12 @@ final class JournalEditorViewModel: ObservableObject {
     @Published var showingCoverImagePicker = false
     @Published var showingCoverCamera = false
 
+    // MARK: - Theme State
+
+    @Published var availableThemes: [JournalTheme] = []
+    @Published var selectedTheme: JournalTheme = .default
+    @Published var isLoadingThemes = false
+
     // MARK: - Alert State
 
     @Published var showingCloseWarning = false
@@ -46,6 +52,7 @@ final class JournalEditorViewModel: ObservableObject {
 
     private let trip: Trip
     private let tripService = TripService.shared
+    private let themeService = ThemeService.shared
     private let toastManager: ToastManager
 
     // MARK: - Change Tracking
@@ -357,6 +364,41 @@ final class JournalEditorViewModel: ObservableObject {
     func handleDone() {
         print("Done button tapped - implement publish logic later")
         // TODO: Implement publish flow
+    }
+
+    // MARK: - Theme Management
+
+    /// Loads available themes from the API or falls back to built-in themes.
+    func loadThemes() async {
+        isLoadingThemes = true
+
+        availableThemes = await themeService.getSystemThemes()
+
+        // If trip has a draft theme, select it
+        if let draftThemeId = trip.draftThemeId,
+           let theme = availableThemes.first(where: { $0.id == draftThemeId }) {
+            selectedTheme = theme
+        } else {
+            // Default to first theme or built-in default
+            selectedTheme = availableThemes.first ?? .default
+        }
+
+        isLoadingThemes = false
+    }
+
+    /// Selects a theme and persists the selection to the API.
+    func selectTheme(_ theme: JournalTheme) {
+        selectedTheme = theme
+
+        // Persist selection to API (fire and forget)
+        Task {
+            do {
+                try await themeService.setDraftTheme(tripId: tripId, themeId: theme.id)
+            } catch {
+                print("Failed to save theme selection: \(error)")
+                // Don't show error to user - theme selection still works locally
+            }
+        }
     }
 }
 

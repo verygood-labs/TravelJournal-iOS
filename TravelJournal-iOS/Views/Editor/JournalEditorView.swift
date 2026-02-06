@@ -43,6 +43,13 @@ struct JournalEditorView: View {
         .task {
             await viewModel.loadDraft()
         }
+        .onChange(of: viewModel.editorMode) { _, newMode in
+            if newMode == .preview {
+                Task {
+                    await viewModel.loadThemes()
+                }
+            }
+        }
         .onChange(of: viewModel.loadFailed) { _, failed in
             if failed {
                 dismiss()
@@ -115,16 +122,21 @@ struct JournalEditorView: View {
     // MARK: - Preview Mode Content
 
     private var previewModeContent: some View {
-        ScrollView {
-            VStack(spacing: AppTheme.Spacing.md) {
-                Text("Preview Mode")
-                    .font(AppTheme.Typography.monoMedium())
-                    .foregroundColor(AppTheme.Colors.passportTextSecondary)
-
-                // TODO: Implement preview rendering
+        JournalPreviewView(
+            title: viewModel.tripTitle,
+            description: viewModel.tripDescription.isEmpty ? nil : viewModel.tripDescription,
+            coverImageUrl: viewModel.coverImageUrl,
+            startDate: viewModel.tripStartDate,
+            endDate: viewModel.tripEndDate,
+            stops: viewModel.tripStops,
+            blocks: viewModel.blocks,
+            availableThemes: viewModel.availableThemes,
+            selectedTheme: $viewModel.selectedTheme,
+            isLoadingThemes: viewModel.isLoadingThemes,
+            onThemeSelected: { theme in
+                viewModel.selectTheme(theme)
             }
-            .padding()
-        }
+        )
     }
 
     // MARK: - Actions
