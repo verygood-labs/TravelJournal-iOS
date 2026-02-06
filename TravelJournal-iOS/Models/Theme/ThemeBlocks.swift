@@ -72,11 +72,17 @@ struct CategoryBadgeStyle: Codable, Equatable {
 struct PhotoBlockStyle: Codable, Equatable {
     let borderColor: String
     let borderRadius: Int
+    let frameColor: String
+    let captionBackground: String
+    let captionTextColor: String
 
     // MARK: - SwiftUI Accessors
 
     var borderSwiftUIColor: Color { Color(hex: borderColor) }
     var cornerRadius: CGFloat { CGFloat(borderRadius) }
+    var frameSwiftUIColor: Color { Color(hex: frameColor) }
+    var captionBackgroundColor: Color { Color(hex: captionBackground) }
+    var captionTextSwiftUIColor: Color { Color(hex: captionTextColor) }
 }
 
 // MARK: - Tip Block Style
@@ -122,7 +128,10 @@ extension ThemeBlocks {
         ),
         photo: PhotoBlockStyle(
             borderColor: "#e0e0e0",
-            borderRadius: 8
+            borderRadius: 8,
+            frameColor: "#ffffff",
+            captionBackground: "#ffffff",
+            captionTextColor: "#333333"
         ),
         tip: TipBlockStyle(
             background: "#f0f9ff",

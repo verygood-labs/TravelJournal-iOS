@@ -31,21 +31,47 @@ struct ThemedPhotoCard: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .center, spacing: 8) {
-            // Photo
-            photoContent
-                .rotationEffect(.degrees(rotation))
+        VStack(spacing: 0) {
+            // Polaroid frame
+            VStack(spacing: 0) {
+                // Photo area
+                photoContent
+                    .padding(.top, 12)
+                    .padding(.horizontal, 12)
 
-            // Caption
-            if let caption = data.caption, !caption.isEmpty {
-                Text(caption)
-                    .font(theme.typography.bodyFont(size: 13))
-                    .foregroundColor(theme.colors.textSecondaryColor)
-                    .italic()
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 16)
+                // Caption area (larger bottom space like a polaroid)
+                VStack(spacing: 4) {
+                    if let caption = data.caption, !caption.isEmpty {
+                        Text(caption)
+                            .font(theme.typography.bodyFont(size: 14))
+                            .foregroundColor(photoStyle.captionTextSwiftUIColor)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(3)
+                    }
+                }
+                .frame(minHeight: 48)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+                .background(photoStyle.captionBackgroundColor)
             }
+            .background(photoStyle.frameSwiftUIColor)
+            .cornerRadius(theme.style.borderRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: theme.style.borderRadius)
+                    .stroke(
+                        theme.style.borderRadius == 0 ? theme.colors.borderColor : theme.colors.borderColor.opacity(0.5),
+                        lineWidth: theme.style.borderRadius == 0 ? 2 : 1
+                    )
+            )
+            .shadow(
+                color: theme.style.cardShadow ? Color.black.opacity(0.15) : .clear,
+                radius: theme.style.cardShadow ? 8 : 0,
+                x: 0,
+                y: theme.style.cardShadow ? 4 : 0
+            )
         }
+        .rotationEffect(.degrees(rotation))
         .padding(.vertical, 8)
     }
 
@@ -65,19 +91,9 @@ struct ThemedPhotoCard: View {
                 case .success(let image):
                     image
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxHeight: 300)
-                        .cornerRadius(photoStyle.cornerRadius)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: photoStyle.cornerRadius)
-                                .stroke(photoStyle.borderSwiftUIColor, lineWidth: 1)
-                        )
-                        .shadow(
-                            color: theme.style.cardShadow ? Color.black.opacity(0.1) : .clear,
-                            radius: theme.style.cardShadow ? 6 : 0,
-                            x: 0,
-                            y: theme.style.cardShadow ? 3 : 0
-                        )
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxHeight: 280)
+                        .clipped()
                 case .failure:
                     photoPlaceholder
                         .overlay(
@@ -108,13 +124,9 @@ struct ThemedPhotoCard: View {
     }
 
     private var photoPlaceholder: some View {
-        RoundedRectangle(cornerRadius: photoStyle.cornerRadius)
+        Rectangle()
             .fill(theme.colors.borderColor.opacity(0.2))
             .frame(height: 200)
-            .overlay(
-                RoundedRectangle(cornerRadius: photoStyle.cornerRadius)
-                    .stroke(photoStyle.borderSwiftUIColor, lineWidth: 1)
-            )
     }
 }
 
