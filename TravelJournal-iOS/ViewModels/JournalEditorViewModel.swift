@@ -393,9 +393,9 @@ final class JournalEditorViewModel: ObservableObject {
 
         availableThemes = await themeService.getSystemThemes()
 
-        // If trip has a draft theme, select it
-        if let draftThemeId = trip.draftThemeId,
-           let theme = availableThemes.first(where: { $0.id == draftThemeId }) {
+        // Match theme by slug from the trip response
+        if let draftThemeSlug = trip.draftThemeSlug,
+           let theme = availableThemes.first(where: { $0.slug == draftThemeSlug }) {
             selectedTheme = theme
         } else {
             // Default to first theme or built-in default
