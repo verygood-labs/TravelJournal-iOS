@@ -10,9 +10,20 @@ final class PlaceService: @unchecked Sendable {
 
     /// Search for places using OpenStreetMap Nominatim
     /// Results are NOT saved to the database until you call getOrCreate
+    /// - Parameters:
+    ///   - query: Search query string
+    ///   - placeType: Optional filter by place type
+    ///   - countryCode: Optional ISO 3166-1 alpha-2 country code to bias results (e.g., "JP" for Japan)
+    ///   - latitude: Optional center latitude for viewbox biasing (prioritizes local results)
+    ///   - longitude: Optional center longitude for viewbox biasing (prioritizes local results)
+    ///   - limit: Maximum number of results (default: 10)
+    ///   - language: Language code for results (default: "en")
     func search(
         query: String,
         placeType: PlaceType? = nil,
+        countryCode: String? = nil,
+        latitude: Double? = nil,
+        longitude: Double? = nil,
         limit: Int = 10,
         language: String = "en"
     ) async throws -> [LocationSearchResult] {
@@ -26,6 +37,12 @@ final class PlaceService: @unchecked Sendable {
         var endpoint = "/places/search?query=\(encodedQuery)&limit=\(limit)&language=\(language)"
         if let placeType = placeType {
             endpoint += "&placeType=\(placeType.rawValue)"
+        }
+        if let countryCode = countryCode, !countryCode.isEmpty {
+            endpoint += "&countryCode=\(countryCode)"
+        }
+        if let latitude = latitude, let longitude = longitude {
+            endpoint += "&latitude=\(latitude)&longitude=\(longitude)"
         }
 
         return try await api.request(endpoint: endpoint, authenticated: false)
