@@ -87,4 +87,6 @@ struct TripStopPlace: Codable {
     let displayName: String
     let placeType: PlaceType
     let countryCode: String?
+    let latitude: Double
+    let longitude: Double
 }
