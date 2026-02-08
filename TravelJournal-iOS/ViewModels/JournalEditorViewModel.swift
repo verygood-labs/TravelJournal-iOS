@@ -45,6 +45,13 @@ final class JournalEditorViewModel: ObservableObject {
     @Published var isLoadingThemes = false
     private var themeSaveTask: Task<Void, Never>?
 
+    // MARK: - Publish State
+
+    @Published var showingPublishSheet = false
+    @Published var selectedVisibility: VisibilityOption = .public
+    @Published var isPublishing = false
+    @Published var publishSucceeded = false
+
     // MARK: - Alert State
 
     @Published var showingCloseWarning = false
@@ -381,8 +388,35 @@ final class JournalEditorViewModel: ObservableObject {
     // MARK: - Done Action (Preview Mode)
 
     func handleDone() {
-        print("Done button tapped - implement publish logic later")
-        // TODO: Implement publish flow
+        showingPublishSheet = true
+    }
+
+    // MARK: - Publish Action
+
+    /// Publishes the journal with the selected visibility setting.
+    func publishJournal() async {
+        isPublishing = true
+        error = nil
+
+        do {
+            // Save any pending changes first
+            await saveDraft()
+
+            // Publish with selected visibility
+            _ = try await tripService.publishDraft(
+                tripId: tripId,
+                targetStatus: selectedVisibility.tripStatus
+            )
+
+            publishSucceeded = true
+            showingPublishSheet = false
+            toastManager.success("Journal published successfully!")
+        } catch {
+            self.error = "Failed to publish: \(error.localizedDescription)"
+            toastManager.error("Failed to publish journal")
+        }
+
+        isPublishing = false
     }
 
     // MARK: - Theme Management
