@@ -18,4 +18,19 @@ struct EditorLocation: Codable, Equatable {
     let displayName: String
     let latitude: Decimal
     let longitude: Decimal
+
+    /// Returns a shortened location display with just city and state.
+    /// Extracts from displayName format: "Place, City, State, Country" → "City, State"
+    var cityAndState: String {
+        let components = displayName.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        // Format is typically: Place, City, State, Country
+        // We want City, State (index 1 and 2 if we have 4+ components)
+        if components.count >= 4 {
+            return "\(components[1]), \(components[2])"
+        } else if components.count >= 2 {
+            // Fallback: return last two components
+            return "\(components[components.count - 2]), \(components[components.count - 1])"
+        }
+        return displayName
+    }
 }
