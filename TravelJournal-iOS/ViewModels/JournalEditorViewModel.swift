@@ -104,6 +104,24 @@ final class JournalEditorViewModel: ObservableObject {
         // Keep for compatibility - returns start date if available
         return startDateText
     }
+    
+    /// The primary country code for the trip, derived from the first stop's place.
+    /// Used to bias location search results to the trip's country.
+    var tripCountryCode: String? {
+        tripStops.first?.place.countryCode
+    }
+    
+    /// The primary latitude for the trip, derived from the first stop's place.
+    /// Used to bias location search results to the trip's area.
+    var tripLatitude: Double? {
+        tripStops.first?.place.latitude
+    }
+    
+    /// The primary longitude for the trip, derived from the first stop's place.
+    /// Used to bias location search results to the trip's area.
+    var tripLongitude: Double? {
+        tripStops.first?.place.longitude
+    }
 
     var hasUnsavedChanges: Bool {
         // Compare blocks
