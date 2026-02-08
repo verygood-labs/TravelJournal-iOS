@@ -23,13 +23,14 @@ struct Trip: Codable, Identifiable {
     let saveCount: Int
     let stopCount: Int
     let themeId: UUID?
-    let draftThemeId: UUID?
+    let themeSlug: String?
+    let draftThemeSlug: String?
 
     enum CodingKeys: String, CodingKey {
         case id, title, description, coverImageUrl, status, tripMode
         case startDate, endDate, createdAt, updatedAt, stops
         case primaryDestination, saveCount, stopCount
-        case themeId, draftThemeId
+        case themeId, themeSlug, draftThemeSlug
     }
 
     // MARK: - Decoder (handles DateOnly format for startDate/endDate)
@@ -50,7 +51,8 @@ struct Trip: Codable, Identifiable {
         saveCount = try container.decodeIfPresent(Int.self, forKey: .saveCount) ?? 0
         stopCount = try container.decodeIfPresent(Int.self, forKey: .stopCount) ?? 0
         themeId = try container.decodeIfPresent(UUID.self, forKey: .themeId)
-        draftThemeId = try container.decodeIfPresent(UUID.self, forKey: .draftThemeId)
+        themeSlug = try container.decodeIfPresent(String.self, forKey: .themeSlug)
+        draftThemeSlug = try container.decodeIfPresent(String.self, forKey: .draftThemeSlug)
 
         // Handle DateOnly format (yyyy-MM-dd)
         let dateOnlyFormatter = DateFormatter()
@@ -88,7 +90,8 @@ struct Trip: Codable, Identifiable {
         saveCount: Int = 0,
         stopCount: Int = 0,
         themeId: UUID? = nil,
-        draftThemeId: UUID? = nil
+        themeSlug: String? = nil,
+        draftThemeSlug: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -105,7 +108,8 @@ struct Trip: Codable, Identifiable {
         self.saveCount = saveCount
         self.stopCount = stopCount
         self.themeId = themeId
-        self.draftThemeId = draftThemeId
+        self.themeSlug = themeSlug
+        self.draftThemeSlug = draftThemeSlug
     }
 }
 
