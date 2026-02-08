@@ -7,6 +7,7 @@ import SwiftUI
 
 struct RecommendationBlockSheet: View {
     let existingBlock: EditorBlock?
+    let tripId: UUID
     let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
 
@@ -18,12 +19,28 @@ struct RecommendationBlockSheet: View {
     @State private var priceLevel: Int? = nil
     @State private var note: String = ""
 
+    // Location picker state
+    @State private var locationSearchText: String = ""
+    @State private var selectedLocation: EditorLocation?
+
+    // Image picker state
+    @State private var imageUrl: String = ""
+    @State private var selectedImage: UIImage?
+    @State private var showingImagePicker = false
+    @State private var showingCamera = false
+
+    // Upload state
+    @State private var isUploading = false
+    @State private var uploadError: String?
+
     init(
         existingBlock: EditorBlock? = nil,
+        tripId: UUID,
         onSave: @escaping (EditorBlock) -> Void,
         onDelete: (() -> Void)? = nil
     ) {
         self.existingBlock = existingBlock
+        self.tripId = tripId
         self.onSave = onSave
         self.onDelete = onDelete
 
@@ -33,11 +50,17 @@ struct RecommendationBlockSheet: View {
             _rating = State(initialValue: block.data.rating)
             _priceLevel = State(initialValue: block.data.priceLevel)
             _note = State(initialValue: block.data.note ?? "")
+            _imageUrl = State(initialValue: block.data.imageUrl ?? "")
+            _selectedLocation = State(initialValue: block.location)
         }
     }
 
     private var isValid: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !isUploading && !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var hasImage: Bool {
+        !imageUrl.isEmpty || selectedImage != nil
     }
 
     private var sheetTitle: String {
@@ -55,6 +78,17 @@ struct RecommendationBlockSheet: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
+                    // Location search section
+                    BlockFormSection(label: "LOCATION (OPTIONAL)") {
+                        PlaceSearchField(
+                            searchText: $locationSearchText,
+                            selectedLocation: $selectedLocation,
+                            onPlaceSelected: { result in
+                                handlePlaceSelection(result)
+                            }
+                        )
+                    }
+
                     BlockFormSection(label: "PLACE NAME") {
                         TextField("e.g., Cafe de Flore", text: $name)
                             .textFieldStyle(BlockTextFieldStyle())
@@ -75,6 +109,19 @@ struct RecommendationBlockSheet: View {
                             minHeight: 100
                         )
                     }
+
+                    // Photo section
+                    BlockFormSection(label: "PHOTO (OPTIONAL)") {
+                        photoContent
+                    }
+
+                    // Error message
+                    if let error = uploadError {
+                        Text(error)
+                            .font(AppTheme.Typography.monoSmall())
+                            .foregroundColor(.red)
+                            .padding(.horizontal, AppTheme.Spacing.xs)
+                    }
                 }
                 .padding(AppTheme.Spacing.md)
             }
@@ -89,6 +136,218 @@ struct RecommendationBlockSheet: View {
         .background(AppTheme.Colors.passportPageDark)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(image: $selectedImage, sourceType: .photoLibrary)
+        }
+        .fullScreenCover(isPresented: $showingCamera) {
+            ImagePicker(image: $selectedImage, sourceType: .camera)
+        }
+        .onChange(of: selectedImage) { _, newImage in
+            if let image = newImage {
+                uploadImage(image)
+            }
+        }
+    }
+
+    // MARK: - Photo Content
+
+    @ViewBuilder
+    private var photoContent: some View {
+        if isUploading {
+            uploadingView
+        } else if !imageUrl.isEmpty {
+            imagePreview
+        } else {
+            imagePlaceholder
+        }
+    }
+
+    private var uploadingView: some View {
+        VStack(spacing: AppTheme.Spacing.sm) {
+            ProgressView()
+                .scaleEffect(1.2)
+            Text("Uploading...")
+                .font(AppTheme.Typography.monoSmall())
+                .foregroundColor(AppTheme.Colors.passportTextMuted)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 150)
+        .background(AppTheme.Colors.passportInputBackground)
+        .cornerRadius(AppTheme.CornerRadius.medium)
+    }
+
+    private var imagePreview: some View {
+        VStack(spacing: AppTheme.Spacing.sm) {
+            AsyncImage(url: APIService.shared.fullMediaURL(for: imageUrl)) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                        .frame(height: 150)
+                case let .success(image):
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 200)
+                        .cornerRadius(AppTheme.CornerRadius.small)
+                case .failure:
+                    failedImageView
+                @unknown default:
+                    EmptyView()
+                }
+            }
+            .frame(maxWidth: .infinity)
+
+            HStack(spacing: AppTheme.Spacing.sm) {
+                Button {
+                    showingImagePicker = true
+                } label: {
+                    HStack(spacing: AppTheme.Spacing.xxxs) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 12))
+                        Text("REPLACE")
+                            .font(AppTheme.Typography.monoCaption())
+                            .tracking(1)
+                    }
+                    .foregroundColor(AppTheme.Colors.primary)
+                }
+
+                Button {
+                    imageUrl = ""
+                } label: {
+                    HStack(spacing: AppTheme.Spacing.xxxs) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 12))
+                        Text("REMOVE")
+                            .font(AppTheme.Typography.monoCaption())
+                            .tracking(1)
+                    }
+                    .foregroundColor(.red)
+                }
+            }
+        }
+    }
+
+    private var failedImageView: some View {
+        VStack(spacing: AppTheme.Spacing.sm) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 32))
+                .foregroundColor(AppTheme.Colors.passportTextMuted)
+            Text("Failed to load image")
+                .font(AppTheme.Typography.monoSmall())
+                .foregroundColor(AppTheme.Colors.passportTextMuted)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 150)
+        .background(AppTheme.Colors.passportInputBackground)
+        .cornerRadius(AppTheme.CornerRadius.medium)
+    }
+
+    private var imagePlaceholder: some View {
+        VStack(spacing: AppTheme.Spacing.md) {
+            VStack(spacing: AppTheme.Spacing.sm) {
+                Image(systemName: "photo.badge.plus")
+                    .font(.system(size: 32))
+                    .foregroundColor(AppTheme.Colors.passportTextMuted.opacity(0.6))
+                Text("Add a photo")
+                    .font(AppTheme.Typography.monoSmall())
+                    .foregroundColor(AppTheme.Colors.passportTextMuted)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 100)
+            .background(AppTheme.Colors.passportInputBackground)
+            .cornerRadius(AppTheme.CornerRadius.medium)
+            .overlay(
+                RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                    .stroke(AppTheme.Colors.passportInputBorder, style: StrokeStyle(lineWidth: 1, dash: [5]))
+            )
+
+            HStack(spacing: AppTheme.Spacing.sm) {
+                Button {
+                    showingCamera = true
+                } label: {
+                    HStack(spacing: AppTheme.Spacing.xxxs) {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 12))
+                        Text("CAMERA")
+                            .font(AppTheme.Typography.monoCaption())
+                            .tracking(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppTheme.Spacing.sm)
+                    .background(AppTheme.Colors.primary)
+                    .foregroundColor(AppTheme.Colors.passportPageLight)
+                    .cornerRadius(AppTheme.CornerRadius.medium)
+                }
+
+                Button {
+                    showingImagePicker = true
+                } label: {
+                    HStack(spacing: AppTheme.Spacing.xxxs) {
+                        Image(systemName: "photo.fill")
+                            .font(.system(size: 12))
+                        Text("LIBRARY")
+                            .font(AppTheme.Typography.monoCaption())
+                            .tracking(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppTheme.Spacing.sm)
+                    .background(AppTheme.Colors.passportInputBackground)
+                    .foregroundColor(AppTheme.Colors.primary)
+                    .cornerRadius(AppTheme.CornerRadius.medium)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                            .stroke(AppTheme.Colors.primary, lineWidth: 1)
+                    )
+                }
+            }
+        }
+    }
+
+    // MARK: - Upload
+
+    private func uploadImage(_ image: UIImage) {
+        isUploading = true
+        uploadError = nil
+
+        Task {
+            do {
+                let result = try await MediaService.shared.upload(
+                    image: image,
+                    type: .block,
+                    tripId: tripId
+                )
+
+                await MainActor.run {
+                    imageUrl = result.url
+                    selectedImage = nil
+                    isUploading = false
+                }
+            } catch {
+                await MainActor.run {
+                    uploadError = "Upload failed. Please try again."
+                    selectedImage = nil
+                    isUploading = false
+                }
+                print("Image upload error: \(error)")
+            }
+        }
+    }
+
+    // MARK: - Location Selection
+
+    private func handlePlaceSelection(_ result: LocationSearchResult) {
+        // Convert LocationSearchResult to EditorLocation
+        selectedLocation = EditorLocation(
+            osmType: result.osmType,
+            osmId: result.osmId,
+            name: result.name,
+            displayName: result.displayName,
+            latitude: Decimal(result.latitude),
+            longitude: Decimal(result.longitude)
+        )
+
+        // Auto-fill the name field
+        name = result.name
     }
 
     private func saveAndDismiss() {
@@ -98,15 +357,16 @@ struct RecommendationBlockSheet: View {
             category: category,
             rating: rating,
             priceLevel: priceLevel,
-            note: note.isEmpty ? nil : note
+            note: note.isEmpty ? nil : note,
+            imageUrl: imageUrl.isEmpty ? nil : imageUrl
         )
 
-        // Preserve the ID if editing
+        // Preserve the ID if editing, use selected location
         let finalBlock = EditorBlock(
             id: existingBlock?.id ?? block.id,
             order: block.order,
             type: block.type,
-            location: existingBlock?.location,
+            location: selectedLocation,
             data: block.data
         )
 
@@ -210,6 +470,24 @@ private struct RatingButton: View {
 
 // MARK: - Preview
 
-#Preview {
-    RecommendationBlockSheet(onSave: { _ in })
+#Preview("New Recommendation") {
+    RecommendationBlockSheet(tripId: UUID(), onSave: { _ in })
+}
+
+#Preview("Edit Recommendation with Photo") {
+    let sampleBlock = EditorBlock.newRecommendation(
+        order: 0,
+        name: "Aristocrat Restaurant",
+        category: .eat,
+        rating: .a,
+        priceLevel: 2,
+        note: "Best chicken barbecue in Manila!",
+        imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400"
+    )
+    RecommendationBlockSheet(
+        existingBlock: sampleBlock,
+        tripId: UUID(),
+        onSave: { _ in },
+        onDelete: { }
+    )
 }
