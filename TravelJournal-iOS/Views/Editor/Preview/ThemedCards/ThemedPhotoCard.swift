@@ -80,7 +80,7 @@ struct ThemedPhotoCard: View {
     @ViewBuilder
     private var photoContent: some View {
         if let imageUrl = data.imageUrl, !imageUrl.isEmpty {
-            AsyncImage(url: URL(string: imageUrl)) { phase in
+            AsyncImage(url: APIService.shared.fullMediaURL(for: imageUrl)) { phase in
                 switch phase {
                 case .empty:
                     photoPlaceholder
