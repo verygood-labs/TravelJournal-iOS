@@ -178,10 +178,12 @@ class TripService {
         )
     }
 
-    func publishDraft(tripId: UUID) async throws -> Trip {
+    func publishDraft(tripId: UUID, targetStatus: TripStatus? = nil) async throws -> Trip {
+        let request = PublishTripRequest(targetStatus: targetStatus)
         return try await api.request(
             endpoint: "/trips/\(tripId)/publish",
-            method: "POST"
+            method: "POST",
+            body: request
         )
     }
 }
