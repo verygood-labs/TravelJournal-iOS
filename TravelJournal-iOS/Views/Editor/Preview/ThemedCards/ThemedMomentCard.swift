@@ -183,7 +183,7 @@ struct ThemedMomentCard: View {
         HStack(spacing: 4) {
             Image(systemName: "mappin")
                 .font(.system(size: 10))
-            Text(location.displayName)
+            Text(location.cityAndState)
                 .font(theme.typography.labelFont(size: 11))
         }
         .foregroundColor(theme.colors.textMutedColor)

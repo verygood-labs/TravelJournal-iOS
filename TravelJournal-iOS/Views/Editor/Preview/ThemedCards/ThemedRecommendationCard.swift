@@ -179,7 +179,7 @@ struct ThemedRecommendationCard: View {
         HStack(spacing: 4) {
             Image(systemName: "mappin.circle.fill")
                 .font(.system(size: 12))
-            Text(location.displayName.uppercased())
+            Text(location.cityAndState.uppercased())
                 .font(theme.typography.labelFont(size: 11, weight: .medium))
                 .tracking(0.3)
         }
