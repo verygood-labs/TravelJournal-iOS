@@ -52,6 +52,16 @@ struct CreateTripStopRequest: Codable {
     }
 }
 
+// MARK: - Publish Trip
+
+struct PublishTripRequest: Codable {
+    let targetStatus: String?
+    
+    init(targetStatus: TripStatus? = nil) {
+        self.targetStatus = targetStatus?.rawValue
+    }
+}
+
 // MARK: - Update Trip
 
 struct UpdateTripRequest: Codable {
