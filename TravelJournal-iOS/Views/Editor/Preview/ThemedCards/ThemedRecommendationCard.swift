@@ -39,51 +39,58 @@ struct ThemedRecommendationCard: View {
     // MARK: - Body
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Image or icon
-            leadingContent
+        VStack(alignment: .leading, spacing: 0) {
+            // Category header (full width)
+            categoryHeader
 
-            // Details
-            VStack(alignment: .leading, spacing: 6) {
-                // Category badge
-                categoryBadge
+            // Image section (if present)
+            if hasImage {
+                imageSection
+            }
 
-                // Name
-                if let name = data.name {
-                    Text(name)
-                        .font(theme.typography.headingFont(size: 17, weight: .semibold))
-                        .foregroundColor(theme.colors.textPrimaryColor)
+            // Content section
+            VStack(alignment: .leading, spacing: 12) {
+                // Name row with rating badge
+                HStack(alignment: .top) {
+                    if let name = data.name {
+                        Text(name)
+                            .font(theme.typography.headingFont(size: 18, weight: .semibold))
+                            .foregroundColor(theme.colors.textPrimaryColor)
+                    }
+
+                    Spacer()
+
+                    if let rating = data.rating {
+                        ratingBadge(rating)
+                    }
                 }
 
-                // Rating and price
-                if data.rating != nil || data.priceLevel != nil {
-                    HStack(spacing: 12) {
-                        if let rating = data.rating {
-                            ratingView(rating)
+                // Location and price row
+                if block.location != nil || data.priceLevel != nil {
+                    HStack(spacing: 8) {
+                        if let location = block.location {
+                            locationLabel(location)
                         }
+
+                        if block.location != nil && data.priceLevel != nil {
+                            Text("·")
+                                .font(theme.typography.labelFont(size: 12))
+                                .foregroundColor(theme.colors.textMutedColor)
+                        }
+
                         if let priceLevel = data.priceLevel {
-                            priceLevelView(priceLevel)
+                            priceLevelLabel(priceLevel)
                         }
                     }
                 }
 
-                // Note
+                // Note as blockquote
                 if let note = data.note, !note.isEmpty {
-                    Text(note)
-                        .font(theme.typography.bodyFont(size: 14))
-                        .foregroundColor(theme.colors.textSecondaryColor)
-                        .lineLimit(3)
-                }
-
-                // Location
-                if let location = block.location {
-                    locationRow(location)
+                    noteBlockquote(note)
                 }
             }
-
-            Spacer(minLength: 0)
+            .padding(16)
         }
-        .padding(14)
         .background(recStyle.cardBackgroundColor)
         .cornerRadius(theme.style.borderRadius)
         .shadow(
@@ -101,97 +108,108 @@ struct ThemedRecommendationCard: View {
         )
     }
 
-    // MARK: - Leading Content
+    // MARK: - Category Header
+
+    private var categoryHeader: some View {
+        HStack(spacing: 6) {
+            Image(systemName: category.icon)
+                .font(.system(size: 12, weight: .semibold))
+
+            Text(category.displayName.uppercased())
+                .font(theme.typography.labelFont(size: 10, weight: .bold))
+                .tracking(0.5)
+        }
+        .foregroundColor(badgeStyle.textColor)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(badgeStyle.backgroundColor)
+    }
+
+    // MARK: - Image Section
 
     @ViewBuilder
-    private var leadingContent: some View {
-        if hasImage, let imageUrl = data.imageUrl {
-            AsyncImage(url: URL(string: imageUrl)) { phase in
+    private var imageSection: some View {
+        if let imageUrl = data.imageUrl {
+            AsyncImage(url: APIService.shared.fullMediaURL(for: imageUrl)) { phase in
                 switch phase {
+                case .empty:
+                    Rectangle()
+                        .fill(theme.colors.borderColor.opacity(0.3))
+                        .aspectRatio(16 / 9, contentMode: .fit)
+                        .overlay(
+                            ProgressView()
+                                .tint(theme.colors.textMutedColor)
+                        )
                 case .success(let image):
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 70, height: 70)
-                        .cornerRadius(theme.style.borderRadius / 2)
+                        .frame(maxHeight: 180)
                         .clipped()
-                default:
-                    iconPlaceholder
+                case .failure:
+                    Rectangle()
+                        .fill(theme.colors.borderColor.opacity(0.3))
+                        .aspectRatio(16 / 9, contentMode: .fit)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .font(.title)
+                                .foregroundColor(theme.colors.textMutedColor)
+                        )
+                @unknown default:
+                    EmptyView()
                 }
             }
-        } else {
-            iconPlaceholder
         }
     }
 
-    private var iconPlaceholder: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: theme.style.borderRadius / 2)
-                .fill(badgeStyle.backgroundColor.opacity(0.15))
-                .frame(width: 70, height: 70)
+    // MARK: - Rating Badge
 
-            Image(systemName: category.icon)
-                .font(.system(size: 24))
-                .foregroundColor(badgeStyle.backgroundColor)
-        }
-    }
-
-    // MARK: - Category Badge
-
-    private var categoryBadge: some View {
-        HStack(spacing: 4) {
-            Image(systemName: category.icon)
-                .font(.system(size: 10, weight: .semibold))
-
-            Text(category.displayName.uppercased())
-                .font(theme.typography.labelFont(size: 9, weight: .bold))
-                .tracking(0.5)
-        }
-        .foregroundColor(badgeStyle.textColor)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(badgeStyle.backgroundColor)
-        .cornerRadius(4)
-    }
-
-    // MARK: - Rating View
-
-    private func ratingView(_ rating: Rating) -> some View {
+    private func ratingBadge(_ rating: Rating) -> some View {
         Text(rating.displayName)
-            .font(theme.typography.labelFont(size: 14, weight: .bold))
+            .font(theme.typography.labelFont(size: 16, weight: .bold))
             .foregroundColor(.white)
-            .frame(width: 24, height: 24)
+            .frame(width: 36, height: 36)
             .background(rating.color)
-            .cornerRadius(4)
+            .cornerRadius(6)
     }
 
-    // MARK: - Price Level View
+    // MARK: - Location Label
 
-    private func priceLevelView(_ level: Int) -> some View {
-        HStack(spacing: 1) {
-            ForEach(0..<4) { index in
-                Text("$")
-                    .font(theme.typography.labelFont(size: 11, weight: .medium))
-                    .foregroundColor(
-                        index < level
-                            ? theme.colors.textPrimaryColor
-                            : theme.colors.textMutedColor.opacity(0.4)
-                    )
-            }
-        }
-    }
-
-    // MARK: - Location Row
-
-    private func locationRow(_ location: EditorLocation) -> some View {
+    private func locationLabel(_ location: EditorLocation) -> some View {
         HStack(spacing: 4) {
-            Image(systemName: "mappin")
-                .font(.system(size: 10))
-            Text(location.displayName)
-                .font(theme.typography.labelFont(size: 11))
+            Image(systemName: "mappin.circle.fill")
+                .font(.system(size: 12))
+            Text(location.displayName.uppercased())
+                .font(theme.typography.labelFont(size: 11, weight: .medium))
+                .tracking(0.3)
         }
         .foregroundColor(theme.colors.textMutedColor)
-        .padding(.top, 2)
+    }
+
+    // MARK: - Price Level Label
+
+    private func priceLevelLabel(_ level: Int) -> some View {
+        Text(String(repeating: "₱", count: level))
+            .font(theme.typography.labelFont(size: 12, weight: .medium))
+            .foregroundColor(theme.colors.textMutedColor)
+    }
+
+    // MARK: - Note Blockquote
+
+    private func noteBlockquote(_ note: String) -> some View {
+        HStack(spacing: 0) {
+            Rectangle()
+                .fill(theme.colors.borderColor)
+                .frame(width: 3)
+
+            Text("\u{201C}\(note)\u{201D}")
+                .font(theme.typography.bodyFont(size: 14))
+                .foregroundColor(theme.colors.textSecondaryColor)
+                .italic()
+                .padding(.leading, 12)
+                .padding(.vertical, 8)
+        }
+        .background(theme.colors.borderColor.opacity(0.08))
     }
 }
 
@@ -201,7 +219,7 @@ struct ThemedRecommendationCard: View {
     ScrollView {
         VStack(spacing: 16) {
             ThemedRecommendationCard(block: .sampleStay)
-            ThemedRecommendationCard(block: .sampleEat)
+            ThemedRecommendationCard(block: .sampleEatWithPhoto)
             ThemedRecommendationCard(block: .sampleDo)
             ThemedRecommendationCard(block: .sampleShop)
         }
@@ -215,7 +233,7 @@ struct ThemedRecommendationCard: View {
     ScrollView {
         VStack(spacing: 16) {
             ThemedRecommendationCard(block: .sampleStay)
-            ThemedRecommendationCard(block: .sampleEat)
+            ThemedRecommendationCard(block: .sampleEatWithPhoto)
             ThemedRecommendationCard(block: .sampleDo)
         }
         .padding()
@@ -227,7 +245,7 @@ struct ThemedRecommendationCard: View {
 #Preview("Retro Theme") {
     ScrollView {
         VStack(spacing: 16) {
-            ThemedRecommendationCard(block: .sampleEat)
+            ThemedRecommendationCard(block: .sampleEatWithPhoto)
             ThemedRecommendationCard(block: .sampleShop)
         }
         .padding()
@@ -239,22 +257,34 @@ struct ThemedRecommendationCard: View {
 // MARK: - Sample Data
 
 private extension EditorBlock {
-    static let sampleStay = EditorBlock.newRecommendation(
-        order: 0,
-        name: "The Peninsula Manila",
-        category: .stay,
-        rating: .a,
-        priceLevel: 4,
-        note: "Iconic luxury hotel in Makati. The lobby is stunning and the afternoon tea is a must."
-    )
+    static let sampleStay: EditorBlock = {
+        var block = EditorBlock.newRecommendation(
+            order: 0,
+            name: "Kawili Resort",
+            category: .stay,
+            rating: .a,
+            priceLevel: 2,
+            note: "Bamboo cottages with AC that actually works. Pool, good wifi, and walking distance to everything. The staff remembers your name by day 2.",
+            location: EditorLocation(
+                osmType: "node",
+                osmId: 123456,
+                name: "General Luna",
+                displayName: "General Luna",
+                latitude: 9.7894,
+                longitude: 126.1169
+            )
+        )
+        return block
+    }()
 
-    static let sampleEat = EditorBlock.newRecommendation(
+    static let sampleEatWithPhoto = EditorBlock.newRecommendation(
         order: 1,
         name: "Aristocrat Restaurant",
         category: .eat,
         rating: .a,
         priceLevel: 2,
-        note: "Best chicken barbecue in Manila! A must-visit institution since 1936."
+        note: "Best chicken barbecue in Manila! A must-visit institution since 1936.",
+        imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400"
     )
 
     static let sampleDo = EditorBlock.newRecommendation(
