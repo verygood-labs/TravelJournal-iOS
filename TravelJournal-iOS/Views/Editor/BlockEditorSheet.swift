@@ -27,6 +27,7 @@ struct BlockEditorSheet: View {
         case .moment:
             MomentBlockSheet(
                 existingBlock: existingBlock,
+                tripId: tripId ?? UUID(), // Fallback for preview
                 onSave: onSave,
                 onDelete: onDelete
             )
@@ -40,6 +41,7 @@ struct BlockEditorSheet: View {
         case .recommendation:
             RecommendationBlockSheet(
                 existingBlock: existingBlock,
+                tripId: tripId ?? UUID(), // Fallback for preview
                 onSave: onSave,
                 onDelete: onDelete
             )
@@ -66,9 +68,13 @@ struct BlockEditorSheet: View {
 }
 
 #Preview("Moment") {
-    BlockEditorSheet(blockType: .moment, onSave: { _ in })
+    BlockEditorSheet(blockType: .moment, tripId: UUID(), onSave: { _ in })
 }
 
 #Preview("Photo") {
     BlockEditorSheet(blockType: .photo, tripId: UUID(), onSave: { _ in })
+}
+
+#Preview("Recommendation") {
+    BlockEditorSheet(blockType: .recommendation, tripId: UUID(), onSave: { _ in })
 }
