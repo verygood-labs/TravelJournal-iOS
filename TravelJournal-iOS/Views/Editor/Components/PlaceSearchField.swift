@@ -14,6 +14,18 @@ struct PlaceSearchField: View {
     @Binding var selectedLocation: EditorLocation?
     let onPlaceSelected: (LocationSearchResult) -> Void
     
+    /// Optional country code (ISO 3166-1 alpha-2) to bias search results.
+    /// When provided, results from this country will be prioritized.
+    var countryCode: String? = nil
+    
+    /// Optional center latitude for viewbox biasing.
+    /// When provided with longitude, prioritizes results near this location.
+    var latitude: Double? = nil
+    
+    /// Optional center longitude for viewbox biasing.
+    /// When provided with latitude, prioritizes results near this location.
+    var longitude: Double? = nil
+    
     @State private var searchResults: [LocationSearchResult] = []
     @State private var isSearching = false
     @State private var searchTask: Task<Void, Never>?
@@ -266,9 +278,13 @@ struct PlaceSearchField: View {
             
             do {
                 // Search for venues specifically, or all types if venue search yields few results
+                // Pass coordinates to bias results to the trip's location area
                 let results = try await PlaceService.shared.search(
                     query: trimmed,
                     placeType: nil, // Search all types for recommendations
+                    countryCode: countryCode,
+                    latitude: latitude,
+                    longitude: longitude,
                     limit: 8
                 )
                 

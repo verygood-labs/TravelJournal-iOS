@@ -5,6 +5,9 @@ struct BlockEditorSheet: View {
     let blockType: BlockType
     let existingBlock: EditorBlock?
     let tripId: UUID?
+    let tripCountryCode: String?
+    let tripLatitude: Double?
+    let tripLongitude: Double?
     let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
 
@@ -12,12 +15,18 @@ struct BlockEditorSheet: View {
         blockType: BlockType,
         existingBlock: EditorBlock? = nil,
         tripId: UUID? = nil,
+        tripCountryCode: String? = nil,
+        tripLatitude: Double? = nil,
+        tripLongitude: Double? = nil,
         onSave: @escaping (EditorBlock) -> Void,
         onDelete: (() -> Void)? = nil
     ) {
         self.blockType = blockType
         self.existingBlock = existingBlock
         self.tripId = tripId
+        self.tripCountryCode = tripCountryCode
+        self.tripLatitude = tripLatitude
+        self.tripLongitude = tripLongitude
         self.onSave = onSave
         self.onDelete = onDelete
     }
@@ -42,6 +51,9 @@ struct BlockEditorSheet: View {
             RecommendationBlockSheet(
                 existingBlock: existingBlock,
                 tripId: tripId ?? UUID(), // Fallback for preview
+                tripCountryCode: tripCountryCode,
+                tripLatitude: tripLatitude,
+                tripLongitude: tripLongitude,
                 onSave: onSave,
                 onDelete: onDelete
             )

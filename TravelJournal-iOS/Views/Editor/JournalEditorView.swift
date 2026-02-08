@@ -61,6 +61,9 @@ struct JournalEditorView: View {
                     blockType: blockType,
                     existingBlock: viewModel.editingBlock,
                     tripId: viewModel.tripId,
+                    tripCountryCode: viewModel.tripCountryCode,
+                    tripLatitude: viewModel.tripLatitude,
+                    tripLongitude: viewModel.tripLongitude,
                     onSave: { block in
                         viewModel.saveBlock(block)
                     },
@@ -174,10 +177,10 @@ struct JournalEditorView: View {
         createdAt: Date(),
         updatedAt: Date(),
         stops: [
-            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH")),
+            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH", latitude: 14.5995, longitude: 120.9842)),
+            TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8349, longitude: 118.7384)),
+            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH", latitude: 10.3157, longitude: 123.8854)),
+            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8482, longitude: 126.0458)),
         ]
     )
 
@@ -198,10 +201,10 @@ struct JournalEditorView: View {
         createdAt: Date(),
         updatedAt: Date(),
         stops: [
-            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH")),
-            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH")),
+            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH", latitude: 14.5995, longitude: 120.9842)),
+            TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8349, longitude: 118.7384)),
+            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH", latitude: 10.3157, longitude: 123.8854)),
+            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8482, longitude: 126.0458)),
         ]
     )
 
@@ -303,6 +306,9 @@ private struct JournalEditorViewWithBlocks: View {
                     blockType: blockType,
                     existingBlock: viewModel.editingBlock,
                     tripId: viewModel.tripId,
+                    tripCountryCode: viewModel.tripCountryCode,
+                    tripLatitude: viewModel.tripLatitude,
+                    tripLongitude: viewModel.tripLongitude,
                     onSave: { block in
                         viewModel.saveBlock(block)
                     },

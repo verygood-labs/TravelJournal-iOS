@@ -8,6 +8,9 @@ import SwiftUI
 struct RecommendationBlockSheet: View {
     let existingBlock: EditorBlock?
     let tripId: UUID
+    let tripCountryCode: String?
+    let tripLatitude: Double?
+    let tripLongitude: Double?
     let onSave: (EditorBlock) -> Void
     let onDelete: (() -> Void)?
 
@@ -36,11 +39,17 @@ struct RecommendationBlockSheet: View {
     init(
         existingBlock: EditorBlock? = nil,
         tripId: UUID,
+        tripCountryCode: String? = nil,
+        tripLatitude: Double? = nil,
+        tripLongitude: Double? = nil,
         onSave: @escaping (EditorBlock) -> Void,
         onDelete: (() -> Void)? = nil
     ) {
         self.existingBlock = existingBlock
         self.tripId = tripId
+        self.tripCountryCode = tripCountryCode
+        self.tripLatitude = tripLatitude
+        self.tripLongitude = tripLongitude
         self.onSave = onSave
         self.onDelete = onDelete
 
@@ -85,7 +94,10 @@ struct RecommendationBlockSheet: View {
                             selectedLocation: $selectedLocation,
                             onPlaceSelected: { result in
                                 handlePlaceSelection(result)
-                            }
+                            },
+                            countryCode: tripCountryCode,
+                            latitude: tripLatitude,
+                            longitude: tripLongitude
                         )
                     }
 
