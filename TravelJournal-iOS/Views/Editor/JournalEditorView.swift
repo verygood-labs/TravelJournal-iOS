@@ -91,6 +91,23 @@ struct JournalEditorView: View {
         } message: {
             Text("You have unsaved changes. What would you like to do?")
         }
+        .sheet(isPresented: $viewModel.showingPublishSheet) {
+            PublishSettingsSheet(
+                selectedVisibility: $viewModel.selectedVisibility,
+                isPublishing: viewModel.isPublishing,
+                onPublish: {
+                    Task {
+                        await viewModel.publishJournal()
+                    }
+                }
+            )
+            .presentationDetents([.medium])
+        }
+        .onChange(of: viewModel.publishSucceeded) { _, succeeded in
+            if succeeded {
+                dismiss()
+            }
+        }
         .modifier(ToastModifier(manager: toastManager, position: .bottom))
     }
 
