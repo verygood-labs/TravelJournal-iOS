@@ -8,21 +8,33 @@
 import SwiftUI
 
 struct JournalTripCard: View {
-    let trip: Trip
+    let trip: TripSummary
     var onView: () -> Void = {}
     var onEdit: () -> Void = {}
+    var onChangeVisibility: () -> Void = {}
     var onDelete: () -> Void = {}
+
+    private var isDraft: Bool {
+        trip.status == .draft
+    }
 
     var body: some View {
         Button {
-            onView()
+            // Tap behavior: drafts open editor, published opens view
+            if isDraft {
+                onEdit()
+            } else {
+                onView()
+            }
         } label: {
             cardContent
         }
         .buttonStyle(.plain)
         .tripContextMenu(
+            trip: trip,
             onView: onView,
             onEdit: onEdit,
+            onChangeVisibility: onChangeVisibility,
             onDelete: onDelete
         )
     }
@@ -193,7 +205,7 @@ struct JournalTripCard: View {
     private var bottomRow: some View {
         HStack(spacing: AppTheme.Spacing.sm) {
             // Locations
-            statItem(icon: "mappin", value: "\(trip.stops?.count ?? 0)")
+            statItem(icon: "mappin", value: "\(trip.stopCount)")
 
             // Entries
             statItem(icon: "doc.text", value: "0")
@@ -271,7 +283,7 @@ struct JournalTripCard: View {
 }
 
 #Preview("Multiple Cards") {
-    let trips: [Trip] = [
+    let trips: [TripSummary] = [
         .preview(),
         .previewDraft,
         .preview(title: "Barcelona, Spain", description: "Gaudi architecture and beach vibes.", status: .private)

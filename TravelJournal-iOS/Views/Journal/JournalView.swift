@@ -5,10 +5,14 @@ struct JournalView: View {
     @EnvironmentObject private var toastManager: ToastManager
     @State private var showingAddTrip = false
     @State private var tripToEdit: Trip?
+    @State private var tripToView: Trip?
     @State private var showingEditor = false
     @State private var viewMode: JournalViewMode = .card
-    @State private var tripToDelete: Trip?
+    @State private var tripToDelete: TripSummary?
     @State private var showingDeleteConfirmation = false
+    @State private var tripToChangeVisibility: TripSummary?
+    @State private var showingVisibilitySheet = false
+    @State private var isLoadingTrip = false
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -68,6 +72,33 @@ struct JournalView: View {
             let _ = print("🎯 Opening editor with trip: \(trip.id), title: \(trip.title)")
             JournalEditorView(trip: trip, toastManager: toastManager)
         }
+        .fullScreenCover(item: $tripToView, onDismiss: {
+            Task {
+                await viewModel.loadTrips()
+            }
+        }) { trip in
+            NavigationView {
+                PublicJournalView(trip: trip)
+            }
+        }
+        .sheet(isPresented: $showingVisibilitySheet) {
+            if let trip = tripToChangeVisibility {
+                VisibilityChangeSheet(
+                    trip: trip,
+                    onVisibilityChanged: { newStatus in
+                        Task {
+                            await handleVisibilityChange(trip: trip, newStatus: newStatus)
+                        }
+                        showingVisibilitySheet = false
+                        tripToChangeVisibility = nil
+                    },
+                    onCancel: {
+                        showingVisibilitySheet = false
+                        tripToChangeVisibility = nil
+                    }
+                )
+            }
+        }
         .task {
             await viewModel.loadTrips()
         }
@@ -102,6 +133,7 @@ struct JournalView: View {
                             trip: trip,
                             onView: { handleViewTrip(trip) },
                             onEdit: { handleEditTrip(trip) },
+                            onChangeVisibility: { handleChangeVisibility(trip) },
                             onDelete: { handleDeleteTrip(trip) }
                         )
                     } else {
@@ -109,6 +141,7 @@ struct JournalView: View {
                             trip: trip,
                             onView: { handleViewTrip(trip) },
                             onEdit: { handleEditTrip(trip) },
+                            onChangeVisibility: { handleChangeVisibility(trip) },
                             onDelete: { handleDeleteTrip(trip) }
                         )
                     }
@@ -264,16 +297,49 @@ struct JournalView: View {
 
     // MARK: - Actions
 
-    private func handleViewTrip(_ trip: Trip) {
+    private func handleViewTrip(_ trip: TripSummary) {
         print("👁️ View trip: \(trip.title)")
-        // TODO: Navigate to trip detail view
+        Task {
+            isLoadingTrip = true
+            do {
+                let fullTrip = try await TripService.shared.getTrip(id: trip.id)
+                tripToView = fullTrip
+            } catch {
+                toastManager.show(.error("Failed to load trip"))
+            }
+            isLoadingTrip = false
+        }
     }
 
-    private func handleEditTrip(_ trip: Trip) {
-        tripToEdit = trip
+    private func handleEditTrip(_ trip: TripSummary) {
+        Task {
+            isLoadingTrip = true
+            do {
+                let fullTrip = try await TripService.shared.getTrip(id: trip.id)
+                tripToEdit = fullTrip
+            } catch {
+                toastManager.show(.error("Failed to load trip"))
+            }
+            isLoadingTrip = false
+        }
     }
 
-    private func handleDeleteTrip(_ trip: Trip) {
+    private func handleChangeVisibility(_ trip: TripSummary) {
+        tripToChangeVisibility = trip
+        showingVisibilitySheet = true
+    }
+
+    private func handleVisibilityChange(trip: TripSummary, newStatus: TripStatus) async {
+        do {
+            _ = try await TripService.shared.updateTripStatus(id: trip.id, status: newStatus)
+            await viewModel.loadTrips()
+            toastManager.show(.success("Visibility updated to \(newStatus.rawValue)"))
+        } catch {
+            toastManager.show(.error("Failed to update visibility"))
+        }
+    }
+
+    private func handleDeleteTrip(_ trip: TripSummary) {
         tripToDelete = trip
         showingDeleteConfirmation = true
     }

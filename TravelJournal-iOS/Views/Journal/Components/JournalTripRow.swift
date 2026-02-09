@@ -9,21 +9,33 @@ import Foundation
 import SwiftUI
 
 struct JournalTripRow: View {
-    let trip: Trip
+    let trip: TripSummary
     var onView: () -> Void = {}
     var onEdit: () -> Void = {}
+    var onChangeVisibility: () -> Void = {}
     var onDelete: () -> Void = {}
+
+    private var isDraft: Bool {
+        trip.status == .draft
+    }
 
     var body: some View {
         Button {
-            onView()
+            // Tap behavior: drafts open editor, published opens view
+            if isDraft {
+                onEdit()
+            } else {
+                onView()
+            }
         } label: {
             rowContent
         }
         .buttonStyle(.plain)
         .tripContextMenu(
+            trip: trip,
             onView: onView,
             onEdit: onEdit,
+            onChangeVisibility: onChangeVisibility,
             onDelete: onDelete
         )
     }
@@ -52,7 +64,7 @@ struct JournalTripRow: View {
                 // Stats row: locations, notes, last updated
                 HStack(spacing: AppTheme.Spacing.sm) {
                     // Locations
-                    statItem(icon: "mappin", value: "\(trip.stops?.count ?? 0)")
+                    statItem(icon: "mappin", value: "\(trip.stopCount)")
 
                     // Notes/Entries
                     statItem(icon: "doc.text", value: "0")
@@ -142,7 +154,7 @@ struct JournalTripRow: View {
 }
 
 #Preview("Multiple Rows") {
-    let trips: [Trip] = [
+    let trips: [TripSummary] = [
         .preview(),
         .previewDraft,
         .preview(title: "Road Trip Across America", status: .private)
