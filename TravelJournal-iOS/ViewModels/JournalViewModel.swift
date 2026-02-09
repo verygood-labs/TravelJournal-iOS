@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 class JournalViewModel: ObservableObject {
-    @Published var trips: [Trip] = []
+    @Published var trips: [TripSummary] = []
     @Published var isLoading = false
     @Published var error: String?
 
@@ -30,7 +30,7 @@ class JournalViewModel: ObservableObject {
         }
     }
 
-    func loadMoreTripsIfNeeded(currentTrip: Trip) async {
+    func loadMoreTripsIfNeeded(currentTrip: TripSummary) async {
         // Check if we're near the end of the list
         guard let index = trips.firstIndex(where: { $0.id == currentTrip.id }),
               index >= trips.count - 3,
@@ -52,28 +52,7 @@ class JournalViewModel: ObservableObject {
         }
     }
 
-    func addTrip(_ trip: Trip) async {
-        // Note: This is for local additions. For API, use createTrip
-        trips.insert(trip, at: 0)
-    }
-
-    func createTrip(title: String, description: String?, startDate: Date?, endDate: Date?) async -> Bool {
-        do {
-            let newTrip = try await tripService.createTrip(
-                title: title,
-                description: description,
-                startDate: startDate,
-                endDate: endDate
-            )
-            trips.insert(newTrip, at: 0)
-            return true
-        } catch {
-            self.error = error.localizedDescription
-            return false
-        }
-    }
-
-    func deleteTrip(_ trip: Trip) async -> Bool {
+    func deleteTrip(_ trip: TripSummary) async -> Bool {
         do {
             try await tripService.deleteTrip(id: trip.id)
             trips.removeAll { $0.id == trip.id }

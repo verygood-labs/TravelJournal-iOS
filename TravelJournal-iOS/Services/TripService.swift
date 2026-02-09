@@ -6,7 +6,7 @@ class TripService {
 
     private init() {}
 
-    func getTrips(page: Int = 1, pageSize: Int = 20, status: TripStatus? = nil) async throws -> PaginatedResponse<Trip> {
+    func getTrips(page: Int = 1, pageSize: Int = 20, status: TripStatus? = nil) async throws -> PaginatedResponse<TripSummary> {
         var endpoint = "/trips?page=\(page)&pageSize=\(pageSize)"
         if let status = status {
             endpoint += "&status=\(status.rawValue)"
