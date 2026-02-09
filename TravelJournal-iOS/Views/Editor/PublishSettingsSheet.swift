@@ -69,9 +69,10 @@ struct PublishSettingsSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
+            VStack(spacing: 20) {
                 // Header
                 headerSection
+                    .padding(.top, 8)
 
                 // Visibility options
                 visibilityOptions
@@ -82,7 +83,6 @@ struct PublishSettingsSheet: View {
                 publishButton
             }
             .padding(.horizontal, 20)
-            .padding(.top, 24)
             .padding(.bottom, 32)
             .background(AppTheme.Colors.backgroundDark)
             .navigationBarTitleDisplayMode(.inline)
@@ -96,10 +96,16 @@ struct PublishSettingsSheet: View {
                 }
 
                 ToolbarItem(placement: .principal) {
-                    Text("Publish Journal")
-                        .font(AppTheme.Typography.monoMedium())
-                        .fontWeight(.semibold)
-                        .foregroundColor(AppTheme.Colors.textPrimary)
+                    HStack(spacing: 8) {
+                        Text("Publish Journal")
+                            .font(AppTheme.Typography.monoMedium())
+                            .fontWeight(.semibold)
+                            .foregroundColor(AppTheme.Colors.textPrimary)
+                        
+                        Image(systemName: "paperplane.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(AppTheme.Colors.primary)
+                    }
                 }
             }
         }
@@ -108,16 +114,10 @@ struct PublishSettingsSheet: View {
     // MARK: - Header Section
 
     private var headerSection: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "paperplane.fill")
-                .font(.system(size: 40))
-                .foregroundColor(AppTheme.Colors.primary)
-
-            Text("Choose who can see your journal")
-                .font(AppTheme.Typography.monoMedium())
-                .foregroundColor(AppTheme.Colors.textSecondary)
-                .multilineTextAlignment(.center)
-        }
+        Text("Choose who can see your journal")
+            .font(AppTheme.Typography.monoMedium())
+            .foregroundColor(AppTheme.Colors.textSecondary)
+            .multilineTextAlignment(.center)
     }
 
     // MARK: - Visibility Options
@@ -143,7 +143,7 @@ struct PublishSettingsSheet: View {
             HStack(spacing: 8) {
                 if isPublishing {
                     ProgressView()
-                        .tint(.white)
+                        .tint(AppTheme.Colors.backgroundDark)
                         .scaleEffect(0.9)
                 } else {
                     Image(systemName: "paperplane.fill")
@@ -154,9 +154,9 @@ struct PublishSettingsSheet: View {
                     .font(AppTheme.Typography.monoMedium())
                     .fontWeight(.semibold)
             }
-            .foregroundColor(.white)
+            .foregroundColor(AppTheme.Colors.backgroundDark)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 14)
             .background(AppTheme.Colors.primary)
             .cornerRadius(12)
         }
@@ -174,15 +174,15 @@ private struct VisibilityOptionRow: View {
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(spacing: 16) {
+            HStack(spacing: 14) {
                 // Icon
                 Image(systemName: option.icon)
-                    .font(.system(size: 20))
+                    .font(.system(size: 18))
                     .foregroundColor(isSelected ? AppTheme.Colors.primary : AppTheme.Colors.textSecondary)
-                    .frame(width: 32)
+                    .frame(width: 28)
 
                 // Text content
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(option.title)
                         .font(AppTheme.Typography.monoMedium())
                         .fontWeight(.medium)
@@ -191,24 +191,26 @@ private struct VisibilityOptionRow: View {
                     Text(option.description)
                         .font(AppTheme.Typography.monoSmall())
                         .foregroundColor(AppTheme.Colors.textSecondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Spacer()
+                Spacer(minLength: 8)
 
                 // Selection indicator
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
-                    .foregroundColor(isSelected ? AppTheme.Colors.primary : AppTheme.Colors.divider)
+                    .foregroundColor(isSelected ? AppTheme.Colors.primary : AppTheme.Colors.textSecondary.opacity(0.5))
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(isSelected ? AppTheme.Colors.primary.opacity(0.1) : AppTheme.Colors.cardBackground)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? AppTheme.Colors.primary : AppTheme.Colors.divider, lineWidth: 1)
+                    .stroke(isSelected ? AppTheme.Colors.primary : Color.clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
