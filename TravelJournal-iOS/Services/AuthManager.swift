@@ -4,15 +4,31 @@ import SwiftUI
 
 @MainActor
 class AuthManager: ObservableObject {
+    static let shared = AuthManager()
+
     @Published var isAuthenticated = false
     @Published var currentUser: User?
     @Published var isLoading = false
     @Published var error: String?
 
+    /// Convenience property for current user's ID
+    var currentUserId: UUID? {
+        currentUser?.id
+    }
+
     private let authService = AuthService.shared
     private let api = APIService.shared
+    private var sessionExpiredObserver: NSObjectProtocol?
+
+    /// Returns true when running in SwiftUI preview canvas
+    private static var isPreview: Bool {
+        ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+    }
 
     init() {
+        // Skip real initialization in previews
+        guard !Self.isPreview else { return }
+
         // Check if user is already logged in
         isAuthenticated = api.isAuthenticated
 
@@ -21,6 +37,30 @@ class AuthManager: ObservableObject {
                 await loadCurrentUser()
             }
         }
+
+        // Listen for session expiration from APIService
+        sessionExpiredObserver = NotificationCenter.default.addObserver(
+            forName: APIService.sessionExpiredNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.handleSessionExpired()
+            }
+        }
+    }
+
+    deinit {
+        if let observer = sessionExpiredObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    /// Called when the API detects the session has expired
+    private func handleSessionExpired() {
+        currentUser = nil
+        isAuthenticated = false
+        error = "Your session has expired. Please log in again."
     }
 
     func login(email: String, password: String) async {

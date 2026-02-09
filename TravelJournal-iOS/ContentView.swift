@@ -20,6 +20,13 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     toastManager.success("Welcome back!")
                 }
+            } else if !newValue && oldValue {
+                // User was logged out (session expired or manual logout)
+                if authManager.error != nil {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        toastManager.error("Session expired. Please log in again.")
+                    }
+                }
             }
         }
     }

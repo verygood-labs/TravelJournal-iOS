@@ -255,8 +255,12 @@ final class APIService: @unchecked Sendable {
 
     // MARK: - Token Refresh
 
+    /// Notification posted when the user's session has expired and they need to re-authenticate
+    static let sessionExpiredNotification = Notification.Name("APIService.sessionExpired")
+
     private func refreshAccessToken() async throws -> Bool {
         guard let refreshToken = refreshToken else {
+            postSessionExpired()
             return false
         }
 
@@ -274,7 +278,14 @@ final class APIService: @unchecked Sendable {
             return true
         } catch {
             clearTokens()
+            postSessionExpired()
             return false
+        }
+    }
+
+    private func postSessionExpired() {
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: APIService.sessionExpiredNotification, object: nil)
         }
     }
 }
