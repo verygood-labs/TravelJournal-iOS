@@ -128,26 +128,12 @@ struct JournalTripRow: View {
 // MARK: - Preview
 
 #Preview("Single Row") {
-    let sampleTrip = Trip(
-        id: UUID(),
-        title: "Paris, France",
-        description: "An amazing week exploring the city of lights.",
-        coverImageUrl: nil,
-        status: .public,
-        tripMode: .live,
-        startDate: Date().addingTimeInterval(-86400 * 30),
-        endDate: Date().addingTimeInterval(-86400 * 23),
-        createdAt: Date().addingTimeInterval(-86400 * 30),
-        updatedAt: Date().addingTimeInterval(-86400 * 2),
-        stops: nil
-    )
-
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
 
         JournalTripRow(
-            trip: sampleTrip,
+            trip: .preview(),
             onView: { print("View tapped") },
             onEdit: { print("Edit tapped") }
         )
@@ -156,46 +142,10 @@ struct JournalTripRow: View {
 }
 
 #Preview("Multiple Rows") {
-    let trips = [
-        Trip(
-            id: UUID(),
-            title: "Paris, France",
-            description: nil,
-            coverImageUrl: nil,
-            status: .public,
-            tripMode: .live,
-            startDate: Date().addingTimeInterval(-86400 * 30),
-            endDate: Date().addingTimeInterval(-86400 * 23),
-            createdAt: Date(),
-            updatedAt: Date(),
-            stops: nil
-        ),
-        Trip(
-            id: UUID(),
-            title: "Tokyo, Japan",
-            description: nil,
-            coverImageUrl: nil,
-            status: .draft,
-            tripMode: .live,
-            startDate: Date(),
-            endDate: Date(),
-            createdAt: Date(),
-            updatedAt: Date(),
-            stops: nil
-        ),
-        Trip(
-            id: UUID(),
-            title: "Road Trip Across America",
-            description: nil,
-            coverImageUrl: nil,
-            status: .private,
-            tripMode: .live,
-            startDate: Date().addingTimeInterval(-86400 * 60),
-            endDate: Date().addingTimeInterval(-86400 * 55),
-            createdAt: Date(),
-            updatedAt: Date(),
-            stops: nil
-        ),
+    let trips: [Trip] = [
+        .preview(),
+        .previewDraft,
+        .preview(title: "Road Trip Across America", status: .private)
     ]
 
     ZStack {

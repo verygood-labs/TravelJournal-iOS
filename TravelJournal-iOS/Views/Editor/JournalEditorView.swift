@@ -182,50 +182,12 @@ struct JournalEditorView: View {
 // MARK: - Preview
 
 #Preview("Empty") {
-    let sampleTrip = Trip(
-        id: UUID(),
-        title: "Two Weeks in the Philippines",
-        description: "Island hopping adventure",
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date().addingTimeInterval(86400 * 14),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: [
-            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH", latitude: 14.5995, longitude: 120.9842)),
-            TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8349, longitude: 118.7384)),
-            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH", latitude: 10.3157, longitude: 123.8854)),
-            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8482, longitude: 126.0458)),
-        ]
-    )
-
-    JournalEditorView(trip: sampleTrip, toastManager: ToastManager())
+    JournalEditorView(trip: .previewWithStops, toastManager: ToastManager())
         .environmentObject(ToastManager())
 }
 
 #Preview("With Blocks") {
-    let sampleTrip = Trip(
-        id: UUID(),
-        title: "Two Weeks in the Philippines",
-        description: "Island hopping adventure",
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date().addingTimeInterval(86400 * 14),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: [
-            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH", latitude: 14.5995, longitude: 120.9842)),
-            TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8349, longitude: 118.7384)),
-            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH", latitude: 10.3157, longitude: 123.8854)),
-            TripStop(id: UUID(), order: 3, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Siargao", displayName: "Siargao, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8482, longitude: 126.0458)),
-        ]
-    )
-
-    JournalEditorViewPreview(trip: sampleTrip)
+    JournalEditorViewPreview(trip: .previewWithStops)
 }
 
 // MARK: - Preview Helper

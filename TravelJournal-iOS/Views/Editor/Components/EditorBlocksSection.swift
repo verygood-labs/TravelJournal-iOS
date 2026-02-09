@@ -213,44 +213,16 @@ struct EditorBlocksSection: View {
 // MARK: - Preview
 
 #Preview("Empty") {
-    let trip = Trip(
-        id: UUID(),
-        title: "Test Trip",
-        description: nil,
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date(),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: nil
-    )
-
     ZStack {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
 
-        EditorBlocksSection(viewModel: JournalEditorViewModel(trip: trip, toastManager: ToastManager()))
+        EditorBlocksSection(viewModel: JournalEditorViewModel(trip: .previewDraft, toastManager: ToastManager()))
     }
 }
 
 #Preview("With Blocks") {
-    let trip = Trip(
-        id: UUID(),
-        title: "Test Trip",
-        description: nil,
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date(),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: nil
-    )
-
-    let viewModel = JournalEditorViewModel(trip: trip, toastManager: ToastManager())
+    let viewModel = JournalEditorViewModel(trip: .previewDraft, toastManager: ToastManager())
     viewModel.blocks = [
         EditorBlock.newMoment(
             order: 0,
@@ -274,21 +246,7 @@ struct EditorBlocksSection: View {
 }
 
 #Preview("With Many Blocks") {
-    let trip = Trip(
-        id: UUID(),
-        title: "Test Trip",
-        description: nil,
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date(),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: nil
-    )
-
-    let viewModel = JournalEditorViewModel(trip: trip, toastManager: ToastManager())
+    let viewModel = JournalEditorViewModel(trip: .previewDraft, toastManager: ToastManager())
     viewModel.blocks = [
         EditorBlock.newMoment(
             order: 0,

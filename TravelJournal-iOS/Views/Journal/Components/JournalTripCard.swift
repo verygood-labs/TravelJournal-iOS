@@ -229,26 +229,12 @@ struct JournalTripCard: View {
 // MARK: - Preview
 
 #Preview("Public Trip") {
-    let sampleTrip = Trip(
-        id: UUID(),
-        title: "Paris, France",
-        description: "An amazing week exploring the city of lights.",
-        coverImageUrl: nil,
-        status: .public,
-        tripMode: .live,
-        startDate: Date().addingTimeInterval(-86400 * 30),
-        endDate: Date().addingTimeInterval(-86400 * 23),
-        createdAt: Date().addingTimeInterval(-86400 * 30),
-        updatedAt: Date().addingTimeInterval(-86400 * 2),
-        stops: nil
-    )
-
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
 
         JournalTripCard(
-            trip: sampleTrip,
+            trip: .preview(),
             onView: { print("View tapped") },
             onEdit: { print("Edit tapped") }
         )
@@ -257,26 +243,12 @@ struct JournalTripCard: View {
 }
 
 #Preview("Draft Trip") {
-    let draftTrip = Trip(
-        id: UUID(),
-        title: "Tokyo, Japan",
-        description: nil,
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date().addingTimeInterval(86400 * 7),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: nil
-    )
-
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
 
         JournalTripCard(
-            trip: draftTrip,
+            trip: .previewDraft,
             onView: { print("View tapped") },
             onEdit: { print("Edit tapped") }
         )
@@ -285,26 +257,12 @@ struct JournalTripCard: View {
 }
 
 #Preview("Private Trip - Long Title") {
-    let privateTrip = Trip(
-        id: UUID(),
-        title: "Road Trip Across the United States of America",
-        description: "From New York to Los Angeles, experiencing the diverse landscapes and cultures along the way. Stopped at countless diners and motels.",
-        coverImageUrl: nil,
-        status: .private,
-        tripMode: .live,
-        startDate: Date().addingTimeInterval(-86400 * 90),
-        endDate: Date().addingTimeInterval(-86400 * 60),
-        createdAt: Date().addingTimeInterval(-86400 * 90),
-        updatedAt: Date().addingTimeInterval(-86400 * 30),
-        stops: nil
-    )
-
     ZStack {
         AppTheme.Colors.backgroundDark
             .ignoresSafeArea()
 
         JournalTripCard(
-            trip: privateTrip,
+            trip: .previewPrivateLongTitle,
             onView: { print("View tapped") },
             onEdit: { print("Edit tapped") }
         )
@@ -313,46 +271,10 @@ struct JournalTripCard: View {
 }
 
 #Preview("Multiple Cards") {
-    let trips = [
-        Trip(
-            id: UUID(),
-            title: "Paris, France",
-            description: "City of lights adventure.",
-            coverImageUrl: nil,
-            status: .public,
-            tripMode: .live,
-            startDate: Date().addingTimeInterval(-86400 * 30),
-            endDate: Date().addingTimeInterval(-86400 * 23),
-            createdAt: Date().addingTimeInterval(-86400 * 30),
-            updatedAt: Date().addingTimeInterval(-86400 * 2),
-            stops: nil
-        ),
-        Trip(
-            id: UUID(),
-            title: "Tokyo, Japan",
-            description: nil,
-            coverImageUrl: nil,
-            status: .draft,
-            tripMode: .live,
-            startDate: Date(),
-            endDate: Date(),
-            createdAt: Date(),
-            updatedAt: Date(),
-            stops: nil
-        ),
-        Trip(
-            id: UUID(),
-            title: "Barcelona, Spain",
-            description: "Gaudi architecture and beach vibes.",
-            coverImageUrl: nil,
-            status: .private,
-            tripMode: .live,
-            startDate: Date().addingTimeInterval(-86400 * 60),
-            endDate: Date().addingTimeInterval(-86400 * 55),
-            createdAt: Date().addingTimeInterval(-86400 * 60),
-            updatedAt: Date().addingTimeInterval(-86400 * 10),
-            stops: nil
-        ),
+    let trips: [Trip] = [
+        .preview(),
+        .previewDraft,
+        .preview(title: "Barcelona, Spain", description: "Gaudi architecture and beach vibes.", status: .private)
     ]
 
     ScrollView {

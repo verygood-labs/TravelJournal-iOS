@@ -71,22 +71,8 @@ struct EditorNavigationBar: View {
 // MARK: - Preview
 
 #Preview {
-    let trip = Trip(
-        id: UUID(),
-        title: "Test Trip",
-        description: nil,
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date(),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: nil
-    )
-
     EditorNavigationBar(
-        viewModel: JournalEditorViewModel(trip: trip, toastManager: ToastManager()),
+        viewModel: JournalEditorViewModel(trip: .previewDraft, toastManager: ToastManager()),
         onClose: {},
         onSave: {},
         onDone: {}

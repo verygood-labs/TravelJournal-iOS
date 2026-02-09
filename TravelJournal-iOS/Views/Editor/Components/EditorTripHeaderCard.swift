@@ -104,29 +104,11 @@ struct EditorTripHeaderCard: View {
 // MARK: - Preview
 
 #Preview {
-    let trip = Trip(
-        id: UUID(),
-        title: "Two Weeks in the Philippines",
-        description: nil,
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date(),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: [
-            TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH", latitude: 14.5995, longitude: 120.9842)),
-            TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8349, longitude: 118.7384)),
-            TripStop(id: UUID(), order: 2, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Cebu", displayName: "Cebu, Philippines", placeType: .city, countryCode: "PH", latitude: 10.3157, longitude: 123.8854)),
-        ]
-    )
-
     ZStack {
         AppTheme.Colors.passportPageDark
             .ignoresSafeArea()
 
-        EditorTripHeaderCard(viewModel: JournalEditorViewModel(trip: trip, toastManager: ToastManager()))
+        EditorTripHeaderCard(viewModel: JournalEditorViewModel(trip: .previewWithStops, toastManager: ToastManager()))
             .padding()
     }
 }

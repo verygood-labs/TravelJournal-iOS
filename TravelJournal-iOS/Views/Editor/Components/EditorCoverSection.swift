@@ -189,19 +189,5 @@ struct EditorCoverSection: View {
 // MARK: - Preview
 
 #Preview("No Cover") {
-    let trip = Trip(
-        id: UUID(),
-        title: "Test Trip",
-        description: nil,
-        coverImageUrl: nil,
-        status: .draft,
-        tripMode: .live,
-        startDate: Date(),
-        endDate: Date(),
-        createdAt: Date(),
-        updatedAt: Date(),
-        stops: nil
-    )
-
-    EditorCoverSection(viewModel: JournalEditorViewModel(trip: trip, toastManager: ToastManager()))
+    EditorCoverSection(viewModel: JournalEditorViewModel(trip: .previewDraft, toastManager: ToastManager()))
 }
