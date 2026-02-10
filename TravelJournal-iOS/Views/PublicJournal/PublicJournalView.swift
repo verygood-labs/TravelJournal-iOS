@@ -126,50 +126,27 @@ struct PublicJournalView: View {
     private var journalContent: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Themed header with cover, title, dates
+                // Themed header with cover, title, dates, and stats
                 ThemedJournalHeader(
                     title: viewModel.trip.title,
                     description: viewModel.trip.description,
                     coverImageUrl: viewModel.trip.coverImageUrl,
                     startDate: viewModel.trip.startDate,
                     endDate: viewModel.trip.endDate,
-                    stops: viewModel.trip.stops ?? []
+                    stops: viewModel.trip.stops ?? [],
+                    statsConfig: HeaderStatsConfig(
+                        viewCount: viewModel.trip.viewCount,
+                        saveCount: viewModel.trip.saveCount
+                    )
                 )
-
-                // Stats row
-                statsRow
-                    .padding(.top, -24)
-                    .padding(.bottom, 24)
 
                 // Journal entries with save buttons
                 entriesSection
+                    .padding(.top, -24)
                     .padding(.bottom, 60)
             }
         }
         .ignoresSafeArea(edges: .top)
-    }
-
-    // MARK: - Stats Row
-
-    private var statsRow: some View {
-        HStack(spacing: 24) {
-            statItem(icon: "eye", value: "\(viewModel.trip.viewCount)")
-            statItem(icon: "bookmark", value: "\(viewModel.trip.saveCount)")
-        }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 24)
-        .background(viewModel.theme.colors.cardBackgroundColor)
-        .cornerRadius(viewModel.theme.style.borderRadius)
-    }
-
-    private func statItem(icon: String, value: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-            Text(value)
-                .font(viewModel.theme.typography.labelFont(size: 14, weight: .medium))
-        }
-        .foregroundColor(viewModel.theme.colors.textMutedColor)
     }
 
     // MARK: - Entries Section
@@ -234,64 +211,31 @@ struct PublicJournalView: View {
 
 // MARK: - Saveable Entry Card
 
-/// Wrapper that adds a save button overlay to themed cards.
+/// Wrapper that passes action config to themed cards.
 private struct SaveableEntryCard: View {
     let entry: JournalEntry
     let isSaved: Bool
     let showSaveButton: Bool
     let onSave: () -> Void
 
-    @Environment(\.journalTheme) private var theme
-
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            // Themed card content
-            themedCard
-
-            // Save button overlay
-            if showSaveButton {
-                saveButton
-                    .padding(12)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var themedCard: some View {
         let block = entry.toEditorBlock()
+        let actionConfig: CardActionConfig? = showSaveButton 
+            ? .interactive(saveCount: entry.saveCount, isSaved: isSaved, onSave: onSave)
+            : nil
 
         switch entry.blockType {
         case .moment:
-            ThemedMomentCard(block: block)
+            ThemedMomentCard(block: block, actionConfig: actionConfig)
         case .recommendation:
-            ThemedRecommendationCard(block: block)
+            ThemedRecommendationCard(block: block, actionConfig: actionConfig)
         case .photo:
-            ThemedPhotoCard(block: block)
+            ThemedPhotoCard(block: block, actionConfig: actionConfig)
         case .tip:
-            ThemedTipCard(block: block)
+            ThemedTipCard(block: block, actionConfig: actionConfig)
         case .divider:
             ThemedDividerView()
         }
-    }
-
-    private var saveButton: some View {
-        Button(action: onSave) {
-            HStack(spacing: 4) {
-                Image(systemName: isSaved ? "heart.fill" : "heart")
-                    .font(.system(size: 14, weight: .medium))
-                Text("\(entry.saveCount)")
-                    .font(theme.typography.labelFont(size: 12, weight: .medium))
-            }
-            .foregroundColor(isSaved ? Color.red : theme.colors.textMutedColor)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill(theme.colors.backgroundColor.opacity(0.9))
-                    .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
-            )
-        }
-        .buttonStyle(.plain)
     }
 }
 

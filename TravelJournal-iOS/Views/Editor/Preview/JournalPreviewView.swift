@@ -82,7 +82,8 @@ struct JournalPreviewView: View {
                 coverImageUrl: coverImageUrl,
                 startDate: startDate,
                 endDate: endDate,
-                stops: stops
+                stops: stops,
+                statsConfig: .preview
             )
 
             // Blocks
@@ -102,16 +103,16 @@ struct JournalPreviewView: View {
     private func blockView(for block: EditorBlock) -> some View {
         switch block.type {
         case .moment:
-            ThemedMomentCard(block: block)
+            ThemedMomentCard(block: block, actionConfig: .preview)
 
         case .recommendation:
-            ThemedRecommendationCard(block: block)
+            ThemedRecommendationCard(block: block, actionConfig: .preview)
 
         case .photo:
-            ThemedPhotoCard(block: block)
+            ThemedPhotoCard(block: block, actionConfig: .preview)
 
         case .tip:
-            ThemedTipCard(block: block)
+            ThemedTipCard(block: block, actionConfig: .preview)
 
         case .divider:
             ThemedDividerView()
