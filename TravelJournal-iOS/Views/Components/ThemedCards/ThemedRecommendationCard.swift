@@ -12,6 +12,7 @@ import SwiftUI
 /// A themed card for displaying recommendation blocks in preview mode.
 struct ThemedRecommendationCard: View {
     let block: EditorBlock
+    var actionConfig: CardActionConfig?
     @Environment(\.journalTheme) private var theme
 
     // MARK: - Computed Properties
@@ -90,6 +91,11 @@ struct ThemedRecommendationCard: View {
                 }
             }
             .padding(16)
+
+            // Action bar
+            if let config = actionConfig {
+                ThemedCardActionBar(config: config)
+            }
         }
         .background(recStyle.cardBackgroundColor)
         .cornerRadius(theme.style.borderRadius)

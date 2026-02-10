@@ -12,6 +12,7 @@ import SwiftUI
 /// A themed card for displaying moment blocks in preview mode.
 struct ThemedMomentCard: View {
     let block: EditorBlock
+    var actionConfig: CardActionConfig?
     @Environment(\.journalTheme) private var theme
 
     // MARK: - Computed Properties
@@ -78,6 +79,11 @@ struct ThemedMomentCard: View {
                 }
             }
             .padding(16)
+
+            // Action bar
+            if let config = actionConfig {
+                ThemedCardActionBar(config: config)
+            }
         }
         .background(momentStyle.cardBackgroundColor)
         .cornerRadius(theme.style.borderRadius)

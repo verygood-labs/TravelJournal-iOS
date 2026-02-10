@@ -12,6 +12,7 @@ import SwiftUI
 /// A themed card for displaying photo blocks in preview mode.
 struct ThemedPhotoCard: View {
     let block: EditorBlock
+    var actionConfig: CardActionConfig?
     @Environment(\.journalTheme) private var theme
 
     // MARK: - Computed Properties
@@ -54,6 +55,11 @@ struct ThemedPhotoCard: View {
                 .padding(.horizontal, 12)
                 .padding(.bottom, 8)
                 .background(photoStyle.captionBackgroundColor)
+
+                // Action bar
+                if let config = actionConfig {
+                    ThemedCardActionBar(config: config)
+                }
             }
             .background(photoStyle.frameSwiftUIColor)
             .cornerRadius(theme.style.borderRadius)

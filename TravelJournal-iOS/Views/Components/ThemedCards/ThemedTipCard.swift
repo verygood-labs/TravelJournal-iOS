@@ -12,6 +12,7 @@ import SwiftUI
 /// A themed card for displaying tip blocks in preview mode.
 struct ThemedTipCard: View {
     let block: EditorBlock
+    var actionConfig: CardActionConfig?
     @Environment(\.journalTheme) private var theme
 
     // MARK: - Computed Properties
@@ -27,34 +28,41 @@ struct ThemedTipCard: View {
     // MARK: - Body
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Icon
-            Image(systemName: "lightbulb.fill")
-                .font(.system(size: 18))
-                .foregroundColor(tipStyle.iconSwiftUIColor)
-                .frame(width: 24)
-
-            // Content
-            VStack(alignment: .leading, spacing: 6) {
-                // Title
-                if let title = data.title, !title.isEmpty {
-                    Text(title)
-                        .font(theme.typography.headingFont(size: 15, weight: .semibold))
-                        .foregroundColor(theme.colors.textPrimaryColor)
-                }
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 12) {
+                // Icon
+                Image(systemName: "lightbulb.fill")
+                    .font(.system(size: 18))
+                    .foregroundColor(tipStyle.iconSwiftUIColor)
+                    .frame(width: 24)
 
                 // Content
-                if let content = data.content, !content.isEmpty {
-                    Text(content)
-                        .font(theme.typography.bodyFont(size: 14))
-                        .foregroundColor(theme.colors.textSecondaryColor)
-                        .lineSpacing(3)
-                }
-            }
+                VStack(alignment: .leading, spacing: 6) {
+                    // Title
+                    if let title = data.title, !title.isEmpty {
+                        Text(title)
+                            .font(theme.typography.headingFont(size: 15, weight: .semibold))
+                            .foregroundColor(theme.colors.textPrimaryColor)
+                    }
 
-            Spacer(minLength: 0)
+                    // Content
+                    if let content = data.content, !content.isEmpty {
+                        Text(content)
+                            .font(theme.typography.bodyFont(size: 14))
+                            .foregroundColor(theme.colors.textSecondaryColor)
+                            .lineSpacing(3)
+                    }
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(14)
+
+            // Action bar
+            if let config = actionConfig {
+                ThemedCardActionBar(config: config)
+            }
         }
-        .padding(14)
         .background(tipStyle.backgroundColor)
         .cornerRadius(theme.style.borderRadius)
         .overlay(
