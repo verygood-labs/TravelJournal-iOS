@@ -17,6 +17,7 @@ struct ThemedJournalHeader: View {
     let startDate: Date?
     let endDate: Date?
     let stops: [TripStop]
+    var statsConfig: HeaderStatsConfig?
 
     @Environment(\.journalTheme) private var theme
 
@@ -162,6 +163,14 @@ struct ThemedJournalHeader: View {
                         .lineLimit(1)
                 }
                 .foregroundColor(theme.colors.textMutedColor)
+            }
+
+            // Stats pill - bottom right
+            if let stats = statsConfig {
+                HStack {
+                    Spacer()
+                    ThemedHeaderStatsBar(config: stats)
+                }
             }
         }
         .padding(20)
