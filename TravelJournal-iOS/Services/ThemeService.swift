@@ -14,38 +14,34 @@ class ThemeService {
     static let shared = ThemeService()
     private let api = APIService.shared
 
-    /// Cached themes to avoid repeated API calls.
-    private var cachedThemes: [JournalTheme]?
-
     private init() {}
 
     // MARK: - Public API
 
-    /// Fetches all system themes from the API.
-    /// Falls back to built-in themes if the API call fails.
-    func getSystemThemes() async -> [JournalTheme] {
-        // Return cached if available
-        if let cached = cachedThemes {
-            return cached
-        }
-
-        do {
-            let themes: [JournalTheme] = try await api.request(endpoint: "/themes")
-            cachedThemes = themes
-            return themes
-        } catch {
-            print("⚠️ Failed to fetch themes from API, using fallbacks: \(error)")
-            return JournalTheme.systemThemes
-        }
+    /// Returns all system themes (built-in, no API call needed).
+    func getSystemThemes() -> [JournalTheme] {
+        return JournalTheme.systemThemes
     }
 
     /// Fetches a theme by ID.
+    /// Returns local system theme if available, otherwise fetches from API.
     func getTheme(id: UUID) async throws -> JournalTheme {
+        // Check if it's a known system theme first
+        if let systemTheme = JournalTheme.systemThemes.first(where: { $0.id == id }) {
+            return systemTheme
+        }
+        // Fetch custom theme from API
         return try await api.request(endpoint: "/themes/\(id)")
     }
 
     /// Fetches a theme by slug.
+    /// Returns local system theme if available, otherwise fetches from API.
     func getTheme(slug: String) async throws -> JournalTheme {
+        // Check if it's a known system theme first
+        if let systemTheme = JournalTheme.systemThemes.first(where: { $0.slug == slug }) {
+            return systemTheme
+        }
+        // Fetch custom theme from API
         return try await api.request(endpoint: "/themes/slug/\(slug)")
     }
 
@@ -57,11 +53,6 @@ class ThemeService {
             method: "PATCH",
             body: body
         )
-    }
-
-    /// Clears the cached themes, forcing a refresh on next fetch.
-    func clearCache() {
-        cachedThemes = nil
     }
 
     // MARK: - Fallback Themes

@@ -421,11 +421,11 @@ final class JournalEditorViewModel: ObservableObject {
 
     // MARK: - Theme Management
 
-    /// Loads available themes from the API or falls back to built-in themes.
+    /// Loads available themes (built-in system themes).
     func loadThemes() async {
         isLoadingThemes = true
 
-        availableThemes = await themeService.getSystemThemes()
+        availableThemes = themeService.getSystemThemes()
 
         // Match theme by slug from the trip response
         if let draftThemeSlug = trip.draftThemeSlug,
