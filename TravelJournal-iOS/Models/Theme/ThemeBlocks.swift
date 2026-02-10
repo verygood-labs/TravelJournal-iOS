@@ -72,17 +72,18 @@ struct CategoryBadgeStyle: Codable, Equatable {
 struct PhotoBlockStyle: Codable, Equatable {
     let borderColor: String
     let borderRadius: Int
-    let frameColor: String
-    let captionBackground: String
-    let captionTextColor: String
+    // Optional fields with defaults - backend may not provide these
+    let frameColor: String?
+    let captionBackground: String?
+    let captionTextColor: String?
 
     // MARK: - SwiftUI Accessors
 
     var borderSwiftUIColor: Color { Color(hex: borderColor) }
     var cornerRadius: CGFloat { CGFloat(borderRadius) }
-    var frameSwiftUIColor: Color { Color(hex: frameColor) }
-    var captionBackgroundColor: Color { Color(hex: captionBackground) }
-    var captionTextSwiftUIColor: Color { Color(hex: captionTextColor) }
+    var frameSwiftUIColor: Color { Color(hex: frameColor ?? "#ffffff") }
+    var captionBackgroundColor: Color { Color(hex: captionBackground ?? "#ffffff") }
+    var captionTextSwiftUIColor: Color { Color(hex: captionTextColor ?? "#333333") }
 }
 
 // MARK: - Tip Block Style
