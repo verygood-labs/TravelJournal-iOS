@@ -64,7 +64,6 @@ struct EditorNavigationBar: View {
         }
         .padding(.horizontal, AppTheme.Spacing.md)
         .padding(.vertical, AppTheme.Spacing.sm)
-        .background(AppTheme.Colors.backgroundDark)
     }
 }
 

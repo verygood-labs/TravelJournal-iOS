@@ -38,7 +38,7 @@ struct EditorBlockToolbar: View {
                     .buttonStyle(.plain)
                 }
             }
-            .background(AppTheme.Colors.backgroundDark)
         }
+        .appToolbarBackgroundBottom()
     }
 }

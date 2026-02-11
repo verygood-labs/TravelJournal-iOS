@@ -33,7 +33,6 @@ struct ThemePickerBar: View {
             }
         }
         .padding(.vertical, 12)
-        .background(AppTheme.Colors.backgroundDark)
     }
 
     // MARK: - Loading View
