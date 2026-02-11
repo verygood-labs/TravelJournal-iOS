@@ -12,13 +12,13 @@ struct JournalCarousel: View {
         VStack(spacing: 0) {
             // Header with location name and dismiss
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 1) {
                     Text(location.name)
                         .font(AppTheme.Typography.serifSmall())
                         .foregroundColor(AppTheme.Colors.passportTextPrimary)
 
                     Text(location.countryName)
-                        .font(AppTheme.Typography.monoSmall())
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundColor(AppTheme.Colors.passportTextSecondary)
                 }
 
@@ -26,13 +26,13 @@ struct JournalCarousel: View {
 
                 Button(action: onDismiss) {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 24))
+                        .font(.system(size: 20))
                         .foregroundColor(AppTheme.Colors.passportTextSecondary)
                 }
             }
-            .padding(.horizontal, AppTheme.Spacing.md)
-            .padding(.top, AppTheme.Spacing.md)
-            .padding(.bottom, AppTheme.Spacing.sm)
+            .padding(.horizontal, AppTheme.Spacing.sm)
+            .padding(.top, AppTheme.Spacing.sm)
+            .padding(.bottom, AppTheme.Spacing.xs)
 
             if isLoading {
                 loadingView
@@ -42,6 +42,7 @@ struct JournalCarousel: View {
                 carouselContent
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
@@ -54,34 +55,34 @@ struct JournalCarousel: View {
     // MARK: - Loading View
 
     private var loadingView: some View {
-        HStack(spacing: AppTheme.Spacing.md) {
+        HStack(spacing: AppTheme.Spacing.sm) {
             ForEach(0..<2, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(AppTheme.Colors.passportPageDark.opacity(0.3))
-                    .frame(width: 200, height: 120)
+                    .frame(width: 140, height: 100)
             }
         }
-        .padding(.horizontal, AppTheme.Spacing.md)
-        .padding(.bottom, AppTheme.Spacing.md)
+        .padding(.horizontal, AppTheme.Spacing.sm)
+        .padding(.bottom, AppTheme.Spacing.sm)
     }
 
     // MARK: - Empty View
 
     private var emptyView: some View {
         Text("No journals at this location")
-            .font(AppTheme.Typography.monoMedium())
+            .font(AppTheme.Typography.monoSmall())
             .foregroundColor(AppTheme.Colors.passportTextSecondary)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, AppTheme.Spacing.lg)
-            .padding(.bottom, AppTheme.Spacing.sm)
+            .padding(.vertical, AppTheme.Spacing.md)
+            .padding(.bottom, AppTheme.Spacing.xs)
     }
 
     // MARK: - Carousel Content
 
     private var carouselContent: some View {
-        VStack(spacing: AppTheme.Spacing.sm) {
+        VStack(spacing: AppTheme.Spacing.xs) {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: AppTheme.Spacing.md) {
+                HStack(spacing: AppTheme.Spacing.sm) {
                     ForEach(journals) { journal in
                         CarouselCard(journal: journal)
                             .onTapGesture {
@@ -89,20 +90,19 @@ struct JournalCarousel: View {
                             }
                     }
                 }
-                .padding(.horizontal, AppTheme.Spacing.md)
+                .padding(.horizontal, AppTheme.Spacing.sm)
             }
-            .scrollClipDisabled()
 
             // Page indicator dots
             if journals.count > 1 {
-                HStack(spacing: 6) {
+                HStack(spacing: 4) {
                     ForEach(0..<min(journals.count, 5), id: \.self) { _ in
                         Circle()
                             .fill(AppTheme.Colors.passportTextSecondary.opacity(0.4))
-                            .frame(width: 6, height: 6)
+                            .frame(width: 5, height: 5)
                     }
                 }
-                .padding(.bottom, AppTheme.Spacing.sm)
+                .padding(.bottom, AppTheme.Spacing.xs)
             }
         }
     }
@@ -138,49 +138,70 @@ private struct CarouselCard: View {
                     imagePlaceholder
                 }
             }
-            .frame(width: 200, height: 100)
+            .frame(width: 140, height: 70)
             .clipped()
 
             // Journal info
             VStack(alignment: .leading, spacing: 4) {
                 Text(journal.title)
-                    .font(AppTheme.Typography.monoMedium())
+                    .font(AppTheme.Typography.monoSmall())
                     .foregroundColor(AppTheme.Colors.passportTextPrimary)
                     .lineLimit(1)
 
                 // Author
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Circle()
                         .fill(AppTheme.Colors.primary.opacity(0.3))
-                        .frame(width: 16, height: 16)
+                        .frame(width: 12, height: 12)
                         .overlay(
                             Text(String(journal.authorName.prefix(1)).uppercased())
-                                .font(.system(size: 8, weight: .bold))
+                                .font(.system(size: 6, weight: .bold))
                                 .foregroundColor(AppTheme.Colors.primary)
                         )
 
                     Text(journal.displayUsername)
-                        .font(AppTheme.Typography.monoSmall())
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
                         .foregroundColor(AppTheme.Colors.passportTextSecondary)
                         .lineLimit(1)
                 }
+
+                // View and Save counts
+                HStack(spacing: AppTheme.Spacing.sm) {
+                    HStack(spacing: 2) {
+                        Image(systemName: "eye")
+                            .font(.system(size: 9))
+                        Text("\(journal.viewCount)")
+                            .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    }
+                    .foregroundColor(AppTheme.Colors.passportTextSecondary)
+
+                    HStack(spacing: 2) {
+                        Image(systemName: "bookmark")
+                            .font(.system(size: 9))
+                        Text("\(journal.saveCount)")
+                            .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    }
+                    .foregroundColor(AppTheme.Colors.passportTextSecondary)
+                }
             }
-            .padding(AppTheme.Spacing.sm)
-            .background(AppTheme.Colors.passportPageDark.opacity(0.3))
+            .padding(AppTheme.Spacing.xs)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(AppTheme.Colors.passportPageLight)
         }
-        .frame(width: 200)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .frame(width: 140)
+        .background(AppTheme.Colors.passportPageLight)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 8)
                 .stroke(AppTheme.Colors.passportPageGrid, lineWidth: 1)
         )
     }
 
     private var imagePlaceholder: some View {
         ZStack {
-            AppTheme.Colors.passportPageDark.opacity(0.2)
+            AppTheme.Colors.passportPageDark
             Image(systemName: "photo")
-                .font(.system(size: 24))
+                .font(.system(size: 20))
                 .foregroundColor(AppTheme.Colors.passportTextSecondary.opacity(0.5))
         }
     }
@@ -206,21 +227,37 @@ private struct CarouselCard: View {
                         id: UUID(),
                         tripId: UUID(),
                         title: "Cherry Blossoms in Ueno",
-                        coverImageUrl: nil,
+                        coverImageUrl: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400",
                         authorId: UUID(),
                         authorName: "Sarah",
                         authorUsername: "sarahtravels",
-                        authorAvatarUrl: nil
+                        authorAvatarUrl: nil,
+                        viewCount: 1243,
+                        saveCount: 89
                     ),
                     JournalPreview(
                         id: UUID(),
                         tripId: UUID(),
                         title: "Shibuya Nights",
-                        coverImageUrl: nil,
+                        coverImageUrl: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400",
                         authorId: UUID(),
                         authorName: "Mike",
                         authorUsername: "mikeadventures",
-                        authorAvatarUrl: nil
+                        authorAvatarUrl: nil,
+                        viewCount: 856,
+                        saveCount: 42
+                    ),
+                    JournalPreview(
+                        id: UUID(),
+                        tripId: UUID(),
+                        title: "Senso-ji Temple",
+                        coverImageUrl: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400",
+                        authorId: UUID(),
+                        authorName: "Emma",
+                        authorUsername: "emmawanders",
+                        authorAvatarUrl: nil,
+                        viewCount: 2105,
+                        saveCount: 156
                     )
                 ],
                 isLoading: false,
