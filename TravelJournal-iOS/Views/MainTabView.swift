@@ -15,7 +15,7 @@ struct MainTabView: View {
             // Map Tab
             MapView()
                 .tabItem {
-                    Label("Map", systemImage: "map.fill")
+                    Label("Discover", systemImage: "map.fill")
                 }
                 .tag(1)
 
