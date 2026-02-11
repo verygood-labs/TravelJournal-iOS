@@ -21,54 +21,36 @@ struct JournalPreviewView: View {
     let stops: [TripStop]
     let blocks: [EditorBlock]
 
-    let availableThemes: [JournalTheme]
-    @Binding var selectedTheme: JournalTheme
-    let isLoadingThemes: Bool
-    let onThemeSelected: (JournalTheme) -> Void
-
     @Environment(\.journalTheme) private var theme
 
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Theme picker bar
-            ThemePickerBar(
-                themes: availableThemes,
-                selectedTheme: $selectedTheme,
-                isLoading: isLoadingThemes
-            )
-            .onChange(of: selectedTheme) { _, newTheme in
-                onThemeSelected(newTheme)
-            }
+        // Journal content
+        ScrollView {
+            VStack(spacing: 0) {
+                // Background with optional texture
+                ZStack {
+                    // Base background
+                    theme.colors.backgroundColor
+                        .ignoresSafeArea()
 
-            // Journal content
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Background with optional texture
-                    ZStack {
-                        // Base background
-                        theme.colors.backgroundColor
-                            .ignoresSafeArea()
-
-                        // Optional paper texture
-                        if theme.style.showPaperTexture {
-                            paperTextureOverlay
-                        }
-
-                        // Optional grid lines
-                        if theme.style.showGridLines {
-                            gridLinesOverlay
-                        }
-
-                        // Content
-                        journalContent
+                    // Optional paper texture
+                    if theme.style.showPaperTexture {
+                        paperTextureOverlay
                     }
+
+                    // Optional grid lines
+                    if theme.style.showGridLines {
+                        gridLinesOverlay
+                    }
+
+                    // Content
+                    journalContent
                 }
             }
-            .background(theme.colors.backgroundColor)
         }
-        .journalTheme(selectedTheme)
+        .background(theme.colors.backgroundColor)
     }
 
     // MARK: - Journal Content
@@ -178,12 +160,9 @@ struct JournalPreviewView: View {
             TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH", latitude: 14.5995, longitude: 120.9842)),
             TripStop(id: UUID(), order: 1, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Palawan", displayName: "Palawan, Philippines", placeType: .city, countryCode: "PH", latitude: 9.8349, longitude: 118.7384)),
         ],
-        blocks: sampleBlocks,
-        availableThemes: JournalTheme.systemThemes,
-        selectedTheme: .constant(.default),
-        isLoadingThemes: false,
-        onThemeSelected: { _ in }
+        blocks: sampleBlocks
     )
+    .journalTheme(.default)
 }
 
 #Preview("Passport Theme") {
@@ -196,12 +175,9 @@ struct JournalPreviewView: View {
         stops: [
             TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH", latitude: 14.5995, longitude: 120.9842)),
         ],
-        blocks: sampleBlocks,
-        availableThemes: JournalTheme.systemThemes,
-        selectedTheme: .constant(.passport),
-        isLoadingThemes: false,
-        onThemeSelected: { _ in }
+        blocks: sampleBlocks
     )
+    .journalTheme(.passport)
 }
 
 #Preview("Retro Theme") {
@@ -214,12 +190,9 @@ struct JournalPreviewView: View {
         stops: [
             TripStop(id: UUID(), order: 0, arrivalDate: nil, place: TripStopPlace(id: UUID(), name: "Manila", displayName: "Manila, Philippines", placeType: .city, countryCode: "PH", latitude: 14.5995, longitude: 120.9842)),
         ],
-        blocks: sampleBlocks,
-        availableThemes: JournalTheme.systemThemes,
-        selectedTheme: .constant(.retro),
-        isLoadingThemes: false,
-        onThemeSelected: { _ in }
+        blocks: sampleBlocks
     )
+    .journalTheme(.retro)
 }
 
 // MARK: - Sample Data

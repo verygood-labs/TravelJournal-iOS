@@ -18,13 +18,36 @@ struct JournalEditorView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Top navigation bar
-            EditorNavigationBar(
-                viewModel: viewModel,
-                onClose: { handleClose() },
-                onSave: { viewModel.handleSave() },
-                onDone: { viewModel.handleDone() }
-            )
+            // Top navigation bar (with theme picker in preview mode)
+            if viewModel.editorMode == .edit {
+                EditorNavigationBar(
+                    viewModel: viewModel,
+                    onClose: { handleClose() },
+                    onSave: { viewModel.handleSave() },
+                    onDone: { viewModel.handleDone() }
+                )
+                .appToolbarBackground()
+            } else {
+                // Combined header with nav bar and theme picker
+                VStack(spacing: 0) {
+                    EditorNavigationBar(
+                        viewModel: viewModel,
+                        onClose: { handleClose() },
+                        onSave: { viewModel.handleSave() },
+                        onDone: { viewModel.handleDone() }
+                    )
+                    
+                    ThemePickerBar(
+                        themes: viewModel.availableThemes,
+                        selectedTheme: $viewModel.selectedTheme,
+                        isLoading: viewModel.isLoadingThemes
+                    )
+                    .onChange(of: viewModel.selectedTheme) { _, newTheme in
+                        viewModel.selectTheme(newTheme)
+                    }
+                }
+                .appToolbarBackground()
+            }
 
             // Main content based on mode
             if viewModel.editorMode == .edit {
@@ -149,14 +172,9 @@ struct JournalEditorView: View {
             startDate: viewModel.tripStartDate,
             endDate: viewModel.tripEndDate,
             stops: viewModel.tripStops,
-            blocks: viewModel.blocks,
-            availableThemes: viewModel.availableThemes,
-            selectedTheme: $viewModel.selectedTheme,
-            isLoadingThemes: viewModel.isLoadingThemes,
-            onThemeSelected: { theme in
-                viewModel.selectTheme(theme)
-            }
+            blocks: viewModel.blocks
         )
+        .journalTheme(viewModel.selectedTheme)
     }
 
     // MARK: - Actions
