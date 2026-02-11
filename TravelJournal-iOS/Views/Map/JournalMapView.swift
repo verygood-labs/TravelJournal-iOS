@@ -145,6 +145,7 @@ struct JournalMapView: View {
         }
         .mapStyle(.standard(elevation: .realistic))
         .mapControlVisibility(.hidden)
+        .safeAreaPadding(.bottom, 30)
     }
 
     // MARK: - Map Controls
