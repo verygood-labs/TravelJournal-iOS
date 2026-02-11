@@ -44,6 +44,7 @@ struct ProfileView: View {
                     Text("Settings")
                         .font(AppTheme.Typography.serifMedium())
                         .foregroundColor(AppTheme.Colors.textPrimary)
+                    
                 }
             }
             .navigationBarTitleDisplayMode(.large)
