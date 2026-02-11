@@ -53,7 +53,7 @@ struct JournalMapView: View {
                     onCenterLocation: centerToFitAll
                 )
                 .padding(.trailing, AppTheme.Spacing.sm)
-                .padding(.bottom, AppTheme.Spacing.lg)
+                .padding(.bottom, 100) // Above tab bar
             }
         }
     }
@@ -145,7 +145,7 @@ struct JournalMapView: View {
         }
         .mapStyle(.standard(elevation: .realistic))
         .mapControlVisibility(.hidden)
-        .safeAreaPadding(.bottom, 30)
+        .safeAreaPadding(.bottom, 100) // Above tab bar for Apple Maps attribution
     }
 
     // MARK: - Map Controls
