@@ -96,7 +96,9 @@ struct JournalPreviewCard: View {
                     authorId: UUID(),
                     authorName: "Sarah Chen",
                     authorUsername: "sarahc",
-                    authorAvatarUrl: nil
+                    authorAvatarUrl: nil,
+                    viewCount: 1243,
+                    saveCount: 89
                 )
             ) {
                 print("Tapped journal")
@@ -111,7 +113,9 @@ struct JournalPreviewCard: View {
                     authorId: UUID(),
                     authorName: "John Doe",
                     authorUsername: "johnd",
-                    authorAvatarUrl: nil
+                    authorAvatarUrl: nil,
+                    viewCount: 856,
+                    saveCount: 42
                 )
             ) {
                 print("Tapped journal")

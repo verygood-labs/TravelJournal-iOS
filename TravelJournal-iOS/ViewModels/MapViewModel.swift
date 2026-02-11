@@ -198,7 +198,9 @@ class MapViewModel: ObservableObject {
             authorId: UUID(),
             authorName: "Sarah Chen",
             authorUsername: "sarahc",
-            authorAvatarUrl: nil
+            authorAvatarUrl: nil,
+            viewCount: 1243,
+            saveCount: 89
         ),
         JournalPreview(
             id: UUID(),
@@ -208,7 +210,9 @@ class MapViewModel: ObservableObject {
             authorId: UUID(),
             authorName: "John Doe",
             authorUsername: "johnd",
-            authorAvatarUrl: nil
+            authorAvatarUrl: nil,
+            viewCount: 856,
+            saveCount: 42
         ),
         JournalPreview(
             id: UUID(),
@@ -218,7 +222,9 @@ class MapViewModel: ObservableObject {
             authorId: UUID(),
             authorName: "Maria Garcia",
             authorUsername: "mariag",
-            authorAvatarUrl: nil
+            authorAvatarUrl: nil,
+            viewCount: 2105,
+            saveCount: 156
         ),
     ]
 

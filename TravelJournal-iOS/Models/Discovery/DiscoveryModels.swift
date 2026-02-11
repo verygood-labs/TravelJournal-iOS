@@ -52,6 +52,8 @@ struct JournalPreview: Identifiable, Codable {
     let authorName: String
     let authorUsername: String
     let authorAvatarUrl: String?
+    let viewCount: Int
+    let saveCount: Int
 
     var displayUsername: String {
         "@\(authorUsername)"
